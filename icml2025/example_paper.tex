@@ -397,22 +397,21 @@ In this section, we propose the ATR method(Algorithm~\ref{alg.accelerated utr}) 
             \STATE $(d_k,\lambda_k) = \operatorname{U}(y_k,\|\nabla f(y_k)\|^{1/2})$
             \IF{$\lambda_k>0$} \label{line.if}
             \STATE $s_k = s_{k-1}+\frac{(k+1)(k+2)}{2}\nabla f(y_k)$ \label{line.nonzero multiplier}
+            \STATE $x_{k+1}=y_k+d_k$
             \ELSE \label{line.else}
             \STATE $d_k^{(0)}=d_k$, $\lambda_k^{(0)} = \lambda_k$, $j=0$
             \WHILE{$\lambda_k^{(j)}=0$} \label{line.while}
-            \STATE $j=j+1$
-            \STATE $(d_k^{(j)},\lambda_k^{(j)})=\operatorname{U}(y_k,\|\nabla f(y_k+d_k^{(j-1)})\|^{1/2})$
+            \STATE $j=j+1, r_k^{(j)} = \|\nabla f(y_k+d_k^{(j)})\|^{1/2}$
+            \STATE $(d_k^{(j)},\lambda_k^{(j)})=\operatorname{U}(y_k,r_k^{(j-1)})$
             \ENDWHILE \label{line.endwhile}
-            \IF{$\lambda_k^{(j)}\leq \frac{\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j-1)})\|^{1/2}$} \label{line.bisection}
+            \IF{$\lambda_k^{(j)}\leq \frac{\sqrt{M}}{3}r_k^{(j-1)}$} \label{line.bisection}
             \STATE $x_{k+1} = y_k+d_k^{(j)}$ \label{line.zero multiplier 1}
             \ELSE
-            \STATE $\mu_- = \frac{\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j-1)})\|^{1/2}$,
-            \STATE $\mu_+ = \lambda_k^{(j)}+\frac{\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j-1)})\|^{1/2}$ \label{line.bracketing}
+            \STATE $\mu_- = \frac{\sqrt{M}}{3}r_k^{(j-1)},\mu_+ = \lambda_k^{(j)}+\frac{\sqrt{M}}{3}r_k^{(j-1)}$ \label{line.bracketing}
             \STATE $x_{k+1} = \operatorname{B}(y_k,\mu_-,\mu_+)$ \label{line.zero multiplier 2}
             \ENDIF \label{line.endbisection}
             \STATE $s_k=s_{k-1}+\frac{(k+1)(k+2)}{2}\nabla f(x_{k+1})$
             \ENDIF
-            \STATE $x_{k+1}=y_k+d_k$
             \STATE $v_{k+1} = v_0-\sqrt{\frac{\ell}{3M\|s_k\|}}s_k$
             \ENDFOR
             \normalsize
