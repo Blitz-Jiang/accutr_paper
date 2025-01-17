@@ -50,8 +50,10 @@
 \newtheorem{remark}[theorem]{Remark}
 
 
-\newcommand{\atr}{\texttt{ATR}}
-\newcommand{\atr}{\texttt{ATR}}
+\newcommand{\utr}{\texttt{UTR}}
+\newcommand{\atr}{\texttt{UTR-A}}
+\newcommand{\arc}{\texttt{CubicReg}}
+\newcommand{\arca}{\texttt{CubicReg-A}}
 % Todonotes is useful during development; simply uncomment the next line
 %    and comment out the line below the next line to turn off comments
 %\usepackage[disable,textsize=tiny]{todonotes}
@@ -65,43 +67,43 @@
 \begin{document}
 
 \twocolumn[
-\icmltitle{The First Acceleration for Trust-Region-Type Method}
+    \icmltitle{The First Acceleration for Trust-Region-Type Method}
 
-% It is OKAY to include author information, even for blind
-% submissions: the style file will automatically remove it for you
-% unless you've provided the [accepted] option to the icml2025
-% package.
+    % It is OKAY to include author information, even for blind
+    % submissions: the style file will automatically remove it for you
+    % unless you've provided the [accepted] option to the icml2025
+    % package.
 
-% List of affiliations: The first argument should be a (short)
-% identifier you will use later to specify author affiliations
-% Academic affiliations should list Department, University, City, Region, Country
-% Industry affiliations should list Company, City, Region, Country
+    % List of affiliations: The first argument should be a (short)
+    % identifier you will use later to specify author affiliations
+    % Academic affiliations should list Department, University, City, Region, Country
+    % Industry affiliations should list Company, City, Region, Country
 
-% You can specify symbols, otherwise they are numbered in order.
-% Ideally, you should not use this facility. Affiliations will be numbered
-% in order of appearance and this is the preferred way.
-\icmlsetsymbol{equal}{*}
+    % You can specify symbols, otherwise they are numbered in order.
+    % Ideally, you should not use this facility. Affiliations will be numbered
+    % in order of appearance and this is the preferred way.
+    \icmlsetsymbol{equal}{*}
 
-\begin{icmlauthorlist}
-\icmlauthor{Yuntian Jiang}{yyy}
-\icmlauthor{Bo Jiang}{yyy}
-\icmlauthor{Chuwen Zhang}{yyy}
-%\icmlauthor{}{sch}
-%\icmlauthor{}{sch}
-\end{icmlauthorlist}
+    \begin{icmlauthorlist}
+        \icmlauthor{Yuntian Jiang}{yyy}
+        \icmlauthor{Bo Jiang}{yyy}
+        \icmlauthor{Chuwen Zhang}{yyy}
+        %\icmlauthor{}{sch}
+        %\icmlauthor{}{sch}
+    \end{icmlauthorlist}
 
-\icmlaffiliation{yyy}{Research Institute for Interdisciplinary Sciences, Shanghai University of Finance and Economics, Shanghai, China}
+    \icmlaffiliation{yyy}{Research Institute for Interdisciplinary Sciences, Shanghai University of Finance and Economics, Shanghai, China}
 
 
-\icmlcorrespondingauthor{Firstname1 Lastname1}{first1.last1@xxx.edu}
-\icmlcorrespondingauthor{Firstname2 Lastname2}{first2.last2@www.uk}
+    \icmlcorrespondingauthor{Firstname1 Lastname1}{first1.last1@xxx.edu}
+    \icmlcorrespondingauthor{Firstname2 Lastname2}{first2.last2@www.uk}
 
-% You may provide any keywords that you
-% find helpful for describing your paper; these are used to populate
-% the "keywords" metadata in the PDF but will not be shown in the document
-\icmlkeywords{Machine Learning, ICML}
+    % You may provide any keywords that you
+    % find helpful for describing your paper; these are used to populate
+    % the "keywords" metadata in the PDF but will not be shown in the document
+    \icmlkeywords{Machine Learning, ICML}
 
-\vskip 0.3in
+    \vskip 0.3in
 ]
 
 % this must go after the closing bracket ] following \twocolumn[ ...
@@ -116,24 +118,24 @@
 % \printAffiliationsAndNotice{\icmlEqualContribution} % otherwise use the standard text.
 
 \begin{abstract}
-Trust-Region-type method is a fundamental class of optimization algorithms, but the constrained nature of its subproblem has made complexity analysis particularly challenging, especially in the acceleration scenario. In this paper, we propose the first accelerated trust-region-type algorithm and establish improved global complexity of $\tilde O(\epsilon^{-1/3})$, addressing a longstanding challenge in the field. Numerical experiments demonstrate that the proposed algorithm achieves performance comparable to Nesterov's accelerated cubic Newton method, while consistently outperforming standard non-accelerated trust-region and cubic Newton methods. Our work contributes to the theoretical foundation of the trust-region-type methods, offering insights that may inspire future research in this area.
+    Trust-Region-type method is a fundamental class of optimization algorithms, but the constrained nature of its subproblem has made complexity analysis particularly challenging, especially in the acceleration scenario. In this paper, we propose the first accelerated trust-region-type algorithm and establish improved global complexity of $\tilde O(\epsilon^{-1/3})$, addressing a longstanding challenge in the field. Numerical experiments demonstrate that the proposed algorithm achieves performance comparable to Nesterov's accelerated cubic Newton method, while consistently outperforming standard non-accelerated trust-region and cubic Newton methods. Our work contributes to the theoretical foundation of the trust-region-type methods, offering insights that may inspire future research in this area.
 \end{abstract}
 
 \section{Introduction}
 \label{Intro}
-The trust-region (TR) method \cite{Moré1983,conn2000trust} is recognized as a powerful second-order method due to its effectiveness in solving practical problems and its significant impact across various fields. It has been successfully applied in machine learning applications, such as adversarial neural networks \cite{yao2019trust}, real-time tracking \cite{liu2004real}, and mixed norm regression \cite{kim2010scalable}. Notably, the TR method has also inspired the widely used trust-region policy optimization \cite{schulman2015trust, kurutach2018model} in the reinforcement learning community.
+The trust-region (TR) method \cite{More1983,conn2000trust} is recognized as a powerful second-order method due to its effectiveness in solving practical problems and its significant impact across various fields. It has been successfully applied in machine learning applications, such as adversarial neural networks \cite{yao2019trust}, real-time tracking \cite{liu2004real}, and mixed norm regression \cite{kim2010scalable}. Notably, the TR method has also inspired the widely used trust-region policy optimization \cite{schulman2015trust, kurutach2018model} in the reinforcement learning community.
 
-In this paper, we consider the unconstrained optimization problem \begin{equation} \label{eq.main problem} \min_{x\in \mathbb{R}^n}~ f(x), \end{equation} where $f:\mathbb{R}^n\to \mathbb{R}$ satisfies Assumption~\ref{assm.main assm}. The standard TR method operates on the local quadratic approximation of the objective function within a TR ball, solving the subproblem: 
+In this paper, we consider the unconstrained optimization problem \begin{equation} \label{eq.main problem} \min_{x\in \mathbb{R}^n}~ f(x), \end{equation} where $f:\mathbb{R}^n\to \mathbb{R}$ satisfies Assumption~\ref{assm.main assm}. The standard TR method operates on the local quadratic approximation of the objective function within a TR ball, solving the subproblem:
 \begin{equation}
-\label{eq.classic tr subproblem} \begin{aligned} \min_{d \in \mathbb{R}^n} \quad &m_k(d):= \nabla f(x_k)^T d+\frac{1}{2}d^T \nabla^2 f(x_k) d, \\ \operatorname{s.t.} \quad &\|d\|\le \Delta_k. \end{aligned} 
-\end{equation} 
+    \label{eq.classic tr subproblem} \begin{aligned} \min_{d \in \mathbb{R}^n} \quad &m_k(d):= \nabla f(x_k)^T d+\frac{1}{2}d^T \nabla^2 f(x_k) d, \\ \operatorname{s.t.} \quad &\|d\|\le \Delta_k. \end{aligned}
+\end{equation}
 
 
 While it has demonstrated outstanding success in practice, its theoretical underpinnings are still evolving, and complexity analyses have proven challenging.
 
 Historically, the convergence analyses of the standard TR method were primarily asymptotic, offering little insight into global complexity. Foundational results can be found in the textbook~\cite{conn2000trust, cartis2022evaluation} and the review~\cite{yuan2015recent}.
 
-Recently, global complexity has emerged as a crucial metric for evaluating optimization algorithms. Early studies established that the standard TR method converges to stationary points with a complexity of $O(\epsilon^{-2})$, matching that of first-order methods but being suboptimal in terms of second-order methods. Many researchers have struggled to establish satisfactory complexity analysis for the standard TR method, which has led to the proposal of various TR-type variants to achieve global complexity results. 
+Recently, global complexity has emerged as a crucial metric for evaluating optimization algorithms. Early studies established that the standard TR method converges to stationary points with a complexity of $O(\epsilon^{-2})$, matching that of first-order methods but being suboptimal in terms of second-order methods. Many researchers have struggled to establish satisfactory complexity analysis for the standard TR method, which has led to the proposal of various TR-type variants to achieve global complexity results.
 
 Much of their complexity analysis has focused on finding approximate stationary points of nonconvex functions. Numerous TR-type variants that are capable of finding $\epsilon$-approximate solutions with complexity of $O(\epsilon^{-3/2})$ have been proposed~\cite{luenberger_linear_2021, curtis2017trust, curtis2021trust, hamad2022consistently, hamad2024simplepracticaladaptivetrustregion}. While their global complexity results are similar, these methods differ in algorithmic design and analytical techniques. For details on their approaches, we refer readers to their respective works. For convex optimization, \cite{jiang2024nonconvexityuniversaltrustregionmethod} proposed a TR variant with a complexity of $O(\epsilon^{-1/2})$ very recently.
 
@@ -147,7 +149,7 @@ Building on the above existing results and observation, a natural question arise
 
 Addressing this question is pivotal for advancing the theoretical understanding of TR methods and unlocking their full potential in convex optimization settings. However, this goal presents significant challenges arising from the ball constraint.
 
-First, the constrained TR subproblem inevitably introduces posterior multipliers, which bring intricate dependencies among the step size, multiplier, and gradient norm. Bridging these factors requires more sophisticated mechanisms and detailed analyses. 
+First, the constrained TR subproblem inevitably introduces posterior multipliers, which bring intricate dependencies among the step size, multiplier, and gradient norm. Bridging these factors requires more sophisticated mechanisms and detailed analyses.
 
 In contrast, existing accelerated algorithms all have unconstrained subproblems, which approximate the objective function with Taylor expansions. For example, both gradient descent and cubic Newton methods naturally fit into this form. These unconstrained subproblems have the advantage of avoiding explicit multipliers, with step sizes scaling naturally as a polynomial of the gradient norm. Consequently, the per-iteration progress is easier to analyze.
 
@@ -156,39 +158,39 @@ Second, accelerating second-order methods heavily relies on the estimating seque
 As far as we know, the only literature that considers accelerating the constrained subproblem is~\cite{carmon2020acceleration}. They accelerate the ball subproblem of the form
 \begin{equation}
     \label{eq.ball oracle}
-    \begin{aligned} \min_{x \in \mathbb{R}^n} \quad &f(x), \\ \operatorname{s.t.} \quad &\|x-x_k\|\le r. \end{aligned} 
+    \begin{aligned} \min_{x \in \mathbb{R}^n} \quad &f(x), \\ \operatorname{s.t.} \quad &\|x-x_k\|\le r. \end{aligned}
 \end{equation}
 Their algorithm exhibited an acceleration from $O\left(R/r\right)$ to $O\left(\left(R/r\right)^{2/3}\right)$, where $R:= \|x_0-x^*\|$. We remark that their complexity results focus on $r$, which diverges from our goal.
 
-\paragraph{Contribution} In this paper, we design the first accelerated TR-type method that achieves a global complexity of $\Tilde{O}(\epsilon^{-1/3})$ for finding $\epsilon$-approximate solutions in convex optimization. 
+\paragraph{Contribution} In this paper, we design the first accelerated TR-type method that achieves a global complexity of $\Tilde{O}(\epsilon^{-1/3})$ for finding $\epsilon$-approximate solutions in convex optimization.
 
 Technically, we introduce a more flexible TR-type subproblem that effectively controls both the function value and the gradient norm in subsequent iterations. Unlike existing accelerated second-order methods, which primarily focus on function value decrease, our approach also incorporates the reduction of the gradient norm, which aligns more closely with the specific characteristics of TR-type methods.
 
 Numerical experiments demonstrate the efficacy of our method. It is comparable to the accelerated cubic Newton method~\cite{nesterov2008accelerating} and outperforms the non-accelerated counterparts of both the TR method~\cite{jiang2024nonconvexityuniversaltrustregionmethod} and the accelerated cubic Newton method~\cite{nesterov2006cubic}.
 \begin{table*}[t]
-\caption{A Summary of the Mainstream Second-Order Methods}
-\label{table.summary}
-\vskip 0.15in
-\begin{center}
-\begin{small}
-\begin{sc}
-\begin{tabular}{lcccr}
-\toprule
-Alg. Type & Nonconvex & Convex & Acceleration \\
-\midrule
-Cubic Newton    & \citet{nesterov2006cubic}& \citet{nesterov2006cubic}& \citet{nesterov2008accelerating} \\
-Gradient Reg. Newton & \citet{gratton2023yet}& \citet{mishchenko_regularized_2023} & \citet{doikov2020contracting}\\
-Trust-Region    & $\dagger$& \citet{jiang2024nonconvexityuniversaltrustregionmethod}& This Paper \\
-\bottomrule
-\end{tabular}
-\end{sc}
-\end{small}
-\end{center}
-\vskip -0.1in
-\begin{tablenotes}
-\small
-\item $\dagger$ denotes the works~\cite{curtis2017trust,curtis2021trust,luenberger_linear_2021,hamad2022consistently,hamad2024simplepracticaladaptivetrustregion}.
-\end{tablenotes}
+    \caption{A Summary of the Mainstream Second-Order Methods}
+    \label{table.summary}
+    \vskip 0.15in
+    \begin{center}
+        \begin{small}
+            \begin{sc}
+                \begin{tabular}{lcccr}
+                    \toprule
+                    Alg. Type            & Nonconvex                 & Convex                                                  & Acceleration                     \\
+                    \midrule
+                    Cubic Newton         & \citet{nesterov2006cubic} & \citet{nesterov2006cubic}                               & \citet{nesterov2008accelerating} \\
+                    Gradient Reg. Newton & \citet{gratton2023yet}    & \citet{mishchenko_regularized_2023}                     & \citet{doikov2020contracting}    \\
+                    Trust-Region         & $\dagger$                 & \citet{jiang2024nonconvexityuniversaltrustregionmethod} & This Paper                       \\
+                    \bottomrule
+                \end{tabular}
+            \end{sc}
+        \end{small}
+    \end{center}
+    \vskip -0.1in
+    \begin{tablenotes}
+        \small
+        \item $\dagger$ denotes the works~\cite{curtis2017trust,curtis2021trust,luenberger_linear_2021,hamad2022consistently,hamad2024simplepracticaladaptivetrustregion}.
+    \end{tablenotes}
 \end{table*}
 \paragraph{Related Works}
 Here we review the literature on accelerated second-order methods. Apart from the accelerated cubic Newton method, another significant development in the accelerated second-order method is the MS acceleration framework~\cite{monteiro2013accelerated}, which serves as a general approach for incorporating second-order methods as inner oracles, achieving a complexity of $\tilde{O}(\epsilon^{-2/7})$. \citet{carmon2022optimal} further demonstrated that some second-order methods qualify as oracles within the MS framework.
@@ -207,88 +209,88 @@ Let $\|\cdot\|$ denote the standard Euclidean norm in $\mathbb{R}^n$, and let $x
 Throughout this paper, we focus on convex objective functions and assume the following conditions:
 
 \begin{assumption}
-\label{assm.main assm} 
-The objective function $f: \mathbb{R}^n \to \mathbb{R}$ is twice continuously differentiable, and its Hessian is Lipschitz continuous. That is, there exists a constant $M > 0$ such that for all $x, y \in \mathbb{R}^n$, 
-\begin{equation} 
-\label{eq.main assm} 
-\|\nabla^2 f(x) - \nabla^2 f(y)\| \leq M \|x - y\|. \end{equation} 
+    \label{assm.main assm}
+    The objective function $f: \mathbb{R}^n \to \mathbb{R}$ is twice continuously differentiable, and its Hessian is Lipschitz continuous. That is, there exists a constant $M > 0$ such that for all $x, y \in \mathbb{R}^n$,
+    \begin{equation}
+        \label{eq.main assm}
+        \|\nabla^2 f(x) - \nabla^2 f(y)\| \leq M \|x - y\|. \end{equation}
 \end{assumption}
 
-\begin{assumption} 
-\label{assm.bounded hessian} 
-The Hessian of the objective function is bounded. Specifically, there exists a constant $\kappa_H > 0$ such that for all $x \in \mathbb{R}^n$, \begin{equation} 
-\label{eq.bounded hessian} 
-\|\nabla^2 f(x)\| \leq \kappa_H. 
-\end{equation} \end{assumption}
+\begin{assumption}
+    \label{assm.bounded hessian}
+    The Hessian of the objective function is bounded. Specifically, there exists a constant $\kappa_H > 0$ such that for all $x \in \mathbb{R}^n$, \begin{equation}
+        \label{eq.bounded hessian}
+        \|\nabla^2 f(x)\| \leq \kappa_H.
+    \end{equation} \end{assumption}
 
-\begin{assumption} 
-\label{assm.solvable} 
-There exists a minimizer $x^* \in \mathbb{R}^n$ such that 
-\begin{equation} 
-\label{eq.solvable}
-f(x^*) = f^* := \min_{x \in \mathbb{R}^n} f(x). 
-\end{equation} 
+\begin{assumption}
+    \label{assm.solvable}
+    There exists a minimizer $x^* \in \mathbb{R}^n$ such that
+    \begin{equation}
+        \label{eq.solvable}
+        f(x^*) = f^* := \min_{x \in \mathbb{R}^n} f(x).
+    \end{equation}
 \end{assumption}
 
 We are interested in finding $\epsilon$-approximate solutions, as defined below:
 
 \begin{definition}
-\label{def.approximate solution}
-Given $\epsilon > 0$, a point $x \in \mathbb{R}^n$ is an $\epsilon$-approximate solution to problem~\eqref{eq.main problem} if
-\begin{equation} 
-\label{eq.approximate solution} 
-f(x) - f^* \leq \epsilon \quad \text{or} \quad \|\nabla f(x)\| \leq \epsilon. 
-\end{equation} 
+    \label{def.approximate solution}
+    Given $\epsilon > 0$, a point $x \in \mathbb{R}^n$ is an $\epsilon$-approximate solution to problem~\eqref{eq.main problem} if
+    \begin{equation}
+        \label{eq.approximate solution}
+        f(x) - f^* \leq \epsilon \quad \text{or} \quad \|\nabla f(x)\| \leq \epsilon.
+    \end{equation}
 \end{definition}
 
 To find such approximate solutions, we focus on accelerating the TR method. Specifically, we propose a modification to the standard TR subproblem to improve its theoretical results. Unlike the classical TR subproblem~\eqref{eq.classic tr subproblem}, we introduce a new form of the subproblem at the current iterate $x_k$.
 
 The modified TR subproblem is given by:
-\begin{equation}\label{eq.newTR} 
-\begin{split} 
-\min_d ~& \frac{1}{2}d^T\left (\nabla^2 f(x_k) + \sigma_k I \right ) d + \nabla f(x_k)^T d\\ \operatorname{s.t.} ~& \|d\| \le r_k. 
-\end{split} 
+\begin{equation}\label{eq.newTR}
+    \begin{split}
+        \min_d ~& \frac{1}{2}d^T\left (\nabla^2 f(x_k) + \sigma_k I \right ) d + \nabla f(x_k)^T d\\ \operatorname{s.t.} ~& \|d\| \le r_k.
+    \end{split}
 \end{equation}
 
 As shown, this new formulation incorporates both an $\ell_2$-regularizer and the TR constraint. This modification makes the TR subproblem more flexible, allowing for the adjustment of the iteration-dependent parameters $\sigma_k$ and $r_k$. Notably, by setting $\sigma_k = 0$ and appropriately choosing $r_k$ based on the classic ratio test, we recover the standard TR subproblem. With careful selection of $\sigma_k$ and $r_k$, the modified subproblem becomes a powerful tool for enhancing the theoretical properties of the TR-type method.
 
 The optimality conditions for this modified subproblem are similar to those in the classical TR method as described in~\citet[Section 3]{conn2000trust}, so we omit the proof for brevity.
 
-\begin{lemma}\label{lem.optimal condition} 
-The direction $d_k$ is the solution to \eqref{eq.newTR} if and only if there exists a dual multiplier $\lambda_k \geq 0 $ such that: \begin{subequations} 
-\begin{align} 
-\label{eq.optcond primal} 
-& \| d_k\| \leq r_k \\
-\label{eq.optcond coml slack} 
-& \lambda_k \left(\|d_k\|-r_k \right)=0 \\ \label{eq.optcond firstorder} 
-& \left(\nabla^2 f(x_k) + \sigma_k I + \lambda_k I \right) d_k = -\nabla f(x_k) \\
-\label{eq.optcond secondorder} 
-& \nabla^2 f(x_k) + \sigma_k I + \lambda_k I \succeq 0. 
-\end{align} 
-\end{subequations} 
+\begin{lemma}\label{lem.optimal condition}
+    The direction $d_k$ is the solution to \eqref{eq.newTR} if and only if there exists a dual multiplier $\lambda_k \geq 0 $ such that: \begin{subequations}
+        \begin{align}
+            \label{eq.optcond primal}
+             & \| d_k\| \leq r_k                                                             \\
+            \label{eq.optcond coml slack}
+             & \lambda_k \left(\|d_k\|-r_k \right)=0                                         \\ \label{eq.optcond firstorder}
+             & \left(\nabla^2 f(x_k) + \sigma_k I + \lambda_k I \right) d_k = -\nabla f(x_k) \\
+            \label{eq.optcond secondorder}
+             & \nabla^2 f(x_k) + \sigma_k I + \lambda_k I \succeq 0.
+        \end{align}
+    \end{subequations}
 \end{lemma}
 
 For convenience, we denote the exact primal-dual solution pair of \eqref{eq.newTR} as $(d_k,\lambda_k) = \operatorname{UTR}(x_k, \sigma_k, r_k)$.
 
-Similar to the update rule in~\eqref{eq.optcond firstorder}, most second-order methods update the iterates in the following form: 
-\begin{equation} 
-\label{eq.second-order update} 
-\left (\nabla^2 f(x_k) + \mu_k I \right )d_k = -\nabla f(x_k), 
-\end{equation} 
-where $\mu_k$ is a parameter that plays a crucial role in the complexity analysis and varies depending on the specific method. In the case of the new TR subproblem~\eqref{eq.newTR}, we have $\mu_k = \sigma_k + \lambda_k$, where $\lambda_k$ is the posterior multiplier. The introduction of the multiplier $\lambda_k$ adds a layer of complexity to the convergence analysis. We now briefly discuss the source of this difficulty. 
+Similar to the update rule in~\eqref{eq.optcond firstorder}, most second-order methods update the iterates in the following form:
+\begin{equation}
+    \label{eq.second-order update}
+    \left (\nabla^2 f(x_k) + \mu_k I \right )d_k = -\nabla f(x_k),
+\end{equation}
+where $\mu_k$ is a parameter that plays a crucial role in the complexity analysis and varies depending on the specific method. In the case of the new TR subproblem~\eqref{eq.newTR}, we have $\mu_k = \sigma_k + \lambda_k$, where $\lambda_k$ is the posterior multiplier. The introduction of the multiplier $\lambda_k$ adds a layer of complexity to the convergence analysis. We now briefly discuss the source of this difficulty.
 
-A direct consequence of Assumption~\ref{assm.main assm} is that we can establish an upper bound for $f(x)$, as shown in~\citet[Lemma 4.1.1]{nesterov_lectures_2018}: \begin{equation*} 
-f(x_k + d) \leq f(x_k) + \nabla f(x_k)^T d + \frac{1}{2}d^T \nabla^2 f(x_k) d + \frac{M}{6}\|d\|^3. \end{equation*} 
-Substituting \eqref{eq.second-order update} into this expression and noting that $\nabla^2 f(x_k) \succeq 0$, we obtain: 
-\begin{equation*} 
-f(x_k + d_k) \leq f(x_k) - \mu_k \|d_k\|^2 + \frac{M}{6}\|d_k\|^3. 
-\end{equation*} 
-On one hand, monotonicity is essential for the global convergence of the method, which requires that $\mu_k \geq \frac{6}{M}\|d_k\|$. This further leads to the function value decrease being proportional to $\Theta(\|d_k\|^3)$. 
+A direct consequence of Assumption~\ref{assm.main assm} is that we can establish an upper bound for $f(x)$, as shown in~\citet[Lemma 4.1.1]{nesterov_lectures_2018}: \begin{equation*}
+    f(x_k + d) \leq f(x_k) + \nabla f(x_k)^T d + \frac{1}{2}d^T \nabla^2 f(x_k) d + \frac{M}{6}\|d\|^3. \end{equation*}
+Substituting \eqref{eq.second-order update} into this expression and noting that $\nabla^2 f(x_k) \succeq 0$, we obtain:
+\begin{equation*}
+    f(x_k + d_k) \leq f(x_k) - \mu_k \|d_k\|^2 + \frac{M}{6}\|d_k\|^3.
+\end{equation*}
+On one hand, monotonicity is essential for the global convergence of the method, which requires that $\mu_k \geq \frac{6}{M}\|d_k\|$. This further leads to the function value decrease being proportional to $\Theta(\|d_k\|^3)$.
 
-On the other hand, from~\eqref{eq.second-order update}, we have: 
-\begin{equation*} 
-\mu_k \|d_k\| \leq \|\left(\nabla^2 f(x_k) + \mu_k I\right) d_k\| = \|\nabla f(x_k)\|. 
-\end{equation*} 
+On the other hand, from~\eqref{eq.second-order update}, we have:
+\begin{equation*}
+    \mu_k \|d_k\| \leq \|\left(\nabla^2 f(x_k) + \mu_k I\right) d_k\| = \|\nabla f(x_k)\|.
+\end{equation*}
 The above equation naturally describes the interplay between the multiplier, step size, and gradient norm. To achieve a more aggressive function value decrease, it is crucial to ensure that $\|d_k\|$ does not become too small. Therefore, the property $\mu_k = \Theta(\|d_k\|)$ is desirable for second-order methods.
 
 For the cubic Newton method, such property always holds since the optimality condition of the subproblem guarantees that $\mu_k = \frac{M}{2}\|d_k\|$.However, there are no theoretical results that confirm the same property holds for TR-type methods. The results shown in Figure support our arguments.
@@ -318,11 +320,11 @@ Since TR-type methods make per-iteration progress in a twofold manner, the estim
 The main idea behind the estimating sequence technique is to maintain a dynamic sequence $\{\phi_k(x),A_k,v_k,x_k\}$ to approximate the objective function $f(x)$ from both above and below. In each iteration, we only update $x_k$ and $v_k$, while the auxiliary sequences $\phi_k(x)$ and $A_k$ are used for theoretical analysis and do not explicitly appear in the algorithm. Specifically, the following relations must be satisfied:
 \begin{align}
     \label{eq.es relation 1}
-    &\mathcal{R}_k^1: \ \phi_k^*  \geq A_k f(x_k), \  \phi_k^*= \phi_k(v_k) =\min_{x\in\mathbb{R}^n}\phi_k(x) \\
+     & \mathcal{R}_k^1: \ \phi_k^*  \geq A_k f(x_k), \  \phi_k^*= \phi_k(v_k) =\min_{x\in\mathbb{R}^n}\phi_k(x) \\
     \label{eq.es relation 2}
-    &\mathcal{R}_k^2: \ \phi_k(x)\leq A_kf(x)+\phi_0(x), \ \forall x\in\mathbb{R}^n.
+     & \mathcal{R}_k^2: \ \phi_k(x)\leq A_kf(x)+\phi_0(x), \ \forall x\in\mathbb{R}^n.
 \end{align}
-By setting $x = x^*$ in \eqref{eq.es relation 2}, it follows from \eqref{eq.es relation 1} and \eqref{eq.es relation 2} that 
+By setting $x = x^*$ in \eqref{eq.es relation 2}, it follows from \eqref{eq.es relation 1} and \eqref{eq.es relation 2} that
 \begin{equation*}
     f(x_k)-f^* \leq \frac{1}{A_k}\phi_0(x^*).
 \end{equation*}
@@ -330,7 +332,7 @@ Thus, the algorithm’s complexity is determined by how rapidly $A_k$ grows. For
 
 As can be observed, the estimating sequence technique captures a recursive relationship between the function value across iterations. However, as discussed above, the TR-type method does not guarantee a consistent decrease in function value at every iteration. This limitation calls for a new design tailored to accelerate TR-type methods.
 
- 
+
 
 
 
@@ -413,14 +415,14 @@ However, at line~\ref{line.else}, the case $\lambda_k = 0$ calls for different p
     \end{equation}
 \end{lemma}
 
-Intuitively, we don't want to let this kind of contraction slip away. Therefore we design the 'while' loop at line~\ref{line.while} to line~\ref{line.endwhile}. There are two possible outcomes of this loop, the first is that the multiplier still equals $0$, as a result, the gradient norm keeps contracting until an $\epsilon$-approximate solution is found. 
+Intuitively, we don't want to let this kind of contraction slip away. Therefore we design the 'while' loop at line~\ref{line.while} to line~\ref{line.endwhile}. There are two possible outcomes of this loop, the first is that the multiplier still equals $0$, as a result, the gradient norm keeps contracting until an $\epsilon$-approximate solution is found.
 
-The second is that the multiplier no longer equals zero, as a result, we have 
+The second is that the multiplier no longer equals zero, as a result, we have
 \begin{equation*}
-\begin{aligned}
-    &\|d_k^{(j)}\| = \frac{1}{3\sqrt{M}}\|f(y_k+d_k^{(j-1)})\|^{1/2},\\
-    &\mu_k^{(j)}:= \sigma_k^{(j)}+\lambda_k^{(j)} \geq \frac{\sqrt{M}}{3}\|f(y_k+d_k^{(j-1)})\|^{1/2}.
-\end{aligned}
+    \begin{aligned}
+         & \|d_k^{(j)}\| = \frac{1}{3\sqrt{M}}\|f(y_k+d_k^{(j-1)})\|^{1/2},                                  \\
+         & \mu_k^{(j)}:= \sigma_k^{(j)}+\lambda_k^{(j)} \geq \frac{\sqrt{M}}{3}\|f(y_k+d_k^{(j-1)})\|^{1/2}.
+    \end{aligned}
 \end{equation*}
 Hence we are provided with a pair of 'good predict' of $\sigma_k^{(j)}$ and $r_k^{(j)}$ such that the aforementioned relation $\mu_k^{(j)} = \Theta(\|d_k^{(j)}\|)$ roughly holds. Then a transparent search procedure at line~\ref{line.bisection} to line~\ref{line.endbisection} is conducted to correct the parameters to make the relation hold strictly, where Algorithm~\ref{alg.bisection} serves as a basic bisection tool.
 
@@ -436,7 +438,7 @@ If the algorithm does not terminate in the first way, we shall show that the 'wh
 
 \begin{lemma}
     \label{lem.inner loop terminate}
-        In the $k$-th outer loop of Algorithm~\ref{alg.accelerated utr}, the inner loop will terminate in 
+    In the $k$-th outer loop of Algorithm~\ref{alg.accelerated utr}, the inner loop will terminate in
     \begin{equation*}
         j_k \leq O\left (\log \frac{\|\nabla f(y_k)\|}{\epsilon}\right)
     \end{equation*}
@@ -451,7 +453,7 @@ If the algorithm does not terminate in the first way, we shall show that the 'wh
     % \end{equation}
 \end{lemma}
 
-Then we consider the complexity of the bisection procedure, we remark that the goal of the bisection search is to find a pair of $\mu_k,d_k$ with $\mu_k = \Theta(\|d_k\|)$. In particular, our choice of parameters in Algorithm~\ref{alg.accelerated utr} and Algorithm~\ref{alg.bisection} target at finding 
+Then we consider the complexity of the bisection procedure, we remark that the goal of the bisection search is to find a pair of $\mu_k,d_k$ with $\mu_k = \Theta(\|d_k\|)$. In particular, our choice of parameters in Algorithm~\ref{alg.accelerated utr} and Algorithm~\ref{alg.bisection} target at finding
 \begin{equation}\label{eq.goal of bisection 1}
     M\|d_k\| \leq \mu_k\leq 2M\|d_k\|,
 \end{equation}
@@ -459,7 +461,7 @@ we define the auxiliary function for iteration $k$,
 \begin{equation}\label{eq.auxiliary bisection function}
     g_{y_k}(\mu): = \frac{\mu}{\|\left(\nabla^2 f(y_k)+\mu I\right)^{-1}\nabla f(y_k)\|}.
 \end{equation}
-Therefore, the goal \eqref{eq.goal of bisection 1} is equivalent to 
+Therefore, the goal \eqref{eq.goal of bisection 1} is equivalent to
 \begin{equation}
     \label{eq.goal of bisection 2}
     M\leq g_{y_k}(\mu)\leq 2M.
@@ -468,7 +470,7 @@ The following lemma claims that we have found the bracketing points for the bise
 
 \begin{lemma}
     \label{eq.valid bracketing}
-    In the $k$-th iteration, at line~\ref{line.bracketing} of Algorithm~\ref{alg.accelerated utr}, 
+    In the $k$-th iteration, at line~\ref{line.bracketing} of Algorithm~\ref{alg.accelerated utr},
     \begin{equation*}
         g_{y_k}(\mu_-) < M, \ g_{y_k}(\mu_+) >2M.
     \end{equation*}
@@ -488,25 +490,25 @@ The above lemmas are crucial in analyzing the complexity of the bisection proced
 
 Next, we will show how we can apply the estimating sequence technique to analyze the complexity of our algorithm. To begin with, we present how we set the auxiliary sequence $A_k$ and $\phi_k(x)$. Our approach is different from the standard one introduced in~\citet{nesterov_lectures_2018} in that we make it more suitable for our method.
 
-We recursively define 
+We recursively define
 \begin{align}
-\label{eq.update a and A}
-&a_k = \frac{(k+1)(k+2)}{2}, \ A_k=\frac{k(k+1)(k+2)}{6}\\
-\label{eq.update phi}
-&\phi_0(x) = \frac{M}{\ell}\|x-x_0\|^3, \\
-&\phi_{k+1}(x) =\left\{ 
-\begin{aligned}
-&\phi_k(x)+a_k\left (f(x_k)+\langle \nabla f(x_k),x-x_k\rangle \right ), k\in \mathcal{N}\\
-&\phi_k(x)+a_k\left (f(y_k)+\langle \nabla f(y_k),x-y_k\rangle \right ), k\in \mathcal{Z}
-\end{aligned}
-\right.
+    \label{eq.update a and A}
+     & a_k = \frac{(k+1)(k+2)}{2}, \ A_k=\frac{k(k+1)(k+2)}{6} \\
+    \label{eq.update phi}
+     & \phi_0(x) = \frac{M}{\ell}\|x-x_0\|^3,                  \\
+     & \phi_{k+1}(x) =\left\{
+    \begin{aligned}
+         & \phi_k(x)+a_k\left (f(x_k)+\langle \nabla f(x_k),x-x_k\rangle \right ), k\in \mathcal{N} \\
+         & \phi_k(x)+a_k\left (f(y_k)+\langle \nabla f(y_k),x-y_k\rangle \right ), k\in \mathcal{Z}
+    \end{aligned}
+    \right.
 \end{align}
-where the sets 
+where the sets
 \begin{equation}
     \label{eq.outer index catagory}
     \begin{aligned}
-    &\mathcal{Z} = \left \{ k | x_k \text{\ updated at line~\ref{line.nonzero multiplier}}\right\}, \\
-    &\mathcal{N} = \left \{k | x_k \text{\ updated at line~\ref{line.zero multiplier 1} or line~\ref{line.zero multiplier 2}}\right\}.
+         & \mathcal{Z} = \left \{ k | x_k \text{\ updated at line~\ref{line.nonzero multiplier}}\right\},                                    \\
+         & \mathcal{N} = \left \{k | x_k \text{\ updated at line~\ref{line.zero multiplier 1} or line~\ref{line.zero multiplier 2}}\right\}.
     \end{aligned}
 \end{equation}
 The sequences defined above and the iterates produced by Algorithm~\ref{alg.accelerated utr} satisfy the following
@@ -515,9 +517,9 @@ The sequences defined above and the iterates produced by Algorithm~\ref{alg.acce
     For the function sequence $\phi_k(x)$, they have the following properties
     \begin{enumerate}
         \item $v_k$ is the unique minimizer of $\phi_k(x)$, i.e.,
-        \begin{equation*}
-            \phi_k^* =\min \phi_k(x) = \phi_k(v_k).
-        \end{equation*}
+              \begin{equation*}
+                  \phi_k^* =\min \phi_k(x) = \phi_k(v_k).
+              \end{equation*}
         \item Suppose Assumption~\ref{assm.main assm} holds, set $0<\ell\leq \frac{25}{34992}$, if Algorithm~\ref{alg.accelerated utr} does not find $\epsilon$-approximate solutions in the 'while' loop, then $\mathcal{R}_k^1$ and $\mathcal{R}_k^2$ defined in \eqref{eq.es relation 1} and \eqref{eq.es relation 2} hold for all $k\geq0$.
     \end{enumerate}
 \end{lemma}
@@ -529,7 +531,8 @@ As a direct consequence of the above lemma, the complexity of Algorithm~\ref{alg
     Suppose \autoref{assm.main assm} holds, then \autoref{alg.accelerated utr} find a point $x\in\mathbb{R}^n$ satisfies Definition~\ref{def.approximate solution} in $O(\epsilon^{-1/3})$ outer iterations. Moreover, the number of the TR subproblems solved is bounded by $\tilde O(\epsilon^{-1/3})$.
 \end{theorem}
 \section{Numerical Experiments}
-In this section, we implement the 
+In this section, we implement the universal trust-region method (\utr{}) and the accelerated enhancement (\atr{}), to compare with the cubic regularization method (\arc{}), and its accelerated version (\arca{}).
+
 
 \section{Conclusion}
 In this work, we addressed the challenge of accelerating trust-region-type methods, bridging the gap between their practical success and theoretical development. By proposing a novel framework that effectively balances function value reduction and gradient norm contraction, we extended the scope of existing acceleration techniques to accommodate the constrained nature of trust-region subproblems. Numerical experiments further support our theoretical findings.
@@ -557,7 +560,7 @@ This paper does not have any potential societal or ethical consequences.
 
 You can have as much text here as you want. The main body must be at most $8$ pages long.
 For the final version, one more page can be added.
-If you want, you can use an appendix like this one.  
+If you want, you can use an appendix like this one.
 
 The $\mathtt{\backslash onecolumn}$ command above can be kept in place if you prefer a one-column appendix, or can be removed if you prefer a two-column appendix.  Apart from this possible change, the style (font size, spacing, margins, page numbering, etc.) should be kept the same as the main body.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
