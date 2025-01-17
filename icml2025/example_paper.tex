@@ -55,6 +55,7 @@
 \newcommand{\atr}{\texttt{UTR-A}}
 \newcommand{\arc}{\texttt{CubicReg}}
 \newcommand{\arca}{\texttt{CubicReg-A}}
+\definecolor{rr}{RGB}{190,88,69}
 \setlist[itemize]{leftmargin=*,label=$\bullet$,topsep=2pt,itemsep=0pt}
 \setlist[enumerate]{label=$(\arabic*)$, leftmargin=*,topsep=2pt,itemsep=0pt}
 % Todonotes is useful during development; simply uncomment the next line
@@ -384,6 +385,40 @@ In this section, we propose the ATR method(Algorithm~\ref{alg.accelerated utr}) 
         \ENDFOR
     \end{algorithmic}
 \end{algorithm}
+
+\textcolor{rr}{
+    \begin{algorithm}[ht]
+        \caption{Accelerated Trust-Region Method (\atr{})}\label{alg.accelerated utr}
+        \begin{algorithmic}[1]
+            \small
+            \STATE \textbf{input:} $x_0=v_0\in \mathbb{R}^n$, $s_0=0$
+            \FOR{$k=0, 1, \ldots, \infty$}
+            \STATE $y_k = \frac{k}{k+3}x_k+\frac{3}{k+3}v_k$
+            \STATE $(d_k,\lambda_k) = \operatorname{U}(y_k,\|\nabla f(y_k)\|^{1/2})$
+            \IF{$\lambda_k>0$} \label{line.if}
+            \STATE $s_k = s_{k-1}+\frac{(k+1)(k+2)}{2}\nabla f(y_k)$ \label{line.nonzero multiplier}
+            \ELSE \label{line.else}
+            \STATE $d_k^{(0)}=d_k$, $\lambda_k^{(0)} = \lambda_k$, $j=0$
+            \WHILE{$\lambda_k^{(j)}=0$} \label{line.while}
+            \STATE $j=j+1$
+            \STATE $(d_k^{(j)},\lambda_k^{(j)})=\operatorname{U}(y_k,\|\nabla f(y_k+d_k^{(j-1)})\|^{1/2})$
+            \ENDWHILE \label{line.endwhile}
+            \IF{$\lambda_k^{(j)}\leq \frac{\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j-1)})\|^{1/2}$} \label{line.bisection}
+            \STATE $x_{k+1} = y_k+d_k^{(j)}$ \label{line.zero multiplier 1}
+            \ELSE
+            \STATE $\mu_- = \frac{\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j-1)})\|^{1/2}$,
+            \STATE $\mu_+ = \lambda_k^{(j)}+\frac{\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j-1)})\|^{1/2}$ \label{line.bracketing}
+            \STATE $x_{k+1} = \operatorname{B}(y_k,\mu_-,\mu_+)$ \label{line.zero multiplier 2}
+            \ENDIF \label{line.endbisection}
+            \STATE $s_k=s_{k-1}+\frac{(k+1)(k+2)}{2}\nabla f(x_{k+1})$
+            \ENDIF
+            \STATE $x_{k+1}=y_k+d_k$
+            \STATE $v_{k+1} = v_0-\sqrt{\frac{\ell}{3M\|s_k\|}}s_k$
+            \ENDFOR
+            \normalsize
+        \end{algorithmic}
+    \end{algorithm}
+}
 
 \begin{algorithm}[!ht]
     \caption{Bisection for ATR}\label{alg.bisection}
