@@ -31,6 +31,7 @@
 \usepackage{amssymb}
 \usepackage{mathtools}
 \usepackage{amsthm}
+\usepackage{enumitem}
 
 % if you use cleveref..
 \usepackage[capitalize,noabbrev]{cleveref}
@@ -54,6 +55,8 @@
 \newcommand{\atr}{\texttt{UTR-A}}
 \newcommand{\arc}{\texttt{CubicReg}}
 \newcommand{\arca}{\texttt{CubicReg-A}}
+\setlist[itemize]{leftmargin=*,label=$\bullet$,topsep=2pt,itemsep=0pt}
+\setlist[enumerate]{label=$(\arabic*)$, leftmargin=*,topsep=2pt,itemsep=0pt}
 % Todonotes is useful during development; simply uncomment the next line
 %    and comment out the line below the next line to turn off comments
 %\usepackage[disable,textsize=tiny]{todonotes}
