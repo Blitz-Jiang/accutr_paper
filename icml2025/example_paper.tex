@@ -7,7 +7,7 @@
 \usepackage{threeparttable}
 \usepackage{microtype}
 \usepackage{graphicx}
-\usepackage{subfigure}
+\usepackage{subcaption}
 % \usepackage[inline]{showlabels}
 \usepackage{booktabs} % for professional tables
 % hyperref makes hyperlinks in the resulting PDF.
@@ -531,8 +531,49 @@ As a direct consequence of the above lemma, the complexity of Algorithm~\ref{alg
     Suppose \autoref{assm.main assm} holds, then \autoref{alg.accelerated utr} find a point $x\in\mathbb{R}^n$ satisfies Definition~\ref{def.approximate solution} in $O(\epsilon^{-1/3})$ outer iterations. Moreover, the number of the TR subproblems solved is bounded by $\tilde O(\epsilon^{-1/3})$.
 \end{theorem}
 \section{Numerical Experiments}
-In this section, we implement the universal trust-region method (\utr{}) and the accelerated enhancement (\atr{}), to compare with the cubic regularization method (\arc{}), and its accelerated version (\arca{}).
+In this section, we implement the universal trust-region method (\utr{}) and its accelerated enhancement (\atr{}) to compare with the cubic regularization method (\arc{}) and its accelerated version (\arca{}). Due to space constraints, only a brief description of the experiment is provided here; further details and the exact experimental setup can be found in \Cref{sec.experiments}.
 
+We begin by testing performance on Nesterov's lower bound problem \cite{nesterovImplementableTensorMethods2021}:
+\[
+    f_k(x) = \eta_{p+1}\left(A_k x\right) - \left\langle e_1, x\right\rangle, \quad 2 \leq k \leq p,
+\]
+where $\eta_{p+1}(x) = \tfrac{1}{p+1}\|x\|_{p+1}^{p+1}$, and $A_k$ is a parametrized bidiagonal matrix (details in \Cref{sec.experiments.nesterov}). This function becomes increasingly challenging as \(k\) increases.
+
+\begin{figure}[h!]
+    \small
+    \centering
+    \subcaptionbox{$k = 50$}{
+        \includegraphics[width=0.47\columnwidth]{figs/e-nesterov-k1.pdf}
+    }
+    \subcaptionbox{$k = 100$}{
+        \includegraphics[width=0.47\columnwidth]{figs/e-nesterov-k2.pdf}
+    }
+    \caption{Nesterov's lower bound problem, $n = 150$, $p = 4$.}\label{fig.nesterov}
+    \normalsize
+\end{figure}
+
+For this experiment, we fix the problem size and differentiability order, considering \(k = 50, 100\). As shown in \Cref{fig.nesterov}, accelerated methods outperform their original variants, with \atr{} slightly outperforming \arca{} in both cases.
+
+Next, we consider softmax minimization, which approximates piecewise linear functions:
+\[
+    f(x) := \mu \ln \left(\sum_{i=1}^m \exp \left(\tfrac{a_i^Tx - b_i}{\mu}\right)\right) \approx \max_{1 \leq i \leq m} \left\{a_i^T x - b_i\right\}.
+\]
+When \(\mu\) is small, this problem is notoriously challenging for unaccelerated methods due to the large smoothness constant, where \(M \leq \tfrac{12}{\mu^2}\) \cite{doikov_super-universal_2024}.
+
+\begin{figure}[h!]
+    \small
+    \centering
+    \subcaptionbox{Iterations}{
+        \includegraphics[width=0.47\columnwidth]{figs/fx-softmax-k.pdf}
+    }
+    \subcaptionbox{Runtime (seconds)}{
+        \includegraphics[width=0.47\columnwidth]{figs/fx-softmax-t.pdf}
+    }
+    \caption{Softmax minimization, $n = 500$, $m = 1000$, $\mu = 0.1$.}\label{fig.softmax}
+    \normalsize
+\end{figure}
+
+\Cref{fig.softmax} illustrates the results. In addition to comparing iterations (panel (a)), we also present runtime in seconds (panel (b)). Notably, the \emph{per-iteration time} of \atr{} (0.02 seconds) is only one-fourth that of \arca{} (0.08 seconds), primarily because solving the trust-region subproblem is computationally simpler than solving the cubic-regularized subproblem.
 
 \section{Conclusion}
 In this work, we addressed the challenge of accelerating trust-region-type methods, bridging the gap between their practical success and theoretical development. By proposing a novel framework that effectively balances function value reduction and gradient norm contraction, we extended the scope of existing acceleration techniques to accommodate the constrained nature of trust-region subproblems. Numerical experiments further support our theoretical findings.
@@ -556,16 +597,10 @@ This paper does not have any potential societal or ethical consequences.
 \newpage
 \appendix
 \onecolumn
-\section{You \emph{can} have an appendix here.}
+\section{Experiments}\label{sec.experiments}
+\subsection{Nesterov's lower bound problem}\label{sec.experiments.nesterov}
 
-You can have as much text here as you want. The main body must be at most $8$ pages long.
-For the final version, one more page can be added.
-If you want, you can use an appendix like this one.
-
-The $\mathtt{\backslash onecolumn}$ command above can be kept in place if you prefer a one-column appendix, or can be removed if you prefer a two-column appendix.  Apart from this possible change, the style (font size, spacing, margins, page numbering, etc.) should be kept the same as the main body.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+$$U_k=\left(\begin{array}{rrccr}1 & -1 & 0 & \ldots & 0 \\ 0 & 1 & -1 & \ldots & 0 \\ & & \ldots & \ldots & \\ 0 & 0 & \ldots & 1 & -1 \\ 0 & 0 & \ldots & 0 & 1\end{array}\right)$$
 
 \end{document}
 
