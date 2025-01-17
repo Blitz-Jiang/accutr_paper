@@ -1,0 +1,220 @@
+\documentclass[10pt, notheorems, envcountsect]{beamer}
+
+
+\usetheme{bjeldbak}
+\usepackage[numbers]{natbib}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{multirow}
+% \usepackage{subfigure}
+\usepackage{amsmath,amssymb,mathrsfs}
+\usepackage{algorithm,algpseudocode}
+\algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}%
+\algnewcommand{\var}{\textit}
+\usepackage{mathtools}
+\usepackage{caption, longtable, booktabs}
+\usepackage{graphicx} % 支持插入图片
+\usepackage{subcaption} % 支持子图标题
+% \usepackage{biblatex}
+
+\setbeamertemplate{theorem}[ams style]
+\setbeamertemplate{theorems}[numbered]
+\setbeamercovered{invisible}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{assumption}{Assumption}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{proposition}{Proposition}[section]
+
+%%%%%%%%%%%%%%%%
+% config
+% my cmd
+% start my commands
+%%%%%%%%%%%%%%%%
+\newcommand{\lm}{\lambda_\mathsf{max}}
+\newcommand{\trace}{\mathsf{trace}}
+\newcommand{\diag}{\mathsf{diag}}
+\newcommand{\rank}[1]{\mathsf{rank}(#1)}
+\newcommand{\model}[1]{(\mathsf{#1})}
+\newcommand{\mx}{\mathsf{\max}~}
+\newcommand{\mn}{\mathsf{\min}~}
+\newcommand{\st}{\mathrm{s.t.}~}
+\newcommand{\ex}{\mathsf E}
+\newcommand{\varr}{\mathsf {Var}}
+\newcommand{\dx}{\;\bm dx}
+\newcommand{\pr}{\mathsf P}
+\newcommand{\id}{\mathsf I}
+\newcommand{\bp}{\mathbb P}
+\newcommand{\be}{\mathbb E}
+\newcommand{\bi}{\mathbb I}
+\newcommand{\bxi}{{\bm \xi}}
+\newcommand{\va}{\mathsf{Var}}
+\newcommand{\dif}{\mathsf{d}}
+\newcommand{\minp}[2]{\min\{#1, #2\}}
+\newcommand{\intp}{\mathsf{int}}
+\newcommand{\apex}{\mathsf{apex}}
+\newcommand{\conv}{\mathsf{conv}}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\redsf}[1]{\textcolor{red}{\textsf{#1}}}
+\newcommand{\real}{\mathbb{R}}
+\newcommand{\prox}{\mathsf{prox}}
+
+%
+\newcommand{\xk}{x_k}
+\newcommand{\Hk}{H_k}
+\newcommand{\Qk}{q_{k+1}}
+\newcommand{\gk}{g_k}
+\newcommand{\dk}{d_k}
+\newcommand{\gkn}{g_{k+1}}
+\newcommand{\xkn}{x_{k+1}}
+\newcommand{\dkn}{d_{k+1}}
+\newcommand{\lk}{\lambda_k}
+\newcommand{\ghg}{\gk^TH_kg_k}
+\newcommand{\dhd}{\dkn^TH_k\dkn}
+\newcommand{\dhtd}{\dkn^T\left(H_k + \lambda_kI\right)\dkn}
+\newcommand{\hkap}{\tilde{H}_k}
+\newcommand{\vk}{V_k}
+\newcommand{\spa}{\mathsf{span}}
+\newcommand{\spak}{\mathcal L_k}
+
+
+
+
+\title{Accelerated Trust-Region method for Convex Optimization}
+\author{Yuntian Jiang \and Chuwen Zhang}
+
+
+\begin{document}
+  {%
+    \setbeamertemplate{headline}{}
+    \frame{\titlepage}
+  }
+
+\footnotesize
+\begin{frame}[allowframebreaks]{Existing Literature}
+Almost all existing researches focus on designing TR variants to find an $\epsilon$-approximate stationary points for nonconvex optimization with global complexity of $O(\epsilon^{-3/2})$:
+\begin{itemize}
+    \item Fixed radius TR:~\citet{luenberger_linear_2021}
+    \item TRACE:~\citet{curtis2017trust}
+    \item Consistently adaptive trust-region:~\citet{hamad2022consistently,hamad2024simplepracticaladaptivetrustregion}
+    \item Trust-Region NewtonCG:~\citet{curtis2021trust}
+\end{itemize}
+\framebreak
+For convex optimization, \citet{jiang2024nonconvexityuniversaltrustregionmethod} proposed the universal trust-region(UTR) method, which has a complexity of $O(\epsilon^{-1/2})$ for convex optimization, the UTR has the following feature:
+\begin{itemize}
+    \item Its subproblem uses both trust-region ball and gradient regularization:
+    \begin{equation}\label{eq.newTR}
+    \begin{split}
+        \min_d ~&  \frac{1}{2}d^T\left (\nabla^2 f(x) + \sigma \|\nabla f(x)\|^{1/2} I \right ) d + \nabla f(x)^T d\\
+        \text{s.t. } ~& \|d\| \le r\|\nabla f(x)\|^{1/2}, \qquad \sigma, r > 0.
+    \end{split}
+\end{equation}
+    \item The most important descent property is that each step of UTR either decreases the function value or the gradient norm sufficiently:
+    \begin{equation}
+        \label{eq.FOSD}
+        f(x+d) - f(x) \leq -\Omega(\|\nabla f(x)\|^{1/2}), \ \text{or } \|\nabla f(x+d)\|\leq \xi \|\nabla f(x)\|, \ \xi<1.
+    \end{equation}
+\end{itemize}
+A further question is: 
+\begin{center}
+\textit{can UTR be further accelerated for convex problems?}
+\end{center}
+\end{frame}
+\begin{frame}[allowframebreaks]{Acceleration Techniques}
+    Nesterov showed that the estimating sequence technique can be used to accelerate cubic Newton method~\citet{nesterov_lectures_2018}.
+    \begin{itemize}
+        \item The key of the technique is to maintain an estimating sequence $\phi_k(x)$ of the function with 
+        \begin{equation}
+            \label{eq.estimating sequence}
+            A_k f(x_k) \leq \phi_k^*:=\min_x \phi_k(x) \leq A_k f(x) + \phi_0(x)
+        \end{equation}
+        \item A direct consequence of such sequence is 
+        \begin{equation}
+            \label{eq.approximate xk}
+            f(x_k)-f^* \leq \frac{1}{A_k} \phi_0(x^*).
+        \end{equation}
+        \item Therefore it remains to analyze the growth of $A_k$.
+        \framebreak
+        \item Currently, cubic Newton method is the only second order method can be accelerated by the estimating sequence.
+        \item There are other kind of estimating sequence(\citet{monteiro2013accelerated}), which can be used to accelerate some second-order oracles(\citet{carmon2022optimal}). However, trust-region method is not included.
+    \end{itemize}
+\end{frame}
+\begin{frame}[allowframebreaks]{Our Method}
+    In order to accelerate the trust-region method, we consider a more general UTR subproblem:
+    \begin{itemize}
+        \item \begin{equation}\label{eq.newTR general}
+    \begin{split}
+        \min_d ~&  \frac{1}{2}d^T\left (\nabla^2 f(x) + \sigma I \right ) d + \nabla f(x)^T d\\
+        \text{s.t. } ~& \|d\| \le r, \qquad \sigma, r > 0.
+    \end{split}
+    \end{equation}
+    \item We allow a more flexible choice of $\sigma$ and $r$.
+    \end{itemize}
+    \framebreak
+    In the scenario of acceleration, the analysis for UTR no longer holds,
+    \begin{itemize}
+        \item In the analysis for UTR, we use the FOSD property, when the case
+        \begin{equation*}
+            \|\nabla f(x_k+d_k)\| \leq \xi \|\nabla f(x_k)\|
+        \end{equation*}
+        occurs for a logarithmic times, we are guaranteed to find approximate solutions.
+        \item The reason is the relation recursively holds
+        \begin{equation*}
+            \|\nabla f(x_{k+j})\| \leq \xi \|\nabla f(x_{k+j-1})\| \leq \cdots\leq \xi^j \|\nabla f(x_k)\|.
+        \end{equation*}
+        \item However, in the acceleration scenario, we need to call UTR oracle at 
+        \begin{equation*}
+            x_{k+1} = \operatorname{UTR}(y_k,\sigma_k,r_k)，
+        \end{equation*}
+        thus the recurrence breaks down.
+        \item Also, the constrained nature of the TR subproblem makes the acceleration difficult.
+    \end{itemize}
+    \framebreak
+    \begin{itemize}
+        \item The above difficulty can be addressed by properly setting $\sigma,r$.
+        \item Our accelerated trust-region method shows a complexity of $\tilde O(\epsilon^{-1/3})$ for convex optimization.
+    \end{itemize}
+\end{frame}
+\begin{frame}[allowframebreaks]{Numerical Experiments}
+  \begin{figure}
+        % 左侧图片
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{icml2025/figs/e-nesterov-k1.pdf}
+            \subcaption{Worstcase1}
+        \end{minipage}
+        \hfill % 增加间距
+        % 右侧图片
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{icml2025/figs/e-nesterov-k2.pdf}
+            \subcaption{Worstcase2}
+        \end{minipage}
+    \end{figure}
+    \framebreak
+    \begin{figure}
+        % 左侧图片
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{icml2025/figs/fx-softmax-k1.pdf}
+            \subcaption{Softmax1}
+        \end{minipage}
+        \hfill % 增加间距
+        % 右侧图片
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{icml2025/figs/fx-softmax-k2.pdf}
+            \subcaption{Softmax2}
+        \end{minipage}
+    \end{figure}
+\end{frame}
+\begin{frame}[allowframebreaks]{Reference}
+\bibliography{icml2025/example_paper}
+\bibliographystyle{plainnat}
+    
+\end{frame}
+
+\end{document}

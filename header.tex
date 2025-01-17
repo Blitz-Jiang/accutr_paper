@@ -1,0 +1,119 @@
+% \usepackage[notextcomp,nomath]{stix2}
+\usepackage{tcolorbox}
+\usepackage{amsfonts,amscd,amssymb,amsmath,amsthm,enumerate}
+\numberwithin{equation}{section}
+\usepackage{array,mathtools,mathrsfs,bm}
+\usepackage{threeparttable}
+\usepackage{booktabs,caption,longtable,multicol,multirow}
+\usepackage{subcaption,lscape}
+\usepackage{makecell}
+\usepackage{graphicx}
+\usepackage{enumerate}
+\usepackage{enumitem}
+\setlist[enumerate]{noitemsep, topsep=2pt}
+\setlist[itemize]{noitemsep, topsep=2pt}
+% \usepackage[linesnumbered,boxruled,lined,commentsnumbered]{algorithm2e}
+\usepackage[colorlinks,citecolor=purple,linkcolor=blue]{hyperref}
+\usepackage[nameinlink]{cleveref}
+% \usepackage[parfill]{parskip}
+\usepackage[margin=1.5in]{geometry}
+\usepackage[numbers]{natbib}
+\usepackage{authblk}
+\usepackage{algorithm,algorithmic}
+\usepackage{pifont}
+\usepackage{appendix}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{makecell}
+% \usepackage[inline]{showlabels}
+% \renewcommand{\showlabelfont}{\tiny\color{blue}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{eqparbox}
+\renewcommand\algorithmiccomment[1]{%
+  \hfill\texttt{\#}\ \eqparbox{COMMENT}{\texttt{#1}}%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% tikz
+\usepackage{tikz}
+\definecolor{ao(english)}{rgb}{0.0, 0.5, 0.0}
+\definecolor{cadmiumgreen}{rgb}{0.0, 0.42, 0.24}
+\definecolor{darkpastelgreen}{rgb}{0.01, 0.75, 0.24}
+\let\subfigureautorefname=\figurename
+\usepackage{adjustbox}
+% Define block styles
+\tikzset{%
+  materia/.style={draw, fill=blue!20, text width=6.0em, text centered, minimum height=1.5em,drop shadow},
+  etape/.style={materia, text width=8em, minimum width=10em, minimum height=3em, rounded corners, drop shadow},
+  texto/.style={above, text width=6em, text centered},
+  linepart/.style={draw, thick, color=black!50, -LaTeX, dashed},
+  line/.style={draw, thick, color=black!50, -LaTeX},
+  ur/.style={draw, text centered, minimum height=0.01em},
+  back group/.style={fill=white!20,rounded corners, draw=black!50, dashed, inner xsep=15pt, inner ysep=10pt},
+}
+
+\newcommand{\etape}[2]{node (p#1) [etape] {#2}}
+
+\newcommand{\transreceptor}[3]{%
+  \path [linepart] (#1.east) -- node [above] {\scriptsize #2} (#3);}
+\tikzstyle{matheq} = [node distance=8.75cm, text width=21em, minimum width=1cm,
+minimum height=2em, text centered,color=black!50]
+
+\renewcommand{\baselinestretch}{1.2}
+
+%
+\newcommand{\gkc}{\|\gk\|^{1/2}}
+\newcommand{\xk}{x_k}
+\newcommand{\Hk}{H_k}
+\newcommand{\gk}{g_k}
+\newcommand{\dk}{d_k}
+\newcommand{\gkn}{g_{k+1}}
+\newcommand{\xkn}{x_{k+1}}
+\newcommand{\dkn}{d_{k+1}}
+\newcommand{\lk}{\lambda_{k+1}}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{condition}{Condition}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{question}{Question}[section]
+\newtheorem{remark}{Remark}[section]
+\newtheorem{assumption}{Assumption}[section]
+\newtheorem{strategy}{Strategy}[section]
+
+
+\def\algorithmautorefname{Algorithm}
+\def\subsectionautorefname{Section}
+\def\definitionautorefname{Definition}
+\def\corollaryautorefname{Corollary}
+\def\lemmaautorefname{Lemma}
+\def\assumptionautorefname{Assumption}
+\def\propositionautorefname{Proposition}
+\def\tableautorefname{Table}
+\def\strategyautorefname{Strategy}
+\def\remarkautorefname{Remark}
+\def\conditionautorefname{Condition}
+
+
+\newcommand{\hsodm}{\texttt{HSODM}}
+\newcommand{\hsodmarc}{\texttt{HSODMArC}}
+\newcommand{\hsodmhvp}{\texttt{HSODM-HVP}}
+\newcommand{\drsom}{\texttt{DRSOM}}
+\newcommand{\drsomh}{\texttt{DRSOM-H}}
+\newcommand{\lbfgs}{\texttt{LBFGS}}
+\newcommand{\newtontr}{\texttt{Newton-TR}}
+\newcommand{\cg}{\texttt{CG}}
+\newcommand{\arc}{\texttt{ARC}}
+\newcommand{\itrace}{\texttt{TRACE}}
+\newcommand{\gd}{\texttt{GD}}
+\newcommand{\utr}{\texttt{UTR}}
+\newcommand{\utrhvp}{\texttt{UTR-HVP}}
+\newcommand{\newtontrst}{\texttt{Newton-TR-STCG}}
+\newcommand{\iutr}{\texttt{iUTR(Hessian)}}
+\newcommand{\iutrhvp}{\texttt{iUTR}}
