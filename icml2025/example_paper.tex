@@ -90,8 +90,9 @@
 
     \begin{icmlauthorlist}
         \icmlauthor{Yuntian Jiang}{yyy}
-        \icmlauthor{Bo Jiang}{yyy}
         \icmlauthor{Chuwen Zhang}{yyy}
+        \icmlauthor{Bo Jiang}{yyy}
+        \icmlauthor{Yinyu Ye}{yyy}
         %\icmlauthor{}{sch}
         %\icmlauthor{}{sch}
     \end{icmlauthorlist}
@@ -99,8 +100,8 @@
     \icmlaffiliation{yyy}{Research Institute for Interdisciplinary Sciences, Shanghai University of Finance and Economics, Shanghai, China}
 
 
-    \icmlcorrespondingauthor{Firstname1 Lastname1}{first1.last1@xxx.edu}
-    \icmlcorrespondingauthor{Firstname2 Lastname2}{first2.last2@www.uk}
+    \icmlcorrespondingauthor{Chuwen Zhang}{first1.last1@xxx.edu}
+    \icmlcorrespondingauthor{Bo Jiang}{first2.last2@www.uk}
 
     % You may provide any keywords that you
     % find helpful for describing your paper; these are used to populate
@@ -122,16 +123,16 @@
 % \printAffiliationsAndNotice{\icmlEqualContribution} % otherwise use the standard text.
 
 \begin{abstract}
-    Trust-Region-type method is a fundamental class of optimization algorithms, but the constrained nature of its subproblem has made complexity analysis particularly challenging, especially in the acceleration scenario. In this paper, we propose the first accelerated trust-region-type algorithm and establish improved global complexity of $\tilde O(\epsilon^{-1/3})$, addressing a longstanding challenge in the field. Numerical experiments demonstrate that the proposed algorithm achieves performance comparable to Nesterov's accelerated cubic Newton method, while consistently outperforming standard non-accelerated trust-region and cubic Newton methods. Our work contributes to the theoretical foundation of the trust-region-type methods, offering insights that may inspire future research in this area.
+    Trust-Region-type method is a fundamental class of optimization algorithms, but the constrained nature of its subproblem has made complexity analysis particularly challenging, especially in the acceleration scenario. In this paper, we propose the first accelerated trust-region-type algorithm and establish improved global complexity of $\tilde O(\epsilon^{-1/3})$, addressing a longstanding challenge in the field. Numerical experiments demonstrate that the proposed algorithm achieves performance comparable to Nesterov's accelerated cubic Newton method, while consistently outperforming non-accelerated trust-region-type method and the cubic Newton method. Our work contributes to the theoretical foundation of the trust-region-type methods, offering insights that may inspire future research in this area.
 \end{abstract}
 
 \section{Introduction}
 \label{Intro}
 The trust-region (TR) method \cite{More1983,conn2000trust} is recognized as a powerful second-order method due to its effectiveness in solving practical problems and its significant impact across various fields. It has been successfully applied in machine learning applications, such as adversarial neural networks \cite{yao2019trust}, real-time tracking \cite{liu2004real}, and mixed norm regression \cite{kim2010scalable}. Notably, the TR method has also inspired the widely used trust-region policy optimization \cite{schulman2015trust, kurutach2018model} in the reinforcement learning community.
 
-In this paper, we consider the unconstrained optimization problem \begin{equation} \label{eq.main problem} \min_{x\in \mathbb{R}^n}~ f(x), \end{equation} where $f:\mathbb{R}^n\to \mathbb{R}$ satisfies Assumption~\ref{assm.main assm}. The standard TR method operates on the local quadratic approximation of the objective function within a TR ball, solving the subproblem:
+In this paper, we consider the unconstrained optimization problem \begin{equation} \label{eq.main problem} \min_{x\in \mathbb{R}^n}~ f(x), \end{equation} where $f:\mathbb{R}^n\to \mathbb{R}$ satisfies Assumption~\ref{assm.main assm}-\ref{assm.solvable}. The standard TR method operates on the local quadratic approximation of the objective function within a TR ball, solving the subproblem:
 \begin{equation}
-    \label{eq.classic tr subproblem} \begin{aligned} \min_{d \in \mathbb{R}^n} \quad &m_k(d):= \nabla f(x_k)^T d+\frac{1}{2}d^T \nabla^2 f(x_k) d, \\ \operatorname{s.t.} \quad &\|d\|\le \Delta_k. \end{aligned}
+    \label{eq.classic tr subproblem} \begin{aligned} \min_{d \in \mathbb{R}^n} \ &m_k^{\text{TR}}(d):= \nabla f(x_k)^T d+\frac{1}{2}d^T \nabla^2 f(x_k) d, \\ \operatorname{s.t.} \ &\|d\|\le \Delta_k. \end{aligned}
 \end{equation}
 
 
@@ -141,36 +142,37 @@ Historically, the convergence analyses of the standard TR method were primarily 
 
 Recently, global complexity has emerged as a crucial metric for evaluating optimization algorithms. Early studies established that the standard TR method converges to stationary points with a complexity of $O(\epsilon^{-2})$, matching that of first-order methods but being suboptimal in terms of second-order methods. Many researchers have struggled to establish satisfactory complexity analysis for the standard TR method, which has led to the proposal of various TR-type variants to achieve global complexity results.
 
-Much of their complexity analysis has focused on finding approximate stationary points of nonconvex functions. Numerous TR-type variants that are capable of finding $\epsilon$-approximate solutions with complexity of $O(\epsilon^{-3/2})$ have been proposed~\cite{luenberger_linear_2021, curtis2017trust, curtis2021trust, hamad2022consistently, hamad2024simplepracticaladaptivetrustregion}. While their global complexity results are similar, these methods differ in algorithmic design and analytical techniques. For details on their approaches, we refer readers to their respective works. For convex optimization, \cite{jiang2024nonconvexityuniversaltrustregionmethod} proposed a TR variant with a complexity of $O(\epsilon^{-1/2})$ very recently.
+Much of their complexity analysis has focused on finding approximate stationary points of nonconvex functions. Numerous TR-type variants that are capable of finding $\epsilon$-approximate solutions with complexity of $O(\epsilon^{-3/2})$ have been proposed~\cite{luenberger_linear_2021, curtis2017trust, curtis2021trust, hamad2022consistently, hamad2024simplepracticaladaptivetrustregion}. While their global complexity results are similar, these methods differ in algorithmic design and analytical techniques. For details on their approaches, we refer readers to their respective works. For convex optimization, \citet{jiang2024nonconvexityuniversaltrustregionmethod} proposed a TR-type variant with a complexity of $O(\epsilon^{-1/2})$ very recently.
 
-We acknowledge the significant contributions of the above results, including fundamental complexity analyses and innovative algorithmic mechanisms. However, there remains considerable room for improvement. Compared to TR-type methods, another milestone second-order approach, the cubic regularized Newton method~\cite{nesterov2006cubic}, demonstrates greater promise in convex optimization due to its ability to be accelerated~\cite{nesterov2008accelerating}. Specifically, while achieving complexities of $O(\epsilon^{-3/2})$ for nonconvex problems and $O(\epsilon^{-1/2})$ for convex problems, it can be further accelerated to $O(\epsilon^{-1/3})$ in the convex setting~\cite{nesterov2008accelerating}. This marks a stark contrast to the TR method's current limitations.
+We acknowledge the significant contributions of the above results, including fundamental complexity analyses and innovative algorithmic mechanisms. However, there remains considerable room for improvement: the pursuit of acceleration techniques~\cite{nesterov_lectures_2018} to enhance optimization algorithms has emerged as a critical research focus, driven by the theoretical and practical successes of accelerated first-order methods in machine learning~\cite{lan_first-order_2020,lin2020accelerated}. This growing interest extends to accelerating second-order methods, offering both improved performance guarantees and practical utility.
 
-The pursuit of acceleration techniques~\cite{nesterov_lectures_2018} to enhance optimization algorithms has emerged as a critical research focus, driven by the theoretical and practical successes of accelerated first-order methods in machine learning~\cite{lan_first-order_2020}. This growing interest extends to accelerating second-order methods, offering both improved performance guarantees and practical utility.
+Compared to TR-type methods, another milestone second-order approach, the cubic regularized Newton method~\cite{nesterov2006cubic}, presents a subproblem of the following form:
+\begin{equation}
+    \label{label.cr update}
+    \min_{d \in \mathbb{R}^n} \  m_k^{\text{CR}}(d):=\nabla f(x_k)^T d+\frac{1}{2}d^T \nabla^2 f(x_k) d+\frac{M}{6}\|d_k\|^3,
+\end{equation}
+where $M>0$ is defined in Assumption~\ref{assm.main assm}. This method holds significant promise for convex optimization, particularly due to its potential for acceleration~\cite{nesterov2008accelerating}. Specifically, while achieving complexities of $O(\epsilon^{-3/2})$ for nonconvex problems and $O(\epsilon^{-1/2})$ for convex problems, it can be further accelerated to $O(\epsilon^{-1/3})$ in the convex setting~\cite{nesterov2008accelerating}. This marks a stark contrast to the TR method's current limitations.
 
-Beyond the accelerated cubic Newton method, other accelerated second-order approaches have also been developed~\cite{monteiro2013accelerated,carmon2022optimal,doikov2020contracting}. However, all the above methods deal with unconstrained subproblems, whereas the trust-region method, with its inherently constrained subproblems, remains notably absent from this landscape.
+Beyond the accelerated cubic Newton method, other accelerated second-order approaches have also been developed~\cite{monteiro2013accelerated,carmon2022optimal,doikov2020contracting}. However, all the above methods deal with unconstrained subproblems, whereas the TR-type method, with their inherently constrained subproblems, remain notably absent from this landscape.
 
-Building on the above existing results and observation, a natural question arises: \emph{Can the TR-type method be further accelerated?}
+To the best of our knowledge, the work by \citet{carmon2018accelerated} is the only one that addresses accelerating algorithms with a constrained subproblem. Their method employs a subproblem that includes a ball constraint with a fixed radius $r > 0$: 
+\begin{equation}
+    \label{eq.ball oracle}
+    \begin{aligned} \min_{x \in \mathbb{R}^n} \ &f(x), \\ \operatorname{s.t.} \ &\|x-x_k\|\le r. \end{aligned}
+\end{equation}
+They focus on the complexity of approximately solving problem~\eqref{eq.main problem} with respect to the radius $r > 0$ and achieve an acceleration, improving the complexity from $\tilde O\left(R/r\right)$ to $\tilde O\left(\left(R/r\right)^{2/3}\right)$, where $R := \|x_0 - x^*\|$. They also provide a TR solver to approximately solve their subproblem, which relies on a stable Hessian assumption. The differing assumptions and complexity measures lead to significant differences in how the constraint is handled and how the complexity is analyzed. Interested readers are referred to their paper for further details.
 
-Addressing this question is pivotal for advancing the theoretical understanding of TR methods and unlocking their full potential in convex optimization settings. However, this goal presents significant challenges arising from the ball constraint.
+Building on the existing results and observations, a natural and crucial question arises, one that is essential for advancing the theoretical understanding of trust-region-type methods and unlocking their full potential in convex optimization settings.
+\begin{center}
+    \emph{Can the TR-type method be further accelerated?}
+\end{center}
+However, this question presents significant challenges arising from the ball constraint.
 
 First, the constrained TR subproblem inevitably introduces posterior multipliers, which bring intricate dependencies among the step size, multiplier, and gradient norm. Bridging these factors requires more sophisticated mechanisms and detailed analyses.
 
 In contrast, existing accelerated algorithms all have unconstrained subproblems, which approximate the objective function with Taylor expansions. For example, both gradient descent and cubic Newton methods naturally fit into this form. These unconstrained subproblems have the advantage of avoiding explicit multipliers, with step sizes scaling naturally as a polynomial of the gradient norm. Consequently, the per-iteration progress is easier to analyze.
 
-Second, accelerating second-order methods heavily relies on the estimating sequence technique~\cite{nesterov_lectures_2018}, which establishes a recursive relationship across iterations to ensure that, cumulatively, the algorithm achieves sufficient progress in function value. For unconstrained subproblems, this relationship is often adequate, as the updates typically ensure a sufficient decrease. However, when applied to TR-type methods, this approach faces additional challenges. The constrained nature of TR subproblems means that function value progress is not guaranteed at every iteration. Instead, each iteration may either result in a reduction in the function value or a reduction in the gradient norm, with these two types of progress alternating across iterations. As a result, the standard estimating sequence technique, which primarily focuses on function value reduction, is not directly applicable to TR-type methods. To address this, the technique must be customized to account for both function value and gradient norm reductions throughout the algorithm.
-
-As far as we know, the only literature that considers accelerating the constrained subproblem is~\cite{carmon2020acceleration}. They accelerate the ball subproblem of the form
-\begin{equation}
-    \label{eq.ball oracle}
-    \begin{aligned} \min_{x \in \mathbb{R}^n} \quad &f(x), \\ \operatorname{s.t.} \quad &\|x-x_k\|\le r. \end{aligned}
-\end{equation}
-Their algorithm exhibited an acceleration from $O\left(R/r\right)$ to $O\left(\left(R/r\right)^{2/3}\right)$, where $R:= \|x_0-x^*\|$. We remark that their complexity results focus on $r$, which diverges from our goal.
-
-\paragraph{Contribution} In this paper, we design the first accelerated TR-type method that achieves a global complexity of $\Tilde{O}(\epsilon^{-1/3})$ for finding $\epsilon$-approximate solutions in convex optimization.
-
-Technically, we introduce a more flexible TR-type subproblem that effectively controls both the function value and the gradient norm in subsequent iterations. Unlike existing accelerated second-order methods, which primarily focus on function value decrease, our approach also incorporates the reduction of the gradient norm, which aligns more closely with the specific characteristics of TR-type methods.
-
-Numerical experiments demonstrate the efficacy of our method. It is comparable to the accelerated cubic Newton method~\cite{nesterov2008accelerating} and outperforms the non-accelerated counterparts of both the TR method~\cite{jiang2024nonconvexityuniversaltrustregionmethod} and the accelerated cubic Newton method~\cite{nesterov2006cubic}.
+Second, accelerating second-order methods heavily relies on the estimating sequence technique~\cite{nesterov_lectures_2018}, which establishes a recursive relationship across iterations to ensure that, cumulatively, the algorithm achieves sufficient progress in function value. For unconstrained subproblems, this relationship is often adequate, as the updates typically ensure a sufficient decrease. However, when applied to TR-type methods, this approach faces additional challenges. The constrained nature of TR subproblems means that function value progress is not guaranteed at every iteration. Instead, each iteration may either result in a reduction in the function value or a reduction in the gradient norm, with these two types of progress alternating across iterations. As a result, the standard estimating sequence technique, which primarily focuses on function value reduction, is not directly applicable to TR-type methods.
 \begin{table*}[t]
     \caption{A Summary of the Mainstream Second-Order Methods}
     \label{table.summary}
@@ -183,7 +185,7 @@ Numerical experiments demonstrate the efficacy of our method. It is comparable t
                     Alg. Type            & Nonconvex                 & Convex                                                  & Acceleration                     \\
                     \midrule
                     Cubic Newton         & \citet{nesterov2006cubic} & \citet{nesterov2006cubic}                               & \citet{nesterov2008accelerating} \\
-                    Gradient Reg. Newton & \citet{gratton2023yet}    & \citet{mishchenko_regularized_2023}                     & \citet{doikov2020contracting}    \\
+                    Grad. Reg. Newton & \citet{gratton2023yet}    & \citet{mishchenko_regularized_2023}                     & \citet{doikov2020contracting}    \\
                     Trust-Region         & $\dagger$                 & \citet{jiang2024nonconvexityuniversaltrustregionmethod} & This Paper                       \\
                     \bottomrule
                 \end{tabular}
@@ -196,12 +198,18 @@ Numerical experiments demonstrate the efficacy of our method. It is comparable t
         \item $\dagger$ denotes the works~\cite{curtis2017trust,curtis2021trust,luenberger_linear_2021,hamad2022consistently,hamad2024simplepracticaladaptivetrustregion}.
     \end{tablenotes}
 \end{table*}
+\paragraph{Contribution} 
+In this paper, we apply the estimating sequence technique for the first time to accelerate trust-region type algorithms, which involve a constrained subproblem that needs special handling. In particular, we design the first accelerated TR-type method that achieves a global complexity of $\Tilde{O}(\epsilon^{-1/3})$ for finding $\epsilon$-approximate solutions in convex optimization.
+
+Technically, we delve into the fundamental difference in iteration mechanisms between trust-region-type methods and other second-order algorithms, and further utilize the distinctive feature of trust-region-type methods, which either decreases the function value or reduces the gradient norm, to design a novel algorithm. This enables us to further apply the estimating sequence technique to accelerate trust-region-type methods, a technique that was originally designed to capture the recursive relationship of function values in the iterations. It has been successfully used to accelerate other second-order methods that focus on function value reduction. Our new algorithm design allows both forms of progress in trust-region methods, namely the reduction of the function value and the decrease in the gradient norm, to be effectively carried over to the next iteration.
+
+Numerical experiments demonstrate the efficacy of our method. It is comparable to the accelerated cubic Newton method~\cite{nesterov2008accelerating} and outperforms the non-accelerated counterparts of both the TR method~\cite{jiang2024nonconvexityuniversaltrustregionmethod} and the accelerated cubic Newton method~\cite{nesterov2006cubic}.
 \paragraph{Related Works}
-Here we review the literature on accelerated second-order methods. Apart from the accelerated cubic Newton method, another significant development in the accelerated second-order method is the MS acceleration framework~\cite{monteiro2013accelerated}, which serves as a general approach for incorporating second-order methods as inner oracles, achieving a complexity of $\tilde{O}(\epsilon^{-2/7})$. \citet{carmon2022optimal} further demonstrated that some second-order methods qualify as oracles within the MS framework.
+We now provide a literature review, with a focus on further discussing the accelerated second-order algorithms mentioned earlier. Apart from the accelerated cubic Newton method, another significant development in the accelerated second-order method is the MS acceleration framework~\cite{monteiro2013accelerated}, which serves as a general approach for incorporating second-order methods as inner oracles, achieving a complexity of $\tilde{O}(\epsilon^{-2/7})$. \citet{carmon2022optimal} further demonstrated that some second-order methods qualify as oracles within the MS framework.
 
 More recently, a new second-order method employing gradient regularization was introduced by~\citet{mishchenko_regularized_2023}. This approach can be accelerated using the contracting mapping technique~\cite{doikov2020contracting}, leading to the development of the accelerated gradient regularized Newton method, which achieves a global complexity of $\tilde{O}(\epsilon^{-1/3})$.
 
-We conclude the convergence behavior of the aforementioned mainstream second-order methods in table~\ref{table.summary}. We remark that the results within rely on different assumptions, please refer to their paper for details.
+We conclude the convergence behavior of the aforementioned mainstream second-order methods in Table~\ref{table.summary}. We remark that the results within rely on different assumptions, please refer to their paper for details.
 
 
 
