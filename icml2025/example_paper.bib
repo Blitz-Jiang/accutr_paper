@@ -538,23 +538,23 @@
 }
 
 @incollection{byrdKnitroIntegratedPackage2006a,
-	address = {Boston, MA},
-	title = {Knitro: {An} {Integrated} {Package} for {Nonlinear} {Optimization}},
-	isbn = {978-0-387-30065-8},
-	shorttitle = {Knitro},
-	url = {https://doi.org/10.1007/0-387-30065-1_4},
-	abstract = {This paper describes Knitro 5.0, a C-package for nonlinear optimization that combines complementary approaches to nonlinear optimization to achieve robust performance over a wide range of application requirements. The package is designed for solving large-scale, smooth nonlinear programming problems, and it is also effective for the following special cases: unconstrained optimization, nonlinear systems of equations, least squares, and linear and quadratic programming. Various algorithmic options are available, including two interior methods and an active-set method. The package provides crossover techniques between algorithmic options as well as automatic selection of options and settings.},
-	language = {en},
-	urldate = {2025-01-21},
-	booktitle = {Large-{Scale} {Nonlinear} {Optimization}},
-	publisher = {Springer US},
-	author = {Byrd, Richard H. and Nocedal, Jorge and Waltz, Richard A.},
-	editor = {Di Pillo, G. and Roma, M.},
-	year = {2006},
-	doi = {10.1007/0-387-30065-1_4},
-	keywords = {interior-point, nonlinear optimization, optimization software, SLQP},
-	pages = {35--59},
-	file = {Full Text PDF:/Users/brent/Zotero/storage/UG3MEGWC/Byrd et al. - 2006 - Knitro An Integrated Package for Nonlinear Optimization.pdf:application/pdf},
+  address    = {Boston, MA},
+  title      = {Knitro: {An} {Integrated} {Package} for {Nonlinear} {Optimization}},
+  isbn       = {978-0-387-30065-8},
+  shorttitle = {Knitro},
+  url        = {https://doi.org/10.1007/0-387-30065-1_4},
+  abstract   = {This paper describes Knitro 5.0, a C-package for nonlinear optimization that combines complementary approaches to nonlinear optimization to achieve robust performance over a wide range of application requirements. The package is designed for solving large-scale, smooth nonlinear programming problems, and it is also effective for the following special cases: unconstrained optimization, nonlinear systems of equations, least squares, and linear and quadratic programming. Various algorithmic options are available, including two interior methods and an active-set method. The package provides crossover techniques between algorithmic options as well as automatic selection of options and settings.},
+  language   = {en},
+  urldate    = {2025-01-21},
+  booktitle  = {Large-{Scale} {Nonlinear} {Optimization}},
+  publisher  = {Springer US},
+  author     = {Byrd, Richard H. and Nocedal, Jorge and Waltz, Richard A.},
+  editor     = {Di Pillo, G. and Roma, M.},
+  year       = {2006},
+  doi        = {10.1007/0-387-30065-1_4},
+  keywords   = {interior-point, nonlinear optimization, optimization software, SLQP},
+  pages      = {35--59},
+  file       = {Full Text PDF:/Users/brent/Zotero/storage/UG3MEGWC/Byrd et al. - 2006 - Knitro An Integrated Package for Nonlinear Optimization.pdf:application/pdf}
 }
 
 @article{carmon2022optimal,
@@ -829,6 +829,56 @@
   publisher = {PMLR},
   pdf       = {https://proceedings.mlr.press/v162/li22o/li22o.pdf},
   url       = {https://proceedings.mlr.press/v162/li22o.html}
+}
+
+@misc{nesterovMethodSolvingConvex1983a,
+  title   = {A method for solving the convex programming problem with convergence rate ${O(1/k^2)}$},
+  url     = {https://cir.nii.ac.jp/crid/1370862715914709505},
+  urldate = {2025-01-22},
+  author  = {Nesterov, Yurii},
+  year    = {1983},
+  note    = {Pages: 543
+             Publication Title: Dokl Akad Nauk SSSR
+             Volume: 269},
+  file    = {A method for solving the convex programming problem with convergence rate o(1/k2) Snapshot:/Users/brent/Zotero/storage/7RWEW93I/1370862715914709505.html:text/html}
+}
+
+@article{cartisComplexitySteepestDescent2010,
+  title    = {On the {Complexity} of {Steepest} {Descent}, {Newton}'s and {Regularized} {Newton}'s {Methods} for {Nonconvex} {Unconstrained} {Optimization} {Problems}},
+  volume   = {20},
+  issn     = {1052-6234},
+  url      = {https://epubs.siam.org/doi/abs/10.1137/090774100},
+  doi      = {10.1137/090774100},
+  abstract = {It is shown that the steepest-descent and Newton's methods for unconstrained nonconvex optimization under standard assumptions may both require a number of iterations and function evaluations arbitrarily close to \$O({\textbackslash}epsilon{\textasciicircum}\{-2\})\$ to drive the norm of the gradient below \${\textbackslash}epsilon\$. This shows that the upper bound of \$O({\textbackslash}epsilon{\textasciicircum}\{-2\})\$ evaluations known for the steepest descent is tight and that Newton's method may be as slow as the steepest-descent method in the worst case. The improved evaluation complexity bound of \$O({\textbackslash}epsilon{\textasciicircum}\{-3/2\})\$ evaluations known for cubically regularized Newton's methods is also shown to be tight.},
+  number   = {6},
+  urldate  = {2022-06-28},
+  journal  = {SIAM Journal on Optimization},
+  author   = {Cartis, C. and Gould, N. I. M. and Toint, Ph. L.},
+  month    = jan,
+  year     = {2010},
+  note     = {Publisher: Society for Industrial and Applied Mathematics},
+  keywords = {65K05, 90C30, 49M05, 49M15, 49M37, trust-region methods, unconstrained optimization, 68Q25, 90C60, cubic regularization, Newton's method, nonlinear optimization, 58C15, global complexity bounds, global rate of convergence, steepest-descent method},
+  pages    = {2833--2852},
+  file     = {Cartis et al. - 2010 - On the Complexity of Steepest Descent, Newton's an.pdf:/Users/brent/Zotero/storage/Z3ANRZG5/Cartis et al. - 2010 - On the Complexity of Steepest Descent, Newton's an.pdf:application/pdf}
+}
+
+@article{cartisComplexityBoundsSecondorder2012,
+  title    = {Complexity bounds for second-order optimality in unconstrained optimization},
+  volume   = {28},
+  issn     = {0885-064X},
+  url      = {https://www.sciencedirect.com/science/article/pii/S0885064X11000537},
+  doi      = {10.1016/j.jco.2011.06.001},
+  abstract = {This paper examines worst-case evaluation bounds for finding weak minimizers in unconstrained optimization. For the cubic regularization algorithm, Nesterov and Polyak (2006) [15] and Cartis et al. (2010) [3] show that at most O(ϵ−3) iterations may have to be performed for finding an iterate which is within ϵ of satisfying second-order optimality conditions. We first show that this bound can be derived for a version of the algorithm, which only uses one-dimensional global optimization of the cubic model and that it is sharp. We next consider the standard trust-region method and show that a bound of the same type may also be derived for this method, and that it is also sharp in some cases. We conclude by showing that a comparison of the bounds on the worst-case behaviour of the cubic regularization and trust-region algorithms favours the first of these methods.},
+  language = {en},
+  number   = {1},
+  urldate  = {2023-02-22},
+  journal  = {Journal of Complexity},
+  author   = {Cartis, C. and Gould, N. I. M. and Toint, Ph. L.},
+  month    = feb,
+  year     = {2012},
+  keywords = {Nonconvex optimization, Evaluation complexity, Second-order optimality conditions, Worst-case analysis},
+  pages    = {93--108},
+  file     = {ScienceDirect Full Text PDF:/Users/brent/Zotero/storage/JMEM6ZP5/Cartis et al. - 2012 - Complexity bounds for second-order optimality in u.pdf:application/pdf;ScienceDirect Snapshot:/Users/brent/Zotero/storage/PDJH38KB/S0885064X11000537.html:text/html}
 }
 
 @inbook{More1983,

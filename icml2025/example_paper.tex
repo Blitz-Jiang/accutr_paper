@@ -52,10 +52,11 @@
 
 
 \newcommand{\utr}{\texttt{UTR}}
-\newcommand{\atr}{\texttt{UTR-A}}
+\newcommand{\atr}{\texttt{ATR}}
 \newcommand{\arc}{\texttt{CubicReg}}
 \newcommand{\arca}{\texttt{CubicReg-A}}
 \definecolor{rr}{RGB}{190,88,69}
+\newcommand{\cz}[1]{{\color{rr} #1}}
 \setlist[itemize]{leftmargin=*,label=$\bullet$,topsep=2pt,itemsep=0pt}
 \setlist[enumerate]{label=$(\arabic*)$, leftmargin=*,topsep=2pt,itemsep=0pt}
 % Todonotes is useful during development; simply uncomment the next line
@@ -125,6 +126,9 @@
 
 \begin{abstract}
     Trust-region-type methods are a fundamental class of optimization algorithms, but the constrained nature of their subproblems has made complexity analysis particularly challenging, especially in acceleration scenarios. Building on this longstanding challenge, we propose a novel algorithmic framework for trust-region-type methods, capturing their essential characteristics to enable acceleration through refined analytical techniques. This leads to the development of the first accelerated trust-region-type algorithm with an improved global iteration complexity of $O(\epsilon^{-1/3})$. Numerical experiments demonstrate that the proposed algorithm achieves performance comparable to Nesterov's accelerated cubic Newton method, while consistently outperforming non-accelerated trust-region-type methods and the cubic Newton method.
+    \cz{
+        Trust-region-type methods are fundamental schemes in optimization due to due to their excellent practical performance. However, the ball-constrained subproblems pose significant obstacles for complexity analysis in convex settings, making it a daunting task for devising acceleration schemes. In this paper, we introduce a novel acceleration framework for trust-region-type methods, by a few novel techniques to refine the essential  characteristics of TRS. This leads to the development of the \emph{first} accelerated trust-region algorithm with an improved global iteration complexity of $O(\epsilon^{-1/3})$. Numerical experiments demonstrate that the proposed algorithm achieves performance comparable to Nesterov's accelerated cubic Newton method, while consistently outperforming non-accelerated trust-region-type methods and the cubic Newton method.
+    }
 \end{abstract}
 
 \section{Introduction}
@@ -141,34 +145,34 @@ While it has been the cornerstone for nonlinear programming and demonstrated out
 
 Historically, the convergence analyses of the standard trust-region method were primarily asymptotic, offering little insight into global complexity. Foundational results can be found in the textbook~\cite{conn2000trust, cartis2022evaluation} and the review~\cite{yuan2015recent}.
 
-Recently, global complexity has emerged as a crucial metric for evaluating optimization algorithms. Early studies established that the standard trust-region method converges to stationary points with an iteration complexity of $O(\epsilon^{-2})$, matching that of first-order methods but being suboptimal in terms of second-order methods. Many researchers have struggled to establish satisfactory complexity analysis for the standard trust-region method, which has led to the proposal of various trust-region-type variants to achieve global complexity results.
+Recently, global complexity has emerged as a crucial metric for evaluating optimization algorithms. Early studies established that the standard trust-region method converges to stationary points with an iteration complexity of $O(\epsilon^{-2})$, matching that of first-order methods \cz{\cite{nesterov_lectures_2018}} but being suboptimal in terms of second-order methods \cz{\cite{carmon2021lower}}.
+\cz{
+    While many researchers struggled to improve complexity analysis for the standard trust-region method, \cite{cartisComplexitySteepestDescent2010,cartisComplexityBoundsSecondorder2012} showed that its complexity rate is at least $O(\epsilon^{-2})$,
+    which has led to various new variants of trust-region methods to achieve better global complexity results.
+    For example, for finding $\epsilon$-approximate second-order stationary points of nonconvex functions, several trust-region-type variants achieve the iteration complexity of $O(\epsilon^{-3/2})$~\cite{luenberger_linear_2021, curtis2017trust, curtis2021trust, hamad2022consistently, hamad2024simplepracticaladaptivetrustregion}, albeit with different algorithmic design and analytical techniques. For details on their approaches, we refer readers to their respective works. For convex optimization, \citet{jiang2024nonconvexityuniversaltrustregionmethod} proposed a universal trust-region method with an iteration complexity of $O(\epsilon^{-1/2})$ very recently.
+}
 
-Much of their complexity analysis has focused on finding approximate stationary points of nonconvex functions. Numerous trust-region-type variants that are capable of finding $\epsilon$-approximate solutions with iteration complexity of $O(\epsilon^{-3/2})$ have been proposed~\cite{luenberger_linear_2021, curtis2017trust, curtis2021trust, hamad2022consistently, hamad2024simplepracticaladaptivetrustregion}. While their global iteration complexity results are similar, these methods differ in algorithmic design and analytical techniques. For details on their approaches, we refer readers to their respective works. For convex optimization, \citet{jiang2024nonconvexityuniversaltrustregionmethod} proposed a trust-region-type variant with an iteration complexity of $O(\epsilon^{-1/2})$ very recently.
+\cz{
+    We acknowledge the significant contributions of the above results; however, there remains considerable room for trust-region methods. In convex optimization, acceleration techniques~\cite{nesterovMethodSolvingConvex1983a,nesterov_lectures_2018} have emerged as a critical aspect of the research, due to theoretical and practical successes of accelerated first-order methods in machine learning~\cite{lan_first-order_2020,lin2020accelerated}.
+}
 
-We acknowledge the significant contributions of the above results, including fundamental complexity analyses and innovative algorithmic mechanisms. However, there remains considerable room for improvement: the pursuit of acceleration techniques~\cite{nesterov_lectures_2018} to enhance optimization algorithms has emerged as a critical research focus, driven by the theoretical and practical successes of accelerated first-order methods in machine learning~\cite{lan_first-order_2020,lin2020accelerated}. This growing interest extends to accelerating second-order methods, offering both improved performance guarantees and practical utility.
-
-Compared to trust-region-type methods, another milestone second-order approach, the cubic regularized Newton method~\cite{nesterov2006cubic}, presents a subproblem of the following form:
+This growing interest extends to accelerating the second-order methods. \citet{nesterov2008accelerating} showed that it is possible to accelerate the cubic regularized Newton method~\cite{nesterov2006cubic}, which relies on a different \emph{unconstrained} cubic-regularized subproblem of the following form:
 \begin{equation}
     \label{eq.cr update}
     \min_{d \in \mathbb{R}^n} \  m_k^{\text{CR}}(d):=\nabla f(x_k)^T d+\frac{1}{2}d^T \nabla^2 f(x_k) d+\frac{M}{6}\|d_k\|^3,
 \end{equation}
-where $M>0$ is defined in Assumption~\ref{assm.main assm}. This method holds significant promise for convex optimization, particularly due to its potential for acceleration~\cite{nesterov2008accelerating}. Specifically, while achieving iteration complexities of $O(\epsilon^{-3/2})$ for nonconvex problems and $O(\epsilon^{-1/2})$ for convex problems, it can be further accelerated to $O(\epsilon^{-1/3})$ in the convex setting. This marks a stark contrast to the trust-region-type method's current limitations.
+where $M>0$ is defined in Assumption~\ref{assm.main assm}. This method holds significant promise due to its ability of handling nonconvex as well as convex problems. Specifically, while achieving iteration complexities of $O(\epsilon^{-3/2})$ for nonconvex problems and $O(\epsilon^{-1/2})$ for convex problems, it can be further accelerated to $O(\epsilon^{-1/3})$ in the convex setting. This marks a stark contrast to the current limitations of trust-region-type methods.
 
-Beyond the accelerated cubic Newton method, other accelerated second-order approaches have also been developed~\cite{monteiro2013accelerated,carmon2022optimal,doikov2020contracting}. However, all the above methods deal with unconstrained subproblems, whereas the trust-region-type methods remain notably absent from this landscape.
+\cz{
+    Building on these observations, an essential question arises for advancing the theoretical understanding of trust-region-type methods in convex optimization:
+    \begin{center}
+        \emph{Can the trust-region-type method be accelerated?}
+    \end{center}
+    We remark that beyond cubic regularation, other accelerated second-order approaches have been developed~\cite{monteiro2013accelerated,carmon2022optimal,doikov2020contracting}. However, all the above methods stick with \emph{unconstrained subproblems}, and thus can be safely delt in \emph{primal space}.
+    However, trust-region-type methods remain obviously absent from this landscape in presence of the ball constraint of trust-region subproblems, where suitable treatment for the \emph{dual variable} is required.
+}
 
-To the best of our knowledge, the work by \citet{carmon2018accelerated} is the only one that addresses accelerating algorithms with a constrained subproblem. Their method employs a subproblem that includes a ball constraint with a fixed radius $r > 0$:
-\begin{equation}
-    \label{eq.ball oracle}
-    \begin{aligned} \min_{x \in \mathbb{R}^n} \ &f(x), \\ \operatorname{s.t.} \ &\|x-x_k\|\le r. \end{aligned}
-\end{equation}
-They focus on the complexity of approximately solving problem~\eqref{eq.main problem} with respect to the radius $r > 0$ and achieve an acceleration, improving the complexity from $\tilde O\left(R/r\right)$ to $\tilde O\left(\left(R/r\right)^{2/3}\right)$, where $R := \|x_0 - x^*\|$. They also provide a trust-region-type solver to approximately solve their subproblem~\eqref{eq.ball oracle}, which relies on a stable Hessian assumption. The differing assumptions and complexity measures lead to significant differences in how the constraint is handled and how the complexity is analyzed. Interested readers are referred to their paper for further details.
-
-Building on the existing results and observations, a natural and crucial question arises, one that is essential for advancing the theoretical understanding of trust-region-type methods and unlocking their full potential in convex optimization settings.
-\begin{center}
-    \emph{Can the trust-region-type method be further accelerated for convex optimization?}
-\end{center}
-Addressing this question poses significant challenges due to the inherently constrained nature of trust-region subproblems.
-
+\paragraph{Our approach}
 To illustrate the difficulty, we begin by introducing a key property required for acceleration, referred to as the 'regularity condition'(Definition~\ref{def.regularity condition}). Algorithms with unconstrained subproblems, such as the cubic Newton method, approximate the objective function using Taylor expansions. These unconstrained subproblems avoid explicit multipliers, allowing step sizes to scale naturally as a polynomial of the gradient norm. Consequently, the regularity condition is naturally satisfied for such algorithms.
 
 The regularity condition plays a crucial role in enabling the estimating sequence technique, which serves as a key tool for accelerating algorithms. This technique relies on establishing a recursive relationship involving the function value across iterations, ensuring consistent cumulative progress that ultimately leads to acceleration. The cumulative progress in function value is naturally ensured by the regularity condition, which is specifically designed to support this kind of iterative setting.
@@ -212,6 +216,15 @@ We now provide a literature review, with a focus on further discussing the accel
 
 More recently, a new second-order method employing gradient regularization was introduced by~\citet{mishchenko_regularized_2023}. This approach can be accelerated using the contracting mapping technique~\cite{doikov2020contracting}, leading to the development of the accelerated gradient regularized Newton method, which achieves a global complexity of $\tilde{O}(\epsilon^{-1/3})$.
 
+\cz{
+    To the best of our knowledge, the work \cite{carmon2018accelerated} is the only one that addresses accelerating algorithms with a constrained subproblem. Their method employs a subproblem that includes a ball constraint with a fixed radius $r > 0$:
+    \begin{equation}
+        \label{eq.ball oracle}
+        \begin{aligned} \min_{x \in \mathbb{R}^n} \ &f(x), \\ \operatorname{s.t.} \ &\|x-x_k\|\le r. \end{aligned}
+    \end{equation}
+    They focus on the complexity of approximately solving problem~\eqref{eq.main problem} with respect to the radius $r > 0$ and achieve an acceleration, improving the complexity from $\tilde O\left(R/r\right)$ to $\tilde O\left(\left(R/r\right)^{2/3}\right)$, where $R := \|x_0 - x^*\|$. They also provide a trust-region-type solver to approximately solve their subproblem~\eqref{eq.ball oracle}, which relies on a stable Hessian assumption. The differing assumptions and complexity measures lead to significant differences in how the constraint is handled and how the complexity is analyzed. Interested readers are referred to their paper for further details.
+}
+
 We conclude the convergence behavior of the aforementioned mainstream second-order methods in Table~\ref{table.summary}. We remark that the results within rely on different assumptions, please refer to their paper for details.
 
 
@@ -221,7 +234,7 @@ We conclude the convergence behavior of the aforementioned mainstream second-ord
 \label{priliminary}
 Let $\|\cdot\|$ denote the standard Euclidean norm in $\mathbb{R}^n$, and let $x^T y$ represent the inner product between $x, y \in \mathbb{R}^n$. For a matrix $A \in \mathbb{R}^{n \times n}$, $\|A\|$ denotes the induced $\ell_2$ norm. We use the standard asymptotic notations $O(\cdot), \Omega(\cdot), \Theta(\cdot)$ in their conventional sense, where $\tilde{O}(\cdot)$ hides logarithmic terms within $O(\cdot)$. Specifically, for two constants $A$ and $B$, we say that $A = O(B)$ if there exists a constant $c > 0$ such that $A \leq c \cdot B$, and $A = \Omega(B)$ if there exists a constant $c > 0$ such that $A \geq c \cdot B$. We write $A = \Theta(B)$ if both $A = O(B)$ and $A = \Omega(B)$ hold.
 
-Throughout this paper, we make the following assumptions on the objective function $f:\mathbb{R}^n\to \mathbb{R}$:
+Throughout this paper, we make the following assumptions on the objective function $f:\mathbb{R}^n\to \mathbb{R}$.
 
 \begin{assumption}
     \label{assm.solvable}
@@ -260,7 +273,7 @@ We are interested in finding $\epsilon$-approximate solutions, as defined below:
 \end{definition}
 
 Next, we introduce the regularity condition, which is mentioned earlier and is the desirable condition for second-order methods to be accelerated.
-\begin{definition}
+\begin{definition}[Regularity condition]
     \label{def.regularity condition}
     At the $k$-th iteration, we say that a step $d_k$ satisfies the regularity condition if
     \begin{equation}
@@ -270,9 +283,9 @@ Next, we introduce the regularity condition, which is mentioned earlier and is t
 \end{definition}
 We remark that for convex function $f(x)$, the regularity condition implies a sufficient function value decrease in the following sense:
 \begin{equation*}
-\begin{aligned}
-    f(x_k)-f(x_k+d_k) &\geq \langle \nabla f(x_k+d_k),-d_k \rangle\\
-    &\geq \Omega\left(\|\nabla f(x_k+d_k)\|^{3/2}\right).
+    \begin{aligned}
+        f(x_k)-f(x_k+d_k) & \geq \langle \nabla f(x_k+d_k),-d_k \rangle          \\
+                          & \geq \Omega\left(\|\nabla f(x_k+d_k)\|^{3/2}\right).
     \end{aligned}
 \end{equation*}
 Although the application of the regularity condition in the proof is more sophisticated, the above observation provides some insight into why this condition is important.
@@ -375,11 +388,11 @@ In summary, the estimating sequence technique captures a recursive relationship 
 % include thanks to reviewers who gave useful comments, to colleagues 
 % who contributed to the ideas, and to funding agencies and corporate 
 % sponsors that provided financial support.
-\section{The Accelerated Trust-Region(ATR) Method}
-In this section, we introduce the ATR method (Algorithm~\ref{alg.accelerated utr}), along with its auxiliary subroutines (Algorithm~\ref{alg.rr} and Algorithm~\ref{alg.bisection}), and provide an explanation of the intuition behind their design.
+\section{The Accelerated Trust-Region Method}
+In this section, we introduce the Accelerated Trust-Region (ATR) method (Algorithm~\ref{alg.accelerated utr}), along with its auxiliary subroutines (Algorithm~\ref{alg.rr} and Algorithm~\ref{alg.bisection}), and provide an explanation of the intuition behind their design.
 
 \begin{algorithm}[ht]
-    \caption{Accelerated Trust-Region Method \atr{}}\label{alg.accelerated utr}
+    \caption{Accelerated Trust-Region Method (\atr{})}\label{alg.accelerated utr}
     \begin{algorithmic}[1]
         \STATE \textbf{input:} $x_0=v_0\in \mathbb{R}^n$, $s_0=0$
         \FOR{$k=0, 1, \ldots, K_\epsilon$}
@@ -396,7 +409,7 @@ In this section, we introduce the ATR method (Algorithm~\ref{alg.accelerated utr
         \STATE \textbf{\# Case 2: Local Detection}
         \STATE $d_k = \operatorname{LD}(y_k,d_k)$
         \STATE $x_{k+1}=y_k+d_k$
-        \STATE $s_k = s_{k-1}+\frac{(k+1)(k+2)}{2}\nabla f(x_{k+1})$        
+        \STATE $s_k = s_{k-1}+\frac{(k+1)(k+2)}{2}\nabla f(x_{k+1})$
         \ENDIF
         \STATE $v_{k+1} = v_0-\sqrt{\frac{\ell}{3M\|s_k\|}}s_k$
         \ENDFOR
@@ -404,7 +417,7 @@ In this section, we introduce the ATR method (Algorithm~\ref{alg.accelerated utr
 \end{algorithm}
 
 \begin{algorithm}[ht]  \caption{Local Detection for ATR}\label{alg.rr}
-        \begin{algorithmic}[1]
+    \begin{algorithmic}[1]
         \STATE \textbf{Input: } $y_k,d_k^{(-1)} := d_k\in\mathbb{R}^n$
         \FOR{$j= 0,1,\ldots,\infty$}
         \STATE \textbf{\# Phase 1: Linear Contraction}
@@ -418,13 +431,12 @@ In this section, we introduce the ATR method (Algorithm~\ref{alg.accelerated utr
         \IF{$0<\lambda_k^{(j)}\leq \frac{\sqrt{M}}{3}\xi^{(j)}$} \label{line.bisection}
         \STATE \textbf{output } $d_k^{(j)}$ \label{line.zero multiplier 1}
         \ELSIF{$\lambda_k^{(j)}> \frac{\sqrt{M}}{3}\xi^{(j)}$}
-        \STATE $\mu_- = \frac{\sqrt{M}}{3}\xi^{(j)}$
-        \STATE $\mu_+ = \lambda_k^{(j)}+\frac{\sqrt{M}}{3}\xi^{(j)}$ \label{line.bracketing}
+        \STATE $\mu_- = \frac{\sqrt{M}}{3}\xi^{(j)}, \mu_+ = \lambda_k^{(j)}+\frac{\sqrt{M}}{3}\xi^{(j)}$ \label{line.bracketing}
         \STATE $d_k^{(j)} = \operatorname{BISECTION}(y_k,\mu_-,\mu_+)$ \label{line.zero multiplier 2}
         \STATE \textbf{output } $d_k^{(j)}$
         \ENDIF \label{line.endbisection}
         \ENDFOR
-        \end{algorithmic}
+    \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}[!ht]
@@ -473,9 +485,9 @@ If such a situation keeps appearing, we will end up with an $\epsilon$-approxima
 On the other hand, if the multiplier no longer equals zero, we turn to \textbf{Phase 2} to find a step $d_k^{(j)}$ with regularity condition holds. At the beginning of this phase, we are provided with a solution $d_k^{(j)}$ and an interval $[\mu_-,\mu_+]$ for which the regularity condition roughly holds.
 \begin{equation*}
     \begin{aligned}
-         & \|d_k^{(j)}\| = \frac{1}{3\sqrt{M}}\xi^{(j)},                                  \\
+         & \|d_k^{(j)}\| = \frac{1}{3\sqrt{M}}\xi^{(j)}, \\
          & \mu_- = \frac
-         {\sqrt{M}}{3}\xi^{(j)}, \ \mu_+= \lambda_k^{(j)} + \frac{\sqrt{M}}{3}\xi^{(j)}.
+        {\sqrt{M}}{3}\xi^{(j)}, \ \mu_+= \lambda_k^{(j)} + \frac{\sqrt{M}}{3}\xi^{(j)}.
     \end{aligned}
 \end{equation*}
 Hence the rest for us to do is to use the above 'good predict' to find a pair of $(d_k,\mu_k)$ such that the regularity condition strictly holds. Luckily, a standard bisection search procedure (Algorithm~\ref{alg.bisection}) can serve this purpose.
@@ -486,11 +498,11 @@ First, we formally divide the iterates produced by Algorithm~\ref{alg.accelerate
 \begin{equation}
     \label{eq.outer index catagory}
     \begin{aligned}
-         & \mathcal{N} = \left \{ k | x_k \text{\ updated in Case 1 of Algorithm~\ref{alg.accelerated utr}}\right\},                                    \\
+         & \mathcal{N} = \left \{ k | x_k \text{\ updated in Case 1 of Algorithm~\ref{alg.accelerated utr}}\right\}, \\
          & \mathcal{Z} = \left \{k | x_k \text{\ updated in Case 2 of Algorithm~\ref{alg.accelerated utr}}\right\}.
     \end{aligned}
 \end{equation}
-We clarify that there are two ways of finding an $\epsilon$-approximate solution in our algorithm as discussed in the previous section. The first way is that in the second case, i.e., $k\in\mathcal{Z}$, there is a possibility that the gradient norm keeps contracting until a solution $y_k+d_k^{(j)}$ with $\|\nabla f(y_k+d_k^{(j)})\| \leq \epsilon$ is found. We call Algorithm~\ref{alg.accelerated utr} early terminated in this case. The second way is that Algorithm~\ref{alg.rr} always gives a step $d_k^{(j)}$ with regularity condition holds, and the recursive relation pass down to the next iteration and we can use the estimating sequence to find a solution $x_k$ with $f(x_k)-f^*\leq \epsilon$. 
+We clarify that there are two ways of finding an $\epsilon$-approximate solution in our algorithm as discussed in the previous section. The first way is that in the second case, i.e., $k\in\mathcal{Z}$, there is a possibility that the gradient norm keeps contracting until a solution $y_k+d_k^{(j)}$ with $\|\nabla f(y_k+d_k^{(j)})\| \leq \epsilon$ is found. We call Algorithm~\ref{alg.accelerated utr} early terminated in this case. The second way is that Algorithm~\ref{alg.rr} always gives a step $d_k^{(j)}$ with regularity condition holds, and the recursive relation pass down to the next iteration and we can use the estimating sequence to find a solution $x_k$ with $f(x_k)-f^*\leq \epsilon$.
 
 The logic of the proof is that if the first second case does not occur before $K_\epsilon = O(\epsilon^{-1/3})$-th out iteration, the estimate sequence technique can guarantee that we find an approximate solution. Otherwise, Algorithm~\ref{alg.accelerated utr} finds it before $K_\epsilon$.
 
@@ -553,7 +565,7 @@ Now it remains to bound the gradient norm of the sequence $y_k$ for $k\in \mathc
 
 \begin{lemma}
     \label{lem.upper bound for zero lambda}
-    Suppose Assumption~\ref{assm.main assm} and Assumption~\ref{assm.bounded hessian} hold, for $k\in \mathcal{Z}$, we have 
+    Suppose Assumption~\ref{assm.main assm} and Assumption~\ref{assm.bounded hessian} hold, for $k\in \mathcal{Z}$, we have
     \begin{equation}
         \label{eq.upper bound for zero lambda}
         \|\nabla f(y_k)\|\leq \frac{9\kappa_H^2}{64M}.
@@ -570,14 +582,14 @@ We recursively define
     \label{eq.update phi}
      & \phi_0(x) = \frac{M}{\ell}\|x-x_0\|^3,
 \end{align}
-     For $k\in\mathcal{N}$,
-     \begin{equation}\label{eq.update phi 1}
-         \phi_{k+1}(x) =\phi_k(x)+a_k\left (f(x_k)+\langle \nabla f(x_k),x-x_k\rangle \right),
-     \end{equation}
-     For $k\in\mathcal{Z}$,
-     \begin{equation}\label{eq.update phi 2}
-     \phi_{k+1}(x) =\phi_k(x)+a_k\left (f(y_k)+\langle \nabla f(y_k),x-y_k\rangle \right ),
-     \end{equation}
+For $k\in\mathcal{N}$,
+\begin{equation}\label{eq.update phi 1}
+    \phi_{k+1}(x) =\phi_k(x)+a_k\left (f(x_k)+\langle \nabla f(x_k),x-x_k\rangle \right),
+\end{equation}
+For $k\in\mathcal{Z}$,
+\begin{equation}\label{eq.update phi 2}
+    \phi_{k+1}(x) =\phi_k(x)+a_k\left (f(y_k)+\langle \nabla f(y_k),x-y_k\rangle \right ),
+\end{equation}
 
 The sequences defined above and the iterates produced by Algorithm~\ref{alg.accelerated utr} satisfy the following propositions:
 \begin{lemma}
