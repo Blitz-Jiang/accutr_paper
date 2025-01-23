@@ -165,15 +165,15 @@ They focus on the complexity of approximately solving problem~\eqref{eq.main pro
 
 Building on the existing results and observations, a natural and crucial question arises, one that is essential for advancing the theoretical understanding of trust-region-type methods and unlocking their full potential in convex optimization settings.
 \begin{center}
-    \emph{Can the trust-region-type method be further accelerated?}
+    \emph{Can the trust-region-type method be further accelerated for convex optimization?}
 \end{center}
-However, addressing this question poses significant challenges due to the inherently constrained nature of trust-region subproblems.
+Addressing this question poses significant challenges due to the inherently constrained nature of trust-region subproblems.
 
 To illustrate the difficulty, we begin by introducing a key property required for acceleration, referred to as the 'regularity condition'(Definition~\ref{def.regularity condition}). Algorithms with unconstrained subproblems, such as the cubic Newton method, approximate the objective function using Taylor expansions. These unconstrained subproblems avoid explicit multipliers, allowing step sizes to scale naturally as a polynomial of the gradient norm. Consequently, the regularity condition is naturally satisfied for such algorithms.
 
-The regularity condition plays a crucial role in enabling the estimating sequence technique, which serves as a key tool for accelerating algorithms. This technique relies on establishing a recursive relationship involving the function value across iterations, ensuring consistent cumulative progress that ultimately leads to acceleration. The regularity condition is essential for maintaining this recursive relationship, as it guarantees the required decrease in the function value throughout the iterations.
+The regularity condition plays a crucial role in enabling the estimating sequence technique, which serves as a key tool for accelerating algorithms. This technique relies on establishing a recursive relationship involving the function value across iterations, ensuring consistent cumulative progress that ultimately leads to acceleration. The cumulative progress in function value is naturally ensured by the regularity condition, which is specifically designed to support this kind of iterative setting.
 
-Unlike algorithms that satisfy the regularity condition, trust-region subproblems introduce posterior multipliers, leading to complex dependencies among the step size, multiplier, and gradient norm. As a result, trust-region methods do not consistently satisfy the regularity condition and therefore cannot ensure the function value decrease required by the estimating sequence technique. Instead, their progress alternates between two distinct forms: reducing the function value or decreasing the gradient norm, reflecting a fundamentally different mechanism of iteration.
+Unlike algorithms that generate steps that satisfy the regularity condition, trust-region subproblems introduce posterior multipliers, leading to complex dependencies among the step size, multiplier, and gradient norm. As a result, trust-region methods do not consistently satisfy the regularity condition and therefore cannot ensure the function value decrease required by the estimating sequence technique. Instead, their progress alternates between two distinct forms: reducing the function value or decreasing the gradient norm, reflecting a fundamentally different mechanism of iteration.
 
 Therefore, to accelerate trust-region methods, we need a more tailored algorithmic framework and analysis that can accommodate their unique characteristics and ensure cumulative progress.
 \begin{table*}[t]
