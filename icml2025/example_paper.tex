@@ -135,17 +135,18 @@
 \label{Intro}
 The trust-region (TR) method \cite{More1983,conn2000trust} is recognized as a powerful second-order method due to its effectiveness in solving practical problems and its significant impact across various fields. It has been successfully applied in machine learning applications, such as adversarial neural networks \cite{yao2019trust}, real-time tracking \cite{liu2004real}, and mixed norm regression \cite{kim2010scalable}. Notably, the trust-region method has also inspired the widely used trust-region policy optimization \cite{schulman2015trust, kurutach2018model} in the reinforcement learning community.
 
-In this paper, we consider the unconstrained optimization problem \begin{equation} \label{eq.main problem} \min_{x\in \mathbb{R}^n}~ f(x), \end{equation} where $f:\mathbb{R}^n\to \mathbb{R}$ satisfies Assumption~\ref{assm.solvable}-\ref{assm.bounded hessian}. The standard trust-region method operates on the local quadratic approximation of the objective function within a trust-region ball, solving the subproblem:
+In this paper, we consider the unconstrained optimization problem \begin{equation} \label{eq.main problem} \min_{x\in \mathbb{R}^n}~ f(x), \end{equation} where $f:\mathbb{R}^n\to \mathbb{R}$ satisfies Assumption~\ref{assm.solvable}-\ref{assm.bounded hessian}. The standard trust-region method operates on the local quadratic approximation of the objective function within a trust-region ball:
 \begin{equation}
-    \label{eq.classic tr subproblem} \begin{aligned} \min_{d \in \mathbb{R}^n} \ &m_k^{\text{TR}}(d):= \nabla f(x_k)^T d+\frac{1}{2}d^T \nabla^2 f(x_k) d, \\ \operatorname{s.t.} \ &\|d\|\le \Delta_k. \end{aligned}
+    \label{eq.classic tr subproblem} \begin{aligned} \min_{d \in \mathbb{R}^n} \  & m_k^{\text{TR}}(d):= \nabla f(x_k)^T d+\frac{1}{2}d^T \nabla^2 f(x_k) d, \\ \operatorname{s.t.} \ &\|d\|\le \Delta_k.
+    \end{aligned}
 \end{equation}
-
+The solution to this subproblem is given by $d_k$ and $\lambda_k$ is the dual variable to the ball constraint.
 
 While it has been the cornerstone for nonlinear programming and demonstrated outstanding success in practice \cite{byrdKnitroIntegratedPackage2006a}, its theoretical underpinnings are still evolving, and complexity analyses have proven challenging.
 
 Historically, the convergence analyses of the standard trust-region method were primarily asymptotic, offering little insight into global complexity. Foundational results can be found in the textbook~\cite{conn2000trust} and the review~\cite{yuan2015recent}.
 
-Recently, global complexity has emerged as a crucial metric for evaluating optimization algorithms. Early studies established that the standard trust-region method converges to stationary points with an iteration complexity of $O(\epsilon^{-2})$, matching that of first-order methods \cz{\cite{nesterov_lectures_2018}} but being suboptimal in terms of second-order methods \cz{\cite{carmon2021lower}}.
+Recently, global complexity has emerged as a crucial metric for evaluating optimization algorithms. Early studies established that the \emph{standard} trust-region method \cite{nocedal1999numerical,conn2000trust} converges to stationary points with an iteration complexity of $O(\epsilon^{-2})$, matching that of first-order methods \cz{\cite{nesterov_lectures_2018}} but being suboptimal in terms of second-order methods \cz{\cite{carmon2021lower}}.
 \cz{
     While many researchers struggled to improve complexity analysis for the standard trust-region method, \citet{cartisComplexitySteepestDescent2010,cartisComplexityBoundsSecondorder2012} showed that its complexity rate is at least $O(\epsilon^{-2})$,
     which has led to various new variants of trust-region methods to achieve better global complexity results.
@@ -169,17 +170,19 @@ where $M>0$ is defined in Assumption~\ref{assm.main assm}. This method holds sig
         \emph{Can the trust-region-type method be accelerated for convex optimization?}
     \end{center}
     We remark that beyond cubic regularization, other accelerated second-order approaches have been developed~\cite{monteiro2013accelerated,carmon2022optimal,doikov2020contracting}. However, all the above methods stick with \emph{unconstrained subproblems}, and thus can be safely dealt in \emph{primal space}.
-    However, trust-region-type methods remain obviously absent from this landscape in the presence of the ball constraint of trust-region subproblems, where suitable treatment for the \emph{dual variable} is required.
+    However, trust-region-type methods remain obviously absent from this landscape in the presence of the ball constraint of trust-region subproblems, where suitable treatment for the \emph{dual variable} $\lambda_k$ is required.
 }
 
 \paragraph{Our approach}
-To illustrate the difficulty, we begin by introducing a key property required for acceleration, referred to as the 'regularity condition'(Definition~\ref{def.regularity condition}). Algorithms with unconstrained subproblems, such as the cubic Newton method, approximate the objective function using Taylor expansions. These unconstrained subproblems avoid explicit multipliers, allowing step sizes to scale naturally as a polynomial of the gradient norm. Consequently, the regularity condition is naturally satisfied for such algorithms.
+To illustrate the difficulty, we begin by introducing a key property required for acceleration, referred to as the \emph{regularity condition} (Definition~\ref{def.regularity condition}).
 
-The regularity condition plays a crucial role in enabling the estimating sequence technique, which serves as a key tool for accelerating algorithms. This technique relies on establishing a recursive relationship involving the function value across iterations, ensuring consistent cumulative progress that ultimately leads to acceleration. The cumulative progress in function value is naturally ensured by the regularity condition, which is specifically designed to support this kind of iterative setting.
+The regularity condition plays a crucial role in enabling the estimating sequence technique \cite{baesEstimateSequenceMethods2009a,nesterov_lectures_2018}, which serves as a key tool for accelerating algorithms. This technique relies on establishing a recursive relationship involving the function value across iterations, ensuring consistent cumulative progress that ultimately leads to acceleration. The cumulative progress in function value is naturally ensured by the regularity condition, which is specifically designed to support this kind of iterative setting.
 
-Unlike algorithms that generate steps that satisfy the regularity condition, trust-region subproblems introduce posterior multipliers, leading to complex dependencies among the step size, multiplier, and gradient norm. As a result, trust-region methods do not consistently satisfy the regularity condition and therefore cannot ensure the function value decrease required by the estimating sequence technique. Instead, their progress alternates between two distinct forms: reducing the function value or decreasing the gradient norm, reflecting a fundamentally different mechanism of iteration.
+Accelerated algorithms, such as the cubic regularized Newton method \cite{nesterov2008accelerating} (and many others \cite{monteiro2013accelerated,carmon2022optimal,doikov2020contracting}), build on unconstrained regularized subproblems that explicitly enables the step size $\|d_k\|$ to scale as some monomial of the gradient norm $\|\nabla f(x_k)\|$. Consequently, the regularity condition is naturally satisfied for such algorithms.
+By contrast, trust-region subproblems are solved by a feedback control, leading to complex dependencies of the step size and gradient norm on the posterior multiplier $\lambda_k$ \cite{nocedal1999numerical,cartis2022evaluation}. As a result, trust-region methods do not consistently satisfy the regularity condition and therefore cannot ensure the function value decrease required by the estimating sequence technique.
 
-Therefore, to accelerate trust-region methods, we need a more tailored algorithmic framework and analysis that can accommodate their unique characteristics and ensure cumulative progress.
+Therefore, to accelerate trust-region methods, we employ ... based on a new subproblem introduced in \cite{jiang2024nonconvexityuniversaltrustregionmethod}. The resulting accelerated trust-region method \atr{} achieves a global iteration complexity of $O(\epsilon^{-1/3})$.
+Shortly we show the progress of \atr{} alternates between two distinct forms: reducing the function value or decreasing the gradient norm; to the best of our knowledge, the latter form is the first time witnessed in these methods.
 \begin{table*}[t]
     \caption{A Summary of the Mainstream Second-Order Methods}
     \label{table.summary}
@@ -333,7 +336,7 @@ In contrast, for the cubic Newton method, such regularity condition always holds
 \begin{equation*}
     \left (\nabla^2 f(x_k) + \frac{M}{2}\|d_k\| I \right )d_k = -\nabla f(x_k),
 \end{equation*}
-and therefore $\mu_k = \frac{M}{2}\|d_k\|$. 
+and therefore $\mu_k = \frac{M}{2}\|d_k\|$.
 
 Fortunately, although this favorable regularity condition is not inherently guaranteed for trust-region-type methods, there is a way to overcome this challenge. Specifically, with careful choice of $(\sigma_k,r_k)$, the progress made in the subproblem formulation~\eqref{eq.newTR} can be interpreted in two distinct ways. As demonstrated in the following two lemmas: when $\lambda_k>0$, we achieve a sufficient decrease in the function value; when $\lambda_k = 0$, we establish a bound on the gradient norm for the next iteration.
 
@@ -354,7 +357,7 @@ Fortunately, although this favorable regularity condition is not inherently guar
         \|\nabla f(x_k+d_k)\| \leq \frac{M}{2}r_k^2+\sigma_kr_k.
     \end{equation}
 \end{lemma}
-Moreover, we leverage the above characteristics of trust-region methods and design a customized algorithmic design for trust-region-type methods, enabling a compensatory process that allows the steps to be effectively integrated into the acceleration framework, thereby achieving acceleration. 
+Moreover, we leverage the above characteristics of trust-region methods and design a customized algorithmic design for trust-region-type methods, enabling a compensatory process that allows the steps to be effectively integrated into the acceleration framework, thereby achieving acceleration.
 
 We briefly review this technique in a simplified manner here. The main idea behind the estimating sequence technique is to maintain a dynamic sequence $\{\phi_k(x),A_k,v_k,x_k\}$ to approximate the objective function $f(x)$ from both above and below. In each iteration, we only update $x_k$ and $v_k$, while the auxiliary sequences $\phi_k(x)$ and $A_k$ are used for theoretical analysis and do not explicitly appear in the algorithm. Specifically, the following relations must be satisfied:
 \begin{align}
@@ -751,7 +754,7 @@ First, we introduce an important lemma which will be used throughout this sectio
     \end{equation}
 \end{lemma}
 \begin{proof}
-    Set $y=x_k+d_k$, $x= x_k$ in \eqref{eq.first-order exp}, we have 
+    Set $y=x_k+d_k$, $x= x_k$ in \eqref{eq.first-order exp}, we have
     \begin{equation*}
         \|\nabla f(x_k+d_k)-\nabla f(x_k)-\nabla ^2 f(x_k) d_k\| \leq \frac{M}{2}\|d_k\|^2.
     \end{equation*}
@@ -761,10 +764,10 @@ First, we introduce an important lemma which will be used throughout this sectio
     \end{equation*}
     Squaring both sides and rearranging items, we have
     \begin{equation*}
-    \begin{aligned}
-        2\mu_k \langle \nabla f(x_k+d_k),-d_k \rangle &\geq \|\nabla f(x_k+d_k)\|^2 +\mu_k^2 \|d_k\|^2 -\frac{M}{4}\|d_k\|^4\\
-        &\geq \|\nabla f(x_k+d_k)\|^2 +\frac{3}{4}\mu_k^2 \|d_k\|^2.
-    \end{aligned}
+        \begin{aligned}
+            2\mu_k \langle \nabla f(x_k+d_k),-d_k \rangle & \geq \|\nabla f(x_k+d_k)\|^2 +\mu_k^2 \|d_k\|^2 -\frac{M}{4}\|d_k\|^4 \\
+                                                          & \geq \|\nabla f(x_k+d_k)\|^2 +\frac{3}{4}\mu_k^2 \|d_k\|^2.
+        \end{aligned}
     \end{equation*}
     The second line is due to $\mu_k\geq M\|d_k\|$, dividing both sides by $2\mu_k$ gives \eqref{eq.inner product g d appendix}. Further, when $\mu_k \leq 2M\|d_k\|$, the above gives
     \begin{equation*}
@@ -791,15 +794,15 @@ First, we introduce an important lemma which will be used throughout this sectio
     \end{equation}
 \end{lemma}
 \begin{proof}
-    Set $y=x_k+d_k$, $x=x_k$ in \eqref{eq.second-order exp}, we have 
+    Set $y=x_k+d_k$, $x=x_k$ in \eqref{eq.second-order exp}, we have
     \begin{equation*}
         f(x_k+d_k) \leq f(x_k) +\nabla f(x_k)^T d_k +\frac{1}{2}d_k^T \nabla ^2 f(x_k) d_k +\frac{M}{6}\|d_k\|^3.
     \end{equation*}
     Plug \eqref{eq.optcond firstorder} into the above we have \eqref{eq.function decrease appendix}. Note that when $\lambda_k>0$, from \eqref{eq.optcond coml slack} we have $\|d_k\| = r_k$, from \eqref{eq.function decrease appendix}, we have
     \begin{equation*}
         \begin{aligned}
-            f(x_k+d_k)&\leq f(x_k)-\frac{1}{2}d_k^T \nabla^2 f(x_k)d_k-\lambda_k r_k^2-\sigma_k r_k^2+\frac{M}{6}r_k^3\\
-            &\leq f(x_k)-\frac{1}{2}d_k^T \nabla^2 f(x_k) d_k-\lambda_k r_k^2 -\frac{5M}{6} r_k^3.
+            f(x_k+d_k) & \leq f(x_k)-\frac{1}{2}d_k^T \nabla^2 f(x_k)d_k-\lambda_k r_k^2-\sigma_k r_k^2+\frac{M}{6}r_k^3 \\
+                       & \leq f(x_k)-\frac{1}{2}d_k^T \nabla^2 f(x_k) d_k-\lambda_k r_k^2 -\frac{5M}{6} r_k^3.
         \end{aligned}
     \end{equation*}
     In the second line, we used $\sigma_k \geq M r_k.$
@@ -833,7 +836,7 @@ First, we introduce an important lemma which will be used throughout this sectio
     \end{equation}
 \end{corollary}
 \begin{proof}
-    
+
 \end{proof}
 \paragraph{Proof to Lemma~\ref{lem.inner loop bound next gradient}}
 \begin{lemma}
@@ -845,7 +848,7 @@ First, we introduce an important lemma which will be used throughout this sectio
     \end{equation}
 \end{lemma}
 \begin{proof}
-    
+
 \end{proof}
 \paragraph{Proof to Lemma~\ref{lem.inner loop terminate}}
 \begin{lemma}
@@ -860,24 +863,24 @@ First, we introduce an important lemma which will be used throughout this sectio
     \end{equation*}
 \end{lemma}
 \begin{proof}
-    
+
 \end{proof}
 \paragraph{Proof to the Complexity of the Bisection Procedure}
 Since both Lemma~\ref{lem.valid bracketing}-\ref{lem.bound initial interval} are intermediate, we proof them altogether to derive the complexity of the bisection procedure.
 
 Suppose in the $k$-th iteration of Algorithm~\ref{alg.accelerated utr}, the Local detection subroutine Algorithm~\ref{alg.rr} enters the bisection procedure at the $j_k$-th inner iteration, then by the mechanism of Algorithm~\ref{alg.rr}, the following can be established:
-    \begin{gather}
+\begin{gather}
     \label{eq.magnitude lambda}
-        \lambda_k^{(j_k)} > \frac{\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}\\
+    \lambda_k^{(j_k)} > \frac{\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}\\
     \label{eq.set mu plus}
-        \mu_+ = \lambda_k^{(j_k)}+\frac{\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}> \frac{2\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}\\
+    \mu_+ = \lambda_k^{(j_k)}+\frac{\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}> \frac{2\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}\\
     \label{eq.newton equation}
-        \left (\nabla ^2 f(y_k)+\mu_+ I\right) d_k^{(j_k)}=-\nabla f(y_k)\\
+    \left (\nabla ^2 f(y_k)+\mu_+ I\right) d_k^{(j_k)}=-\nabla f(y_k)\\
     \label{eq.step size}
-        \|d_k^{(j_k)}\| = \frac{1}{3\sqrt{M}}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}.
-    \end{gather}
+    \|d_k^{(j_k)}\| = \frac{1}{3\sqrt{M}}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}.
+\end{gather}
 
-We first review the mission of the bisection procedure: for the auxiliary function $g_{y_k}(\mu) = \frac{\mu}{\|\left (\nabla^2 f(y_k)+\mu I\right)^{-1}\nabla f(y_k)\|}$, given current point $y_k$, our goal is to find the regularize $\mu$ such that 
+We first review the mission of the bisection procedure: for the auxiliary function $g_{y_k}(\mu) = \frac{\mu}{\|\left (\nabla^2 f(y_k)+\mu I\right)^{-1}\nabla f(y_k)\|}$, given current point $y_k$, our goal is to find the regularize $\mu$ such that
 \begin{equation*}
     M \leq g_{y_k}(\mu) \leq 2M.
 \end{equation*}
@@ -897,17 +900,17 @@ We first analyze some basic properties of $g_{y_k}(\mu)$,
     Where $\lambda_i$ is the $i$-th eigenvalue of $\nabla ^2 f(y_k)$, $\beta_i = \nabla f(y_k)^T v_i$, $v_i$ denotes the eigenvector corresponding to $\lambda_i$.
 \end{lemma}
 \begin{proof}
-    Since $\nabla^2 f(y_k)+\mu I \succ 0$ for $\mu>0$, we can apply eigen decomposition to it, then 
+    Since $\nabla^2 f(y_k)+\mu I \succ 0$ for $\mu>0$, we can apply eigen decomposition to it, then
     \begin{equation*}
         \|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|=\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}}, \ g_{y_k}(\mu) = \frac{\mu}{\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}}}.
     \end{equation*}
     Obviously $g_{y_k}(\mu)$ is increasing in $\mu \in \left (0,+\infty\right ]$. Also, through some basic calculations, we have
     \begin{equation*}
         \begin{aligned}
-            g_{y_k}'(\mu) &= \frac{1}{\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}}}+\mu \frac{1}{\left ( (\sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}\right )^{3/2}}\sum_{i=1}^n\frac{\beta_i^2}{\left (\lambda_i+\mu\right )^3}\\
-            &= \frac{1}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|}+\frac{\mu}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\left (\lambda_i+\mu\right )^3}\\
-            &\leq \frac{1}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|}+\frac{\mu}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\mu\left (\lambda_i+\mu\right )^2}\\
-            &=  \frac{2}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|}.
+            g_{y_k}'(\mu) & = \frac{1}{\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}}}+\mu \frac{1}{\left ( (\sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}\right )^{3/2}}\sum_{i=1}^n\frac{\beta_i^2}{\left (\lambda_i+\mu\right )^3} \\
+                          & = \frac{1}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|}+\frac{\mu}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\left (\lambda_i+\mu\right )^3}                                   \\
+                          & \leq \frac{1}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|}+\frac{\mu}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\mu\left (\lambda_i+\mu\right )^2}                             \\
+                          & =  \frac{2}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|}.
         \end{aligned}
     \end{equation*}
     The inequality is because of $\lambda_i \geq 0$ for $i=1,\ldots,n$.
@@ -921,7 +924,7 @@ We now show that the choices $\mu_+,\mu_-$ in Algorithm~\ref{alg.rr} are valid f
     \end{equation*}
 \end{lemma}
 \begin{proof}
-    From the mechanism of Algorithm~\ref{alg.rr}, we have 
+    From the mechanism of Algorithm~\ref{alg.rr}, we have
     \begin{equation*}
         \| \left (\nabla ^2 f(y_k)+\mu^+ I\right )^{-1} \nabla f(y_k)\| = \frac{1}{3\sqrt{M}}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}, \ \mu_+ >\frac{2\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}=2M\|d_k^{(j_k)}\|,
     \end{equation*}
@@ -952,10 +955,10 @@ To clarify, now we are given the initial interval $[\mu_-,\mu_+]$ and are using 
     combine the above with \eqref{eq.derivative bound} and \eqref{eq.target interval bracketing points} we have
     \begin{equation*}
         \begin{aligned}
-            \mu_+-\mu_- &=  \frac{1}{g_{y_k}'(\xi)}\left(g_{y_k}(\mu_u)-g_{y_k}(\mu_l)\right)\\
-            &\geq \frac{M\|\left (\nabla ^2 f(y_k)+\xi I \right )^{-1}\nabla f(y_k)\|}{2}\\
-            &\geq \frac{M\|\left (\nabla ^2 f(y_k)+\mu_+ I \right )^{-1}\nabla f(y_k)\|}{2}\\
-            &= \frac{\sqrt{M}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}}{6}.
+            \mu_+-\mu_- & =  \frac{1}{g_{y_k}'(\xi)}\left(g_{y_k}(\mu_u)-g_{y_k}(\mu_l)\right)           \\
+                        & \geq \frac{M\|\left (\nabla ^2 f(y_k)+\xi I \right )^{-1}\nabla f(y_k)\|}{2}   \\
+                        & \geq \frac{M\|\left (\nabla ^2 f(y_k)+\mu_+ I \right )^{-1}\nabla f(y_k)\|}{2} \\
+                        & = \frac{\sqrt{M}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}}{6}.
         \end{aligned}
     \end{equation*}
     The third line is because of $\mu_+ >\xi$, the last line is from \eqref{eq.newton equation} and \eqref{eq.step size}.
@@ -963,11 +966,11 @@ To clarify, now we are given the initial interval $[\mu_-,\mu_+]$ and are using 
 Now we established a lower bound for the target interval, it remains to bound the length of the initial interval $\mu_+ -\mu_- = \lambda_k^{(j_k)}$.
 \begin{lemma}
     \label{lem.bound initial interval appendix}
-    At the $k$-th iteration of Algorithm~\ref{alg.accelerated utr}, if the Algorithm~\ref{alg.rr} enters \textbf{Phase 2}, we have 
+    At the $k$-th iteration of Algorithm~\ref{alg.accelerated utr}, if the Algorithm~\ref{alg.rr} enters \textbf{Phase 2}, we have
     \begin{equation*}
-    \lambda_k^{(j_k)}\leq \frac{3\sqrt{M}\|\nabla f(y_k)\|}{\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}}\leq O\left(\log\frac{\|\nabla f(y_k)\|}{\epsilon}\right).
+        \lambda_k^{(j_k)}\leq \frac{3\sqrt{M}\|\nabla f(y_k)\|}{\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}}\leq O\left(\log\frac{\|\nabla f(y_k)\|}{\epsilon}\right).
     \end{equation*}
-    As a consequence, the complexity of the bisection search procedure is 
+    As a consequence, the complexity of the bisection search procedure is
     \begin{equation}
         \label{eq.complexity bisection}
         O \left (\log \left( \frac{\mu_+-\mu_-}{\mu_u-\mu_l}\right)\right)= O\left (\log \left(\frac{\|\nabla f(y_k)\|}{\|\nabla f(y_k+d_k^{(j_k-1)})\|}\right)\right)
@@ -982,7 +985,7 @@ Now we established a lower bound for the target interval, it remains to bound th
     \begin{equation*}
         \lambda_k^{(j_k)}\|d_k^{(j_k)}\| \leq \|\nabla f(y_k)\|,
     \end{equation*}
-    thus 
+    thus
     \begin{equation*}
         \lambda_k^{(j_k)} \leq \frac{\|\nabla f(y_k)\|}{\|d_k^{(j_k)}\|} = \frac{3\sqrt{M}\|\nabla f(y_k)\|}{\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}}.
     \end{equation*}
@@ -990,7 +993,7 @@ Now we established a lower bound for the target interval, it remains to bound th
     \begin{equation*}
         \frac{\mu_+-\mu_-}{\mu_u-\mu_l} \leq \frac{18\|\nabla f(y_k)\|}{\|\nabla f(y_k+d_k^{(j_k-1)})\|}.
     \end{equation*}
-     Note that $\|\nabla f(y_k+d_k^{(j_k-1)})\|\geq \epsilon$. Hence the proof is finished.
+    Note that $\|\nabla f(y_k+d_k^{(j_k-1)})\|\geq \epsilon$. Hence the proof is finished.
 \end{proof}
 \paragraph{Proof to Lemma~\ref{lem.upper bound for zero lambda}}
 \begin{lemma}
@@ -1003,7 +1006,7 @@ Now we established a lower bound for the target interval, it remains to bound th
     As a consequence, in each iteration of Algorithm~\ref{alg.accelerated utr}, the complexity of Algorithm~\ref{alg.rr} is bounded by $O\left(\log\left(\frac{\kappa_H}{M\epsilon}\right)\right)$
 \end{lemma}
 \begin{proof}
-Note that when $k\in \mathcal{Z}$, we have $\lambda_k =0$, hence the following hold
+    Note that when $k\in \mathcal{Z}$, we have $\lambda_k =0$, hence the following hold
     \begin{equation*}
         \left (\nabla^2 f(y_k)+\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2} I\right )d_k^{(0)} = -\nabla f(y_k), \ \|d_k^{(0)}\| \leq \frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2}.
     \end{equation*}
@@ -1011,15 +1014,15 @@ Note that when $k\in \mathcal{Z}$, we have $\lambda_k =0$, hence the following h
     \begin{equation*}
         \|\nabla f(y_k)\| \leq \|\nabla^2 f(y_k) d_k^{(0)}\| +\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2}\|d_k^{(0)}\| \leq \|\nabla^2 f(y_k) d_k^{(0)}\|+\frac{1}{9}\|\nabla f(y_k)\|.
     \end{equation*}
-    By \autoref{assm.bounded hessian}, we have 
+    By \autoref{assm.bounded hessian}, we have
     \begin{equation*}
         \begin{aligned}
-            \kappa_H \cdot \frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2} &\geq \kappa_H \|d_k^{(0)}\| \\
-            & \geq \|\nabla^2 f(y_k) d_k^{(0)}\|\\
-            & \geq \frac{8}{9}\|\nabla f(y_k)\|.
+            \kappa_H \cdot \frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2} & \geq \kappa_H \|d_k^{(0)}\|        \\
+                                                                      & \geq \|\nabla^2 f(y_k) d_k^{(0)}\| \\
+                                                                      & \geq \frac{8}{9}\|\nabla f(y_k)\|.
         \end{aligned}
     \end{equation*}
-    Rearrange items we will have \eqref{eq.upper bound for zero lambda appendix}.    
+    Rearrange items we will have \eqref{eq.upper bound for zero lambda appendix}.
 \end{proof}
 \paragraph{Proof to the Total Complexity of Algorithm~\ref{alg.accelerated utr}}
 Since the iteration complexity results of Theorem~\ref{thm.convergence outer loop} is a direct consequence of Lemma~\ref{lem.property of phi} and the number of total subproblems solved is a direct consequence of the above Lemma~\ref{lem.inner loop terminate} and the complexity of the bisection search, we will direct prove the main theorem which demonstrates the complexity.
@@ -1046,12 +1049,12 @@ We call a differentiable function $d(x)$ on $\mathbb{R}^n$ uniformly convex \cit
     For the function sequence $\phi_k(x)$, they have the following properties
     \begin{enumerate}
         \item $\phi_k(x)$ is uniformly convex of degree $3$ with constant $\frac{3M}{2\ell}$.
-        \item $v_k$ is the unique minimizer of $\phi_k(x)$, and 
-        \begin{equation}
-            \label{eq.phi_k phi_low}
-            \phi_k(x)\geq \phi_k^* + \frac{M}{2\ell}\|x-v_k\|^3.,
-        \end{equation}
-        where $\phi_k^* =\min \phi_k(x).$
+        \item $v_k$ is the unique minimizer of $\phi_k(x)$, and
+              \begin{equation}
+                  \label{eq.phi_k phi_low}
+                  \phi_k(x)\geq \phi_k^* + \frac{M}{2\ell}\|x-v_k\|^3.,
+              \end{equation}
+              where $\phi_k^* =\min \phi_k(x).$
     \end{enumerate}
 \end{lemma}
 \begin{proof}
@@ -1062,13 +1065,13 @@ We call a differentiable function $d(x)$ on $\mathbb{R}^n$ uniformly convex \cit
     \end{equation}
     From optimality condition
     \begin{equation*}
-    \begin{aligned}
-        \nabla \phi_k(x) &= \nabla \phi_0(x)+\sum_{i\in \mathcal{N}_k}a_i\nabla f(y_i)+ \sum_{j\in \mathcal{Z}_k}a_j\nabla f(x_j)\\
-        &= \frac{3M}{\ell}\|x-x_0\|(x-x_0)+\sum_{i\in \mathcal{N}_k}a_i\nabla f(y_i)+ \sum_{j\in \mathcal{Z}_k}a_j\nabla f(x_j)\\
-        &=0.
-    \end{aligned}
+        \begin{aligned}
+            \nabla \phi_k(x) & = \nabla \phi_0(x)+\sum_{i\in \mathcal{N}_k}a_i\nabla f(y_i)+ \sum_{j\in \mathcal{Z}_k}a_j\nabla f(x_j)                \\
+                             & = \frac{3M}{\ell}\|x-x_0\|(x-x_0)+\sum_{i\in \mathcal{N}_k}a_i\nabla f(y_i)+ \sum_{j\in \mathcal{Z}_k}a_j\nabla f(x_j) \\
+                             & =0.
+        \end{aligned}
     \end{equation*}
-    Solving the optimality condition and noticing the way we update $s_k$ gives 
+    Solving the optimality condition and noticing the way we update $s_k$ gives
     \begin{equation*}
         x = v_0 - \sqrt{\frac{\ell}{3M\|s_{k-1}\|}}s_{k-1},
     \end{equation*}
@@ -1076,70 +1079,70 @@ We call a differentiable function $d(x)$ on $\mathbb{R}^n$ uniformly convex \cit
 \end{proof}
 During the update of the algorithm, we can show that the following properties hold
 \begin{lemma}\label{lem.estimate sequence}
-If we set $0<\ell \leq\frac{25}{12\cdot 54^2}$, then we can guarantee the following for all $k\geq 0$:
-\begin{equation}
-    \label{eq.estimating sequence relation}
-    A_k f(x_k)\leq \phi_k^*  \leq \phi_k(x)\leq A_k f(x)+\phi_0(x), \ \forall x\in \mathbb{R}^n.
-\end{equation}
+    If we set $0<\ell \leq\frac{25}{12\cdot 54^2}$, then we can guarantee the following for all $k\geq 0$:
+    \begin{equation}
+        \label{eq.estimating sequence relation}
+        A_k f(x_k)\leq \phi_k^*  \leq \phi_k(x)\leq A_k f(x)+\phi_0(x), \ \forall x\in \mathbb{R}^n.
+    \end{equation}
 \end{lemma}
 \begin{proof}
-We prove by induction, note that $A_0 = 0$, so \eqref{eq.estimating sequence relation} holds for $i=0$. Suppose it also holds for $i=k$, 
-We first check  
-$$\phi_{k+1}(x)\leq A_{k+1} f(x)+\phi_0(x),$$ 
-suppose $k\in \mathcal{N}$
-\begin{equation*}
-    \begin{aligned}
-        \phi_{k+1}(x)&=\phi_k(x)+a_k\left (f(y_k)+\langle \nabla f(y_k),x-y_k\rangle \right)\\
-        &\leq A_k f(x)+\phi_0(x) +a_k\left (f(y_k)+\langle \nabla f(y_k),x-y_k\rangle \right)\\
-        & \leq A_k f(x)+\phi_0(x) +a_k f(x)\\
-        &=A_{k+1} f(x)+\phi_0(x).
-    \end{aligned}
-\end{equation*}
-The first inequality is from the induction hypothesis. The proof for the case $k\in \mathcal{Z}$ is exactly the same.
+    We prove by induction, note that $A_0 = 0$, so \eqref{eq.estimating sequence relation} holds for $i=0$. Suppose it also holds for $i=k$,
+    We first check
+    $$\phi_{k+1}(x)\leq A_{k+1} f(x)+\phi_0(x),$$
+    suppose $k\in \mathcal{N}$
+    \begin{equation*}
+        \begin{aligned}
+            \phi_{k+1}(x) & =\phi_k(x)+a_k\left (f(y_k)+\langle \nabla f(y_k),x-y_k\rangle \right)               \\
+                          & \leq A_k f(x)+\phi_0(x) +a_k\left (f(y_k)+\langle \nabla f(y_k),x-y_k\rangle \right) \\
+                          & \leq A_k f(x)+\phi_0(x) +a_k f(x)                                                    \\
+                          & =A_{k+1} f(x)+\phi_0(x).
+        \end{aligned}
+    \end{equation*}
+    The first inequality is from the induction hypothesis. The proof for the case $k\in \mathcal{Z}$ is exactly the same.
 
-We now check $\phi_{k+1}^* \geq A_{k+1}f(x_{k+1})$,
-\begin{equation*}
-    \begin{aligned}
-        \phi_{k+1}^* &= \min \left \{ \phi_k(x)+a_k \left (f(z_k)+\langle \nabla f(z_k),x-z_k\rangle \right)\right \}\\
-        &\geq \min \left \{ \phi_k^* +\frac{M}{2\ell}\|x-v_k\|^3+a_k \left (f(z_k)+\langle \nabla f(z_k),x-z_k\rangle \right)\right \}\\
-        &\geq \min \left \{ A_k f(x_k) +\frac{M}{2\ell}\|x-v_k\|^3+a_k \left (f(z_k)+\langle \nabla f(z_k),x-z_k\rangle \right)\right \}\\
-        &\geq \min \left \{ A_k f(z_k) +A_k \langle \nabla f(z_k),x_k-z_k\rangle +\frac{M}{2\ell}\|x-v_k\|^3+a_k \left (f(z_k)+\langle \nabla f(z_k),x-z_k\rangle \right)\right \}\\
-        &= \min \left \{ A_{k+1} f(z_k)+A_{k+1} \langle \nabla f(z_k),\frac{A_k}{A_{k+1}}x_k+\frac{a_k}{A_{k+1}}v_k-z_k\rangle +\frac{M}{2\ell}\|x-v_k\|^3+a_k\langle \nabla f(z_k),x-v_k\rangle\right \}\\
-        &= A_{k+1} f(z_k)+A_{k+1} \langle \nabla f(z_k),\frac{A_k}{A_{k+1}}x_k+\frac{a_k}{A_{k+1}}v_k-z_k\rangle-\frac{2\sqrt{2}\sqrt{\ell}\cdot a_k^{3/2}}{3\sqrt{3}\cdot\sqrt{M}}\|\nabla f(z_k)\|^{3/2}.
-    \end{aligned}
-\end{equation*}
-In the above analysis, the first line is because of the uniform convexity of $\phi_k$, the second line is from the induction hypothesis, and the third line is from the convexity of $f$. Note that we set $z_k = y_k$ if $k\in \mathcal{N}$, otherwise, $z_k=x_k$. When $k\in \mathcal{N}$, we have
-\begin{equation*}
-\begin{aligned}
-    \phi_{k+1}^* &\geq A_{k+1}f(y_k)-\frac{2\sqrt{2}\sqrt{\ell}\cdot a_k^{3/2}}{3\sqrt{3}\cdot\sqrt{M}}\|\nabla f(y_k)\|^{3/2}\\
-    &\geq f(x_{k+1}).
-\end{aligned}
-\end{equation*}
-The second inequality is from the way we set $\ell$, \eqref{eq.decrease of order 1.5}, and \eqref{eq.magnitude a and A}. 
+    We now check $\phi_{k+1}^* \geq A_{k+1}f(x_{k+1})$,
+    \begin{equation*}
+        \begin{aligned}
+            \phi_{k+1}^* & = \min \left \{ \phi_k(x)+a_k \left (f(z_k)+\langle \nabla f(z_k),x-z_k\rangle \right)\right \}                                                                                                    \\
+                         & \geq \min \left \{ \phi_k^* +\frac{M}{2\ell}\|x-v_k\|^3+a_k \left (f(z_k)+\langle \nabla f(z_k),x-z_k\rangle \right)\right \}                                                                      \\
+                         & \geq \min \left \{ A_k f(x_k) +\frac{M}{2\ell}\|x-v_k\|^3+a_k \left (f(z_k)+\langle \nabla f(z_k),x-z_k\rangle \right)\right \}                                                                    \\
+                         & \geq \min \left \{ A_k f(z_k) +A_k \langle \nabla f(z_k),x_k-z_k\rangle +\frac{M}{2\ell}\|x-v_k\|^3+a_k \left (f(z_k)+\langle \nabla f(z_k),x-z_k\rangle \right)\right \}                          \\
+                         & = \min \left \{ A_{k+1} f(z_k)+A_{k+1} \langle \nabla f(z_k),\frac{A_k}{A_{k+1}}x_k+\frac{a_k}{A_{k+1}}v_k-z_k\rangle +\frac{M}{2\ell}\|x-v_k\|^3+a_k\langle \nabla f(z_k),x-v_k\rangle\right \}   \\
+                         & = A_{k+1} f(z_k)+A_{k+1} \langle \nabla f(z_k),\frac{A_k}{A_{k+1}}x_k+\frac{a_k}{A_{k+1}}v_k-z_k\rangle-\frac{2\sqrt{2}\sqrt{\ell}\cdot a_k^{3/2}}{3\sqrt{3}\cdot\sqrt{M}}\|\nabla f(z_k)\|^{3/2}.
+        \end{aligned}
+    \end{equation*}
+    In the above analysis, the first line is because of the uniform convexity of $\phi_k$, the second line is from the induction hypothesis, and the third line is from the convexity of $f$. Note that we set $z_k = y_k$ if $k\in \mathcal{N}$, otherwise, $z_k=x_k$. When $k\in \mathcal{N}$, we have
+    \begin{equation*}
+        \begin{aligned}
+            \phi_{k+1}^* & \geq A_{k+1}f(y_k)-\frac{2\sqrt{2}\sqrt{\ell}\cdot a_k^{3/2}}{3\sqrt{3}\cdot\sqrt{M}}\|\nabla f(y_k)\|^{3/2} \\
+                         & \geq f(x_{k+1}).
+        \end{aligned}
+    \end{equation*}
+    The second inequality is from the way we set $\ell$, \eqref{eq.decrease of order 1.5}, and \eqref{eq.magnitude a and A}.
 
-When $k\in \mathcal{Z}$, we have 
-\begin{equation*}
-\begin{aligned}
-    \phi_{k+1}^* &\geq A_{k+1} f(x_{k+1}) +A_{k+1}\langle \nabla f(x_{k+1}),y_k-x_{k+1} \rangle -\frac{2\sqrt{2}\sqrt{\ell}\cdot a_k^{3/2}}{3\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2}\\
-    &= A_{k+1} f(x_{k+1}) +A_{k+1}\left (\langle \nabla f(x_{k+1}),y_k-x_{k+1} \rangle -A_{k+1}^{-1}\frac{2\sqrt{2}\sqrt{\ell}\cdot a_k^{3/2}}{3\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2}\right )\\
-    &\geq A_{k+1} f(x_{k+1}) +A_{k+1}\left (\langle \nabla f(x_{k+1}),y_k-x_{k+1} \rangle -\frac{2\sqrt{\ell}}{\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2}\right ).
-    \end{aligned}
-\end{equation*}
-The last inequality is from \eqref{eq.magnitude a and A}. Now it reduces to prove 
-\begin{equation*}
-    \langle f(x_{k+1}),y_k-x_{k+1} \rangle -\frac{2\sqrt{\ell}}{\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2} \geq 0.
-\end{equation*}
-Note that the output of Algorithm~\ref{alg.rr} satisfies
-\begin{gather*}
-    x_{k+1}=y_k+d_k\\
-    \left (\nabla ^2 f(y_k)+\mu_k I\right)d_k = -\nabla f(y_k)\\
-    M\|d_k\| \leq \mu_k \leq 2M\|d_k\|.
-\end{gather*}
-As a result of \eqref{eq.inner product g d advanced}, we have 
-\begin{equation*}
-    \langle f(x_{k+1}),y_k-x_{k+1} \rangle -\frac{2\sqrt{\ell}}{\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2} \geq \frac{\sqrt{6}}{6\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2}-\frac{2\sqrt{\ell}}{\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2} \geq 0.
-\end{equation*}
-Thus the proof is finished.
+    When $k\in \mathcal{Z}$, we have
+    \begin{equation*}
+        \begin{aligned}
+            \phi_{k+1}^* & \geq A_{k+1} f(x_{k+1}) +A_{k+1}\langle \nabla f(x_{k+1}),y_k-x_{k+1} \rangle -\frac{2\sqrt{2}\sqrt{\ell}\cdot a_k^{3/2}}{3\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2}                         \\
+                         & = A_{k+1} f(x_{k+1}) +A_{k+1}\left (\langle \nabla f(x_{k+1}),y_k-x_{k+1} \rangle -A_{k+1}^{-1}\frac{2\sqrt{2}\sqrt{\ell}\cdot a_k^{3/2}}{3\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2}\right ) \\
+                         & \geq A_{k+1} f(x_{k+1}) +A_{k+1}\left (\langle \nabla f(x_{k+1}),y_k-x_{k+1} \rangle -\frac{2\sqrt{\ell}}{\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2}\right ).
+        \end{aligned}
+    \end{equation*}
+    The last inequality is from \eqref{eq.magnitude a and A}. Now it reduces to prove
+    \begin{equation*}
+        \langle f(x_{k+1}),y_k-x_{k+1} \rangle -\frac{2\sqrt{\ell}}{\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2} \geq 0.
+    \end{equation*}
+    Note that the output of Algorithm~\ref{alg.rr} satisfies
+    \begin{gather*}
+        x_{k+1}=y_k+d_k\\
+        \left (\nabla ^2 f(y_k)+\mu_k I\right)d_k = -\nabla f(y_k)\\
+        M\|d_k\| \leq \mu_k \leq 2M\|d_k\|.
+    \end{gather*}
+    As a result of \eqref{eq.inner product g d advanced}, we have
+    \begin{equation*}
+        \langle f(x_{k+1}),y_k-x_{k+1} \rangle -\frac{2\sqrt{\ell}}{\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2} \geq \frac{\sqrt{6}}{6\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2}-\frac{2\sqrt{\ell}}{\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2} \geq 0.
+    \end{equation*}
+    Thus the proof is finished.
 \end{proof}
 \end{document}
 
