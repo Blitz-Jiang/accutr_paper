@@ -281,8 +281,8 @@ Next, we introduce the regularity condition, which is mentioned earlier and is t
 We remark that for convex function $f(x)$, the regularity condition implies the following proposition:
 \begin{equation*}
     \begin{aligned}
-        f(x)-f(x+d) & \geq \langle \nabla f(x+d),-d \rangle          \\
-                          & \geq \Omega\left(\|\nabla f(x+d)\|^{3/2}\right).
+        f(x)-f(x+d) & \geq \langle \nabla f(x+d),-d \rangle            \\
+                    & \geq \Omega\left(\|\nabla f(x+d)\|^{3/2}\right).
     \end{aligned}
 \end{equation*}
 Although the application of the regularity condition in the proof is more sophisticated, the above observation sheds some light on the importance of this condition, as it effectively ensures the function value guarantees needed for the estimating sequence technique.
@@ -293,8 +293,10 @@ To find approximate solutions as in Definition~\ref{def.approximate solution}, w
         \min_d ~& \frac{1}{2}d^T\left (\nabla^2 f(x) + \sigma I \right ) d + \nabla f(x)^T d\\ \operatorname{s.t.} ~& \|d\| \le r.
     \end{split}
 \end{equation}
-
-Similar to their paper, this formulation combines both an $\ell_2$-regularizer and the trust-region constraint. However, the key modification lies in the increased flexibility of the trust-region subproblem, allowing greater freedom in adjusting the iteration-dependent parameters $\sigma$ and $r$. Specifically, we no longer require these parameters to be linked to the norm of the current gradient. We will demonstrate that these parameters can be chosen in a way that is more suitable for acceleration.
+% Similar to their paper, this formulation combines both an $\ell_2$-regularizer and the trust-region constraint. However, the key modification lies in the increased flexibility of the trust-region subproblem, allowing greater freedom in adjusting the iteration-dependent parameters $\sigma$ and $r$. Specifically, we no longer require these parameters to be linked to the norm of the current gradient. We will demonstrate that these parameters can be chosen in a way that is more suitable for acceleration.
+\cz{
+The original paper sets $(\sigma, r)$ to some multiple of $\|\nabla f(x)\|^{1/2}$, which is not suitable for acceleration. Specifically, we no longer require these parameters to be linked to the norm of the current gradient, allowing even greater freedom to work with the estimating sequence technique.
+}
 
 The optimality conditions for this modified subproblem are analogous to those in the classical trust-region method, as outlined in~\citet[Section 3]{conn2000trust}, and thus we omit the proof for brevity.
 
@@ -302,9 +304,9 @@ The optimality conditions for this modified subproblem are analogous to those in
     The direction $d$ is the solution to \eqref{eq.newTR} if and only if there exists a dual multiplier $\lambda \geq 0 $ such that: \begin{subequations}
         \begin{align}
             \label{eq.optcond primal}
-             & \| d\| \leq r                                                             \\
+             & \| d\| \leq r                                                       \\
             \label{eq.optcond coml slack}
-             & \lambda \left(\|d\|-r \right)=0                                         \\ \label{eq.optcond firstorder}
+             & \lambda \left(\|d\|-r \right)=0                                     \\ \label{eq.optcond firstorder}
              & \left(\nabla^2 f(x) + \sigma I + \lambda I \right) d = -\nabla f(x) \\
             \label{eq.optcond secondorder}
              & \nabla^2 f(x) + \sigma I + \lambda I \succeq 0.
@@ -312,19 +314,26 @@ The optimality conditions for this modified subproblem are analogous to those in
     \end{subequations}
 \end{lemma}
 
-For convenience, we denote the exact primal-dual solution pair of \eqref{eq.newTR} as $(d,\lambda) = \operatorname{SA}(x, \sigma, r)$, where SA stands for Subproblem for Acceleration.
+For convenience, we denote the primal-dual solution pair of \eqref{eq.newTR} as $(d,\lambda) = \operatorname{SA}(x, \sigma, r)$, where SA stands for Subproblem for Acceleration.
 
-As can be observed, among all the above conditions, \eqref{eq.optcond firstorder} is the decisive condition for step $d$. Similar to the update rule in~\eqref{eq.optcond firstorder}, most second-order methods update the step at $x$ in the following form:
+Apparently, among all the above conditions, \eqref{eq.optcond firstorder} forms the decisive computations of step $d$. In fact, most second-order methods update the step at $x$ in a similar form as follows:
 \begin{equation}
     \label{eq.second-order update}
     \left (\nabla^2 f(x) + \mu I \right )d = -\nabla f(x),
 \end{equation}
-where $\mu$ is a regularizer that varies depending on the specific method and is crucial to verify if step $d$ satisfies the regularity condition. In particular, to verify whether the regularity condition holds, the relation $\mu = \Theta(\|d\|)$ serves as a sufficient condition.
+where $\mu$ is a regularizer that varies among different methods. In convex optimization, the second-order condition \eqref{eq.optcond secondorder} readily holds, and most of the efforts are paid to  a trial-and-error process of $\mu$ to justify the regularity condition \eqref{eq.inner product g d advanced}. Instead of caculating an extra gradient $\nabla f(x+d)$, one observation is that a stable ratio $\mu / \|d\|$ serves as a sufficient condition for the regularity condition \eqref{eq.inner product g d advanced}.
+% to verify whether the regularity condition holds, the relation $\mu = \Theta(\|d\|)$ serves as a sufficient condition.
 \begin{lemma}
     \label{lem.inner product g and d}
     Suppose Assumption~\ref{assm.main assm} holds, and \eqref{eq.second-order update} holds for some $\mu = \Theta(\|d\|)$, then $d$ satisfies the regularity condition at $x$.
 \end{lemma}
-In the case of the accelerated trust-region subproblem~\eqref{eq.newTR}, we have $\mu = \sigma + \lambda$, where $\lambda$ is the posterior multiplier. The introduction of the multiplier $\lambda$ may cause the trust-region step to fail to satisfy the regularity condition. \cz{The empirical results shown in Figure support our arguments.}
+In the case of the accelerated trust-region subproblem~\eqref{eq.newTR}, we have $\mu = \sigma + \lambda$, where $\lambda$ is the posterior multiplier. The introduction of the multiplier $\lambda$ may cause the trust-region step to fail to satisfy the regularity condition.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\columnwidth]{figs/ratio.pdf}
+    \caption{The ratio of $\mu/\|d\|$ for a typical trust-region method and the cubic Newton method.}
+    \label{fig.soft maximum ratio}
+\end{figure}
 
 In contrast, for the cubic Newton method, such regularity condition always holds since the optimality condition of the subproblem \eqref{eq.cr update} gives
 \begin{equation*}
@@ -615,7 +624,7 @@ In this section, we implement our accelerated Trust-Region method (\atr{}), to c
 
 We begin by testing performance on Nesterov's worst case function:
 \[
-    f_k(x) = \eta_{p+1}\left(A_k x\right) - \left\langle e_1, x\right\rangle, \quad 2 \leq k \leq p,
+    f_k(x) = \eta_{p+1}\left(A_k x\right) - \left\langle e_1, x\right\rangle, \quad 2 \leq p \leq k,
 \]
 where $\eta_{p+1}(x) = \tfrac{1}{p+1}\|x\|_{p+1}^{p+1}$, and $A_k$ is a parametrized bidiagonal matrix (details in \Cref{sec.experiments.nesterov}). This function becomes increasingly challenging as \(k\) increases.
 
@@ -628,7 +637,7 @@ where $\eta_{p+1}(x) = \tfrac{1}{p+1}\|x\|_{p+1}^{p+1}$, and $A_k$ is a parametr
     \subcaptionbox{$k = 100$}{
         \includegraphics[width=0.47\columnwidth]{figs/e-nesterov-k2.pdf}
     }
-    \caption{Nesterov's lower bound problem, $n = 150$, $p = 4$.}\label{fig.nesterov}
+    \caption{Nesterov's lower bound problem, $n = 150$, $p = 2$.}\label{fig.nesterov}
     \normalsize
 \end{figure}
 
@@ -696,7 +705,7 @@ Further details of the test problems are provided in the following.
 \paragraph{Nesterov's lower bound problem}\label{sec.experiments.nesterov}
 Nesterov's lower bound problem \cite{nesterovImplementableTensorMethods2021} is defined as the following:
 \[
-    f_k(x) = \eta_{p+1}\left(A_k x\right) - \left\langle e_1, x\right\rangle, \quad 2 \leq k \leq p,
+    f_k(x) = \eta_{p+1}\left(A_k x\right) - \left\langle e_1, x\right\rangle, \quad 2 \leq p \leq k,
 \]
 where $\eta_{p+1}(x) = \tfrac{1}{p+1}\|x\|_{p+1}^{p+1}$, and $A_k$ is a parametrized bidiagonal matrix, and $e_1$ is the first standard basis vector.
 \small
@@ -762,7 +771,7 @@ First, we introduce an important lemma which will be used throughout this sectio
     \begin{equation*}
         \begin{aligned}
             2\mu \langle \nabla f(x+d),-d \rangle & \geq \|\nabla f(x+d)\|^2 +\mu^2 \|d\|^2 -\frac{M}{4}\|d\|^4 \\
-                                                          & \geq \|\nabla f(x+d)\|^2 +\frac{3}{4}\mu^2 \|d\|^2.
+                                                  & \geq \|\nabla f(x+d)\|^2 +\frac{3}{4}\mu^2 \|d\|^2.
         \end{aligned}
     \end{equation*}
     The second line is due to $\mu\geq M\|d\|$, dividing both sides by $2\mu$ gives \eqref{eq.inner product g d appendix}. Further, when $\mu \leq 2M\|d\|$, the above gives
@@ -798,7 +807,7 @@ First, we introduce an important lemma which will be used throughout this sectio
     \begin{equation*}
         \begin{aligned}
             f(x+d) & \leq f(x)-\frac{1}{2}d^T \nabla^2 f(x)d-\lambda r^2-\sigma r^2+\frac{M}{6}r^3 \\
-                       & \leq f(x)-\frac{1}{2}d^T \nabla^2 f(x) d-\lambda r^2 -\frac{5M}{6} r^3.
+                   & \leq f(x)-\frac{1}{2}d^T \nabla^2 f(x) d-\lambda r^2 -\frac{5M}{6} r^3.
         \end{aligned}
     \end{equation*}
     In the second line, we used $\sigma \geq M r.$
@@ -832,7 +841,7 @@ First, we introduce an important lemma which will be used throughout this sectio
     \end{equation}
 \end{corollary}
 \begin{proof}
-Note $\nabla^2 f(x)\succeq 0$. This is a direct consequence of plugging $x=y_k$, $x+d =x_{k+1}= y_k+d_k$, and $(\sigma,r) = (\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2},\frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2})$ into Lemma~\ref{lem.function decrease appendix}.
+    Note $\nabla^2 f(x)\succeq 0$. This is a direct consequence of plugging $x=y_k$, $x+d =x_{k+1}= y_k+d_k$, and $(\sigma,r) = (\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2},\frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2})$ into Lemma~\ref{lem.function decrease appendix}.
 \end{proof}
 \paragraph{Proof to Corollary~\ref{coro.inner loop bound next gradient}}
 \begin{corollary}
@@ -844,7 +853,7 @@ Note $\nabla^2 f(x)\succeq 0$. This is a direct consequence of plugging $x=y_k$,
     \end{equation}
 \end{corollary}
 \begin{proof}
-This is a direct consequence of $\lambda_k^{(j)}=0$ and plugging $x+d = y_k+d_k^{(j)}$, $(\sigma,r) = \left(\frac{\sqrt{M}}{3}\xi^{(j)},\frac{1}{3\sqrt{M}}\xi^{(j)}\right)$ into \eqref{eq.bound next gradient appendix}.
+    This is a direct consequence of $\lambda_k^{(j)}=0$ and plugging $x+d = y_k+d_k^{(j)}$, $(\sigma,r) = \left(\frac{\sqrt{M}}{3}\xi^{(j)},\frac{1}{3\sqrt{M}}\xi^{(j)}\right)$ into \eqref{eq.bound next gradient appendix}.
 \end{proof}
 \paragraph{Proof to Lemma~\ref{lem.inner loop terminate}}
 \begin{lemma}
@@ -859,11 +868,11 @@ This is a direct consequence of $\lambda_k^{(j)}=0$ and plugging $x+d = y_k+d_k^
     \end{equation*}
 \end{lemma}
 \begin{proof}
-Note that if in \textbf{Phase 1}, the multiplier $\lambda_k^{(j)}$ keeps being equal to $0$, the gradient norm will keep contracting as \eqref{eq.inner loop bound next gradient appendix} is equivalent to
-\begin{equation*}
-    \|\nabla f(y_k+d_k^{(j)})\|\leq \frac{1}{6}\|\nabla f(y_k+d_k^{(j-1)})\|.
-\end{equation*}
-Then in $O\left (\log \frac{\|\nabla f(y_k)\|}{\epsilon}\right)$ iterations, we either have terminated the algorithm with an approximate solution found or Algorithm~\ref{alg.rr} enters \textbf{Phase 2}.
+    Note that if in \textbf{Phase 1}, the multiplier $\lambda_k^{(j)}$ keeps being equal to $0$, the gradient norm will keep contracting as \eqref{eq.inner loop bound next gradient appendix} is equivalent to
+    \begin{equation*}
+        \|\nabla f(y_k+d_k^{(j)})\|\leq \frac{1}{6}\|\nabla f(y_k+d_k^{(j-1)})\|.
+    \end{equation*}
+    Then in $O\left (\log \frac{\|\nabla f(y_k)\|}{\epsilon}\right)$ iterations, we either have terminated the algorithm with an approximate solution found or Algorithm~\ref{alg.rr} enters \textbf{Phase 2}.
 \end{proof}
 \paragraph{Proof to the Complexity of the Bisection Procedure}
 Since both Lemma~\ref{lem.valid bracketing}-\ref{lem.bound initial interval} are intermediate, we proof them altogether to derive the complexity of the bisection procedure.
