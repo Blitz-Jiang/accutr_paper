@@ -476,9 +476,9 @@ In this section, we introduce the Accelerated Trust-Region (ATR) method (Algorit
 
 We begin by clarifying Algorithm~\ref{alg.accelerated utr}, which governs the recursive relations in \eqref{eq.es relation 1} and \eqref{eq.es relation 2}. Following the guidance provided by Lemma~\ref{lem.function decrease} and Lemma~\ref{lem.bound next gradient}, a natural approach is to classify the iterations into two cases and handle them separately(\textbf{Case 1} and \textbf{Case 2} shown in Algorithm~\ref{alg.accelerated utr}). In these two scenarios, we adopt distinct strategies for updating the elements $x_k$ and $v_k$ in the estimating sequence to ensure that either the recursive relation smoothly transitions to the next iteration, or the algorithm terminates early(the flag $ET$ stands for early terminate). This distinction is the key difference between our algorithm and other acceleration frameworks.
 
-Specifically, in \textbf{Case 1} of Algorithm~\ref{alg.accelerated utr}, the multiplier $\lambda_k>0$, which means our choice of $\sigma_k,r_k$ has brought a sufficient decrease in function value for the recursive relation to pass down to the next iterate:
+Specifically, in \textbf{Case 1} of Algorithm~\ref{alg.accelerated utr}, the multiplier $\lambda_k>0$, which means that the constraint is active and our choice of $\sigma_k,r_k$ has brought a sufficient decrease in function value for the recursive relation to pass down to the next iterate:
 \begin{corollary}\label{coro.function value decrease}
-    Suppose Assumption~\ref{assm.main assm} holds, in Case~1 of Algorithm~\ref{alg.accelerated utr}, we have
+    Suppose Assumption~\ref{assm.main assm} holds, in \textbf{Case~1} of Algorithm~\ref{alg.accelerated utr}, we have
     \begin{equation}
         \label{eq.decrease of order 1.5}
         f(x_{k+1}) \leq f(y_k)-\frac{5}{162\sqrt{M}}\|\nabla f(y_k)\|^{3/2}.
@@ -529,7 +529,7 @@ We first examine the complexity of Algorithm~\ref{alg.rr} in each iteration $k\i
 
 \begin{lemma}
     \label{lem.inner loop terminate}
-    In the $k$-th outer loop of Algorithm~\ref{alg.accelerated utr}, Algorithm~\ref{alg.rr} will enter \textbf{Phase 2} in
+    In the $k$-th outer loop of Algorithm~\ref{alg.accelerated utr}, where $k\in\mathcal{Z}$, Algorithm~\ref{alg.rr} will enter \textbf{Phase 2} in
     \begin{equation*}
         j_k \leq O\left (\log \frac{\|\nabla f(y_k)\|}{\epsilon}\right)
     \end{equation*}
@@ -561,7 +561,7 @@ The following lemma claims that we have found the bracketing points for the bise
 
 \begin{lemma}\label{lem.valid bracketing}
     \label{eq.valid bracketing}
-    In the $k$-th iteration, in \textbf{Phase 2} of Algorithm~\ref{alg.rr},
+    In the $k$-th iteration, where $k\in\mathcal{Z}$, in \textbf{Phase 2} of Algorithm~\ref{alg.rr},
     \begin{equation*}
         g_{y_k}(\mu_-) < M, \ g_{y_k}(\mu_+) >2M.
     \end{equation*}
@@ -570,12 +570,12 @@ The following lemma claims that we have found the bracketing points for the bise
 Also, to guarantee the validity of the bisection search, we establish the following propositions of $g_{y_k}(\mu)$ over the interval $\left[\mu_-,\mu_+\right]$.
 \begin{lemma}
     \label{lem.property g}
-    For any $k\geq0$, $g_{y_k}(\mu)$ is continuously differentiable and monotonically increasing for $\mu \in \left (0,+\infty\right ]$. Moreover, its derivative is uniformly bounded above.
+    For any $k\in\mathcal{Z}$, $g_{y_k}(\mu)$ is continuously differentiable and monotonically increasing for $\mu \in \left (0,+\infty\right ]$. Moreover, its derivative is uniformly bounded above.
 \end{lemma}
 The above lemmas are crucial in analyzing the complexity of the bisection procedure, with the help of them we have
 \begin{lemma}
     \label{lem.bound initial interval}
-    At the $k$-th iteration of Algorithm~\ref{alg.accelerated utr}, the number of linear equations solved during the bisection search procedure is at most $O(\log \frac{\|\nabla f(y_k)\|}{\epsilon})$.
+    At the $k$-th iteration of Algorithm~\ref{alg.accelerated utr}, where $k\in\mathcal{Z}$, the number of linear equations solved during the bisection search procedure is at most $O(\log \frac{\|\nabla f(y_k)\|}{\epsilon})$.
 \end{lemma}
 
 As observed, both \textbf{Phase 1} and \textbf{Phase 2} have a worst-case complexity of $O\left(\log\left(\frac{\|\nabla f(y_k)\|}{\epsilon}\right) \right)$, in \textbf{Phase 1} we need to solve trust-region subproblems while in \textbf{Phase 2} we only need to solve linear equations. We remark that it is more expensive to solve trust-region subproblems than linear equations. Therefore, the complexity of \textbf{Phase 2} is dominated by the complexity of \textbf{Phase 1}. Also, all these trust-region subproblems and linear equations share the same Hessian and gradient. This means if we use eigenvalue decomposition, the decomposition is a one-time effort.
@@ -619,7 +619,7 @@ The sequences defined above and the iterates produced by Algorithm~\ref{alg.acce
               \begin{equation*}
                   \phi_k^* =\min \phi_k(x) = \phi_k(v_k).
               \end{equation*}
-        \item Suppose Assumption~\ref{assm.main assm} holds, set $0<\ell\leq \frac{25}{34992}$, if Algorithm~\ref{alg.accelerated utr} does not early terminate, then $\mathcal{R}_k^1$ and $\mathcal{R}_k^2$ defined in \eqref{eq.es relation 1} and \eqref{eq.es relation 2} hold for all $k\geq0$.
+        \item Suppose Assumption~\ref{assm.main assm} holds, set $\ell = \Theta(1)$, if Algorithm~\ref{alg.accelerated utr} does not early terminate, then $\mathcal{R}_k^1$ and $\mathcal{R}_k^2$ defined in \eqref{eq.es relation 1} and \eqref{eq.es relation 2} hold for all $k\geq0$.
     \end{enumerate}
 \end{lemma}
 
@@ -757,7 +757,12 @@ First, we introduce an important lemma which will be used throughout this sectio
 \paragraph{Proof to Lemma~\ref{lem.inner product g and d}}
 \begin{lemma}
     \label{lem.inner product g and d appendix}
-    Suppose Assumption~\ref{assm.main assm} holds, and \eqref{eq.second-order update} holds for some $\mu$ with $\mu\geq M \|d\|$, then we have
+    Suppose Assumption~\ref{assm.main assm} holds, and 
+    \begin{equation}
+    \label{eq.second-order update appendix}
+    \left (\nabla^2 f(x) + \mu I \right )d = -\nabla f(x),
+    \end{equation}
+    holds for some $\mu$ with $\mu\geq M \|d\|$, then we have
     \begin{equation}
         \label{eq.inner product g d appendix}
         \langle \nabla f(x+d),-d \rangle \geq \frac{\|\nabla f(x+d)\|^2}{2\mu}+\frac{3}{8}\mu \|d\|^2.
@@ -773,20 +778,20 @@ First, we introduce an important lemma which will be used throughout this sectio
     \begin{equation*}
         \|\nabla f(x+d)-\nabla f(x)-\nabla ^2 f(x) d\| \leq \frac{M}{2}\|d\|^2.
     \end{equation*}
-    Plug \eqref{eq.second-order update} into the above, we have
+    Plug \eqref{eq.second-order update appendix} into the above, we have
     \begin{equation*}
         \|\nabla f(x+d)+\mu d\| \leq \frac{M}{2}\|d\|^2.
     \end{equation*}
     Squaring both sides and rearranging items, we have
     \begin{equation*}
         \begin{aligned}
-            2\mu \langle \nabla f(x+d),-d \rangle & \geq \|\nabla f(x+d)\|^2 +\mu^2 \|d\|^2 -\frac{M}{4}\|d\|^4 \\
+            2\mu \langle \nabla f(x+d),-d \rangle & \geq \|\nabla f(x+d)\|^2 +\mu^2 \|d\|^2 -\frac{M^2}{4}\|d\|^4 \\
                                                   & \geq \|\nabla f(x+d)\|^2 +\frac{3}{4}\mu^2 \|d\|^2.
         \end{aligned}
     \end{equation*}
     The second line is due to $\mu\geq M\|d\|$, dividing both sides by $2\mu$ gives \eqref{eq.inner product g d appendix}. Further, when $\mu \leq 2M\|d\|$, the above gives
     \begin{equation*}
-        4M\|d\| \langle \nabla f(x+d),-d \rangle \geq \|f(x+d)\|^2 +\frac{3}{4} M^2 \|d\|^4,
+        4M\|d\| \langle \nabla f(x+d),-d \rangle\geq 2\mu \langle \nabla f(x+d),-d \rangle\geq \|\nabla f(x+d)\|^2 +\frac{3}{4}\mu^2 \|d\|^2  \geq \|f(x+d)\|^2 +\frac{3}{4} M^2 \|d\|^4,
     \end{equation*}
     which yields
     \begin{equation*}
@@ -797,7 +802,7 @@ First, we introduce an important lemma which will be used throughout this sectio
 \paragraph{Proof to Lemma~\ref{lem.function decrease}}
 \begin{lemma}
     \label{lem.function decrease appendix}
-    Suppose \autoref{assm.main assm} holds and $(d,\lambda) = \operatorname{SA}(x,\sigma,r)$, then we have
+    Suppose Assumption~\ref{assm.main assm} holds and $(d,\lambda) = \operatorname{SA}(x,\sigma,r)$, then we have
     \begin{equation}
         \label{eq.function decrease appendix}
         f(x+d) \leq f(x) -\frac{1}{2}d^T \nabla^2 f(x) d -(\lambda+\sigma)\|d\|^2 +\frac{M}{6}\|d\|^3.
@@ -825,7 +830,7 @@ First, we introduce an important lemma which will be used throughout this sectio
 \paragraph{Proof to Lemma~\ref{lem.bound next gradient}}
 \begin{lemma}
     \label{lem.bound next gradient appendix}
-    Suppose \autoref{assm.main assm} holds and $(d,\lambda)= \operatorname{SA}(x,\sigma,r)$ , then we have
+    Suppose Assumption~\ref{assm.main assm} holds and $(d,\lambda)= \operatorname{SA}(x,\sigma,r)$ , then we have
     \begin{equation}
         \label{eq.bound next gradient appendix}
         \|\nabla f(x+d)\| \leq \frac{M}{2}r_k^2+(\sigma_k+\lambda_k)r_k.
@@ -844,14 +849,14 @@ First, we introduce an important lemma which will be used throughout this sectio
 \end{proof}
 \paragraph{Proof to Corollary~\ref{coro.function value decrease}}
 \begin{corollary}\label{coro.function value decrease appendix}
-    Suppose Assumption~\ref{assm.main assm} holds, in Case~1 of Algorithm~\ref{alg.accelerated utr}, we have
+    Suppose Assumption~\ref{assm.main assm} holds, in \textbf{Case~1} of Algorithm~\ref{alg.accelerated utr}, we have
     \begin{equation}
         \label{eq.decrease of order 1.5 appendix}
         f(x_{k+1}) \leq f(y_k)-\frac{5}{162\sqrt{M}}\|\nabla f(y_k)\|^{3/2}.
     \end{equation}
 \end{corollary}
 \begin{proof}
-    Note $\nabla^2 f(x)\succeq 0$. This is a direct consequence of plugging $x=y_k$, $x+d =x_{k+1}= y_k+d_k$, and $(\sigma,r) = (\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2},\frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2})$ into Lemma~\ref{lem.function decrease appendix}.
+    Note $\nabla^2 f(x)\succeq 0$. This is a direct consequence of plugging $x=y_k$, $x+d =x_{k+1}= y_k+d_k$, and $(\sigma,r) = (\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2},\frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2})$ into \eqref{eq.function decrease advanced appendix}.
 \end{proof}
 \paragraph{Proof to Corollary~\ref{coro.inner loop bound next gradient}}
 \begin{corollary}
@@ -868,7 +873,7 @@ First, we introduce an important lemma which will be used throughout this sectio
 \paragraph{Proof to Lemma~\ref{lem.inner loop terminate}}
 \begin{lemma}
     \label{lem.inner loop terminate appendix}
-    In the $k$-th outer loop of Algorithm~\ref{alg.accelerated utr}, Algorithm~\ref{alg.rr} will enter \textbf{Phase 2} in
+    In the $k$-th outer loop of Algorithm~\ref{alg.accelerated utr}, where $k\in\mathcal{Z}$, Algorithm~\ref{alg.rr} will enter \textbf{Phase 2} in
     \begin{equation*}
         j_k \leq O\left (\log \frac{\|\nabla f(y_k)\|}{\epsilon}\right)
     \end{equation*}
@@ -1027,17 +1032,17 @@ Now we established a lower bound for the target interval, it remains to bound th
 \begin{proof}
     Note that when $k\in \mathcal{Z}$, we have $\lambda_k =0$, hence the following hold
     \begin{equation*}
-        \left (\nabla^2 f(y_k)+\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2} I\right )d_k^{(0)} = -\nabla f(y_k), \ \|d_k^{(0)}\| \leq \frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2}.
+        \left (\nabla^2 f(y_k)+\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2} I\right )d_k^{(-1)} = -\nabla f(y_k), \ \|d_k^{(-1)}\| \leq \frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2}.
     \end{equation*}
     Therefore, by triangle inequality, it holds that
     \begin{equation*}
-        \|\nabla f(y_k)\| \leq \|\nabla^2 f(y_k) d_k^{(0)}\| +\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2}\|d_k^{(0)}\| \leq \|\nabla^2 f(y_k) d_k^{(0)}\|+\frac{1}{9}\|\nabla f(y_k)\|.
+        \|\nabla f(y_k)\| \leq \|\nabla^2 f(y_k) d_k^{(-1)}\| +\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2}\|d_k^{(-1)}\| \leq \|\nabla^2 f(y_k) d_k^{(-1)}\|+\frac{1}{9}\|\nabla f(y_k)\|.
     \end{equation*}
     By \autoref{assm.bounded hessian}, we have
     \begin{equation*}
         \begin{aligned}
-            \kappa_H \cdot \frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2} & \geq \kappa_H \|d_k^{(0)}\|        \\
-                                                                      & \geq \|\nabla^2 f(y_k) d_k^{(0)}\| \\
+            \kappa_H \cdot \frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2} & \geq \kappa_H \|d_k^{(-1)}\|        \\
+                                                                      & \geq \|\nabla^2 f(y_k) d_k^{(-1)}\| \\
                                                                       & \geq \frac{8}{9}\|\nabla f(y_k)\|.
         \end{aligned}
     \end{equation*}
