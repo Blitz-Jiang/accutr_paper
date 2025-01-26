@@ -276,7 +276,7 @@ The original paper sets $(\sigma, r)$ to some multiple of $\|\nabla f(x)\|^{1/2}
 The optimality conditions for this modified subproblem are analogous to those in the classical trust-region method, as outlined in~\citet[Section 3]{conn2000trust}, and thus we omit the proof for brevity.
 
 \begin{lemma}\label{lem.optimal condition}
-    The direction $d$ is the solution to \eqref{eq.newTR} if and only if there exists a dual multiplier $\lambda \geq 0 $ such that: \begin{subequations}
+    The direction $d$ is the solution to \eqref{eq.newTR} if and only if there exists a dual multiplier $\lambda \geq 0 $ such that: \begin{subequations}\label{eq.sa}
         \begin{align}
             \label{eq.optcond primal}
              & \| d\| \leq r                                                       \\
@@ -412,7 +412,7 @@ In this section, we introduce the Accelerated Trust-Region (ATR) method (Algorit
         \FOR{$k=0, 1, \ldots, K_\epsilon$}
         \STATE $y_k = \frac{k}{k+3}x_k+\frac{3}{k+3}v_k$
         \STATE $(\sigma_k,r_k) = (\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2},\frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2})$
-        \STATE $(d_k,\lambda_k) = \operatorname{SA}(y_k,\sigma_k,r_k)$
+        \STATE $(d_k,\lambda_k) = \operatorname{SA}(y_k,\sigma_k,r_k)$ \hfill\texttt{\# See \eqref{eq.sa}}
         % \noindent\rule{8cm}{0.4pt} 
         \IF{$\lambda_k>0$} \label{line.if}
         % \STATE $x_{k+1}=y_k+d_k$ \label{line.nonzero multiplier}
@@ -421,7 +421,7 @@ In this section, we introduce the Accelerated Trust-Region (ATR) method (Algorit
         \STATE $s_k = s_{k-1}+\frac{(k+1)(k+2)}{2}\nabla f(y_k)$
         \ELSE \label{line.else}
         \STATE \textbf{\# Case 2: Local Detection}
-        \STATE $d_k,ET = \operatorname{LD}(y_k,d_k)$
+        \STATE $d_k,ET = \operatorname{LD}(y_k,d_k)$ \hfill\texttt{\# Algorithm 2}
         \IF{$ET$}
         \STATE \textbf{terminate}
         \ENDIF
@@ -433,7 +433,7 @@ In this section, we introduce the Accelerated Trust-Region (ATR) method (Algorit
     \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}[ht]  \caption{Local Detection for ATR}\label{alg.rr}
+\begin{algorithm}[ht]  \caption{Local Detection for ATR (LD)}\label{alg.rr}
     \begin{algorithmic}[1]
         \STATE \textbf{Input: } $y_k,d_k^{(-1)} := d_k\in\mathbb{R}^n$
         \FOR{$j= 0,1,\ldots,j_k$}
@@ -449,7 +449,7 @@ In this section, we introduce the Accelerated Trust-Region (ATR) method (Algorit
         \STATE \textbf{output } $d_k^{(j)}, ET=\text{False}$ \label{line.zero multiplier 1}
         \ELSIF{$\lambda_k^{(j)}> \frac{\sqrt{M}}{3}\xi^{(j)}$}
         \STATE $\mu_- = \frac{\sqrt{M}}{3}\xi^{(j)}, \mu_+ = \lambda_k^{(j)}+\frac{\sqrt{M}}{3}\xi^{(j)}$ \label{line.bracketing}
-        \STATE $d_k^{(j)} = \operatorname{BISECTION}(y_k,\mu_-,\mu_+)$ \label{line.zero multiplier 2}
+        \STATE $d_k^{(j)} = \operatorname{BS}(y_k,\mu_-,\mu_+)$ \label{line.zero multiplier 2} \texttt{\# Algorithm 3}
         \STATE \textbf{output } $d_k^{(j)}, ET=\text{False}$
         \ENDIF \label{line.endbisection}
         \ENDFOR
@@ -457,7 +457,7 @@ In this section, we introduce the Accelerated Trust-Region (ATR) method (Algorit
 \end{algorithm}
 
 \begin{algorithm}[!ht]
-    \caption{Bisection for ATR}\label{alg.bisection}
+    \caption{Bisection for ATR (BS)}\label{alg.bisection}
     \begin{algorithmic}[1]
         \STATE{\textbf{input:} $y\in \mathbb{R}^n$, $\mu_- < \mu_+$;}
         \WHILE{True}
@@ -474,7 +474,7 @@ In this section, we introduce the Accelerated Trust-Region (ATR) method (Algorit
     \end{algorithmic}
 \end{algorithm}
 
-We begin by clarifying Algorithm~\ref{alg.accelerated utr}, which governs the recursive relations in \eqref{eq.es relation 1} and \eqref{eq.es relation 2}. Following the guidance provided by Lemma~\ref{lem.function decrease} and Lemma~\ref{lem.bound next gradient}, a natural approach is to classify the iterations into two cases and handle them separately(\textbf{Case 1} and \textbf{Case 2} shown in Algorithm~\ref{alg.accelerated utr}). In these two scenarios, we adopt distinct strategies for updating the elements $x_k$ and $v_k$ in the estimating sequence to ensure that either the recursive relation smoothly transitions to the next iteration, or the algorithm terminates early(the flag $ET$ stands for early terminate). This distinction is the key difference between our algorithm and other acceleration frameworks.
+We begin by clarifying Algorithm~\ref{alg.accelerated utr}, which governs the recursive relations in \eqref{eq.es relation 1} and \eqref{eq.es relation 2}. Following the guidance provided by Lemma~\ref{lem.function decrease} and Lemma~\ref{lem.bound next gradient}, a natural approach is to classify the iterations into two cases and handle them separately (\textbf{Case 1} and \textbf{Case 2} shown in Algorithm~\ref{alg.accelerated utr}). In these two scenarios, we adopt distinct strategies for updating the elements $x_k$ and $v_k$ in the estimating sequence to ensure that either the recursive relation smoothly transitions to the next iteration, or the algorithm terminates early (the flag $ET$ stands for early terminate). This distinction is the key difference between our algorithm and other acceleration frameworks.
 
 Specifically, in \textbf{Case 1} of Algorithm~\ref{alg.accelerated utr}, the multiplier $\lambda_k>0$, which means that the constraint is active and our choice of $\sigma_k,r_k$ has brought a sufficient decrease in function value for the recursive relation to pass down to the next iterate:
 \begin{corollary}\label{coro.function value decrease}
@@ -486,7 +486,7 @@ Specifically, in \textbf{Case 1} of Algorithm~\ref{alg.accelerated utr}, the mul
 \end{corollary}
 Therefore, we can skip the regularity condition verification and directly update the estimate sequence in this case.
 
-However, \textbf{Case 2} of Algorithm~1 calls for different processing. We design a 'Local Dection'(LD) process to deal with this case. Specifically, we use Algorithm~\ref{alg.rr} to investigate the local property of the current iterate $y_k$, whose goal is twofold.
+However, \textbf{Case 2} of \Cref{alg.accelerated utr} calls for different processing. We design a Local Detection (LD) process (\Cref{alg.rr}) to deal with this case. Specifically, we use Algorithm~\ref{alg.rr} to investigate the local property of the current iterate $y_k$, whose goal is twofold.
 
 On one hand, in \textbf{Phase 1} of Algorithm~\ref{alg.rr}, a distinctive feature is that the gradient norm of the next iterate will keep contracting as long as the multiplier $\lambda_k^{(j)}=0$. Therefore, intuitively, we want to use such contraction to speed up the convergence. In particular, in Algorihtm~\ref{alg.rr} we use the notation $\xi^{(j)}$ to keep track of such contraction and serve as the parameter for the next iteration.
 \begin{corollary}
@@ -603,11 +603,11 @@ We recursively define
 \end{align}
 For $k\in\mathcal{N}$,
 \begin{equation}\label{eq.update phi 1}
-    \phi_{k+1}(x) =\phi_k(x)+a_k\left (f(x_k)+\langle \nabla f(x_k),x-x_k\rangle \right),
+    \phi_{k+1}(x) =\phi_k(x)+a_k\left (f(y_k)+\langle \nabla f(y_k),x-y_k\rangle \right),
 \end{equation}
 For $k\in\mathcal{Z}$,
 \begin{equation}\label{eq.update phi 2}
-    \phi_{k+1}(x) =\phi_k(x)+a_k\left (f(y_k)+\langle \nabla f(y_k),x-y_k\rangle \right ),
+    \phi_{k+1}(x) =\phi_k(x)+a_k\left (f(x_{k+1})+\langle \nabla f(x_{k+1}),x-x_{k+1}\rangle \right ),
 \end{equation}
 
 The sequences defined above and the iterates produced by Algorithm~\ref{alg.accelerated utr} satisfy the following propositions:
@@ -908,10 +908,30 @@ We first review the mission of the bisection procedure: for the auxiliary functi
 \begin{equation*}
     M \leq g_{y_k}(\mu) \leq 2M.
 \end{equation*}
-We first analyze some basic properties of $g_{y_k}(\mu)$,
+We now show that the choices $\mu_+,\mu_-$ in Algorithm~\ref{alg.rr} are valid for the bisection procedure,
+\begin{lemma}\label{lem.valid bracketing appendix}
+    \label{eq.valid bracketing appendix}
+    In the $k$-th iteration, where $k\in\mathcal Z$, in \textbf{Phase 2} of Algorithm~\ref{alg.rr},
+    \begin{equation*}
+        g_{y_k}(\mu_-) < M, \ g_{y_k}(\mu_+) >2M.
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    From the mechanism \eqref{eq.magnitude lambda}-\eqref{eq.step size} of Algorithm~\ref{alg.rr}, we have
+    \begin{equation*}
+        \| \left (\nabla ^2 f(y_k)+\mu^+ I\right )^{-1} \nabla f(y_k)\| = \frac{1}{3\sqrt{M}}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}, \ \mu_+ >\frac{2\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}=2M\|d_k^{(j_k)}\|,
+    \end{equation*}
+    thus $g_{y_k}(\mu_+) >2M$. Since $\mu_- <\mu^+$, then
+    \begin{equation*}
+        \| \left (\nabla ^2 f(y_k)+\mu^- I\right )^{-1} \nabla f(y_k)\|>\| \left (\nabla ^2 f(y_k)+\mu^+ I\right )^{-1} \nabla f(y_k)\| = \frac{1}{3\sqrt{M}}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2},
+    \end{equation*}
+    therefore $g_{y_k}(\mu_-)< M$.
+\end{proof}
+
+Then we analyze some basic properties of $g_{y_k}(\mu)$,
 \begin{lemma}
     \label{lem.property g appendix}
-    For any $y_k\in \mathbb{R}^n$, $g_{y_k}(\mu)$ is continuously differentiable and monotonically increasing for $\mu \in \left (0,+\infty\right ]$ and
+    For any $k\in\mathcal{Z}$, $g_{y_k}(\mu)$ is continuously differentiable and monotonically increasing for $\mu \in \left (0,+\infty\right ]$ and
     \begin{equation}
         \label{eq.derivative}
         g_{y_k}'(\mu) = \frac{1}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|}+\frac{\mu}{\|\left (\nabla ^2 f(y_k)+\mu I \right)^{-1}\nabla f(y_k)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\left (\lambda_i+\mu\right )^3},
@@ -939,25 +959,7 @@ We first analyze some basic properties of $g_{y_k}(\mu)$,
     \end{equation*}
     The inequality is because of $\lambda_i \geq 0$ for $i=1,\ldots,n$.
 \end{proof}
-We now show that the choices $\mu_+,\mu_-$ in Algorithm~\ref{alg.rr} are valid for the bisection procedure,
-\begin{lemma}\label{lem.valid bracketing appendix}
-    \label{eq.valid bracketing appendix}
-    In the $k$-th iteration, in \textbf{Phase 2} of Algorithm~\ref{alg.rr},
-    \begin{equation*}
-        g_{y_k}(\mu_-) < M, \ g_{y_k}(\mu_+) >2M.
-    \end{equation*}
-\end{lemma}
-\begin{proof}
-    From the mechanism of Algorithm~\ref{alg.rr}, we have
-    \begin{equation*}
-        \| \left (\nabla ^2 f(y_k)+\mu^+ I\right )^{-1} \nabla f(y_k)\| = \frac{1}{3\sqrt{M}}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}, \ \mu_+ >\frac{2\sqrt{M}}{3}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2}=2M\|d_k^{(j_k)}\|,
-    \end{equation*}
-    thus $g_{y_k}(\mu_+) >2M$. Since $\mu_- <\mu^+$, then
-    \begin{equation*}
-        \| \left (\nabla ^2 f(y_k)+\mu^- I\right )^{-1} \nabla f(y_k)\|>\| \left (\nabla ^2 f(y_k)+\mu^+ I\right )^{-1} \nabla f(y_k)\| = \frac{1}{3\sqrt{M}}\|\nabla f(y_k+d_k^{(j_k-1)})\|^{1/2},
-    \end{equation*}
-    therefore $g_{y_k}(\mu_-)< M$.
-\end{proof}
+
 From the continuity and monotonicity of $g_{y_k}(\mu)$, we know there exist $\mu_-<\mu_l<\mu_u<\mu_+$ such that
 \begin{equation}\label{eq.target interval bracketing points}
     g_{y_k}(\mu_l)=M, \ g_{y_k}(\mu_u)=2M.
@@ -1030,7 +1032,7 @@ Now we established a lower bound for the target interval, it remains to bound th
     As a consequence, in each iteration of Algorithm~\ref{alg.accelerated utr}, the complexity of Algorithm~\ref{alg.rr} is bounded by $O\left(\log\left(\frac{\kappa_H}{M\epsilon}\right)\right)$
 \end{lemma}
 \begin{proof}
-    Note that when $k\in \mathcal{Z}$, we have $\lambda_k =0$, hence the following hold
+    Note that when $k\in \mathcal{Z}$, we have $\lambda_k =0$, hence the following hold when it enters the local detection phase
     \begin{equation*}
         \left (\nabla^2 f(y_k)+\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2} I\right )d_k^{(-1)} = -\nabla f(y_k), \ \|d_k^{(-1)}\| \leq \frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2}.
     \end{equation*}
@@ -1038,18 +1040,18 @@ Now we established a lower bound for the target interval, it remains to bound th
     \begin{equation*}
         \|\nabla f(y_k)\| \leq \|\nabla^2 f(y_k) d_k^{(-1)}\| +\frac{\sqrt{M}}{3}\|\nabla f(y_k)\|^{1/2}\|d_k^{(-1)}\| \leq \|\nabla^2 f(y_k) d_k^{(-1)}\|+\frac{1}{9}\|\nabla f(y_k)\|.
     \end{equation*}
-    By \autoref{assm.bounded hessian}, we have
+    By the above inequality and Assumption~\ref{assm.bounded hessian}, we have
     \begin{equation*}
         \begin{aligned}
-            \kappa_H \cdot \frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2} & \geq \kappa_H \|d_k^{(-1)}\|        \\
-                                                                      & \geq \|\nabla^2 f(y_k) d_k^{(-1)}\| \\
-                                                                      & \geq \frac{8}{9}\|\nabla f(y_k)\|.
+        \frac{8}{9}\|\nabla f(y_k)\|&\leq \|\nabla^2 f(y_k) d_k^{(-1)}\|\\
+        &\leq \kappa_H \|d_k^{(-1)}\|\\
+        &\leq \kappa_H \cdot \frac{1}{3\sqrt{M}}\|\nabla f(y_k)\|^{1/2} .
         \end{aligned}
     \end{equation*}
     Rearrange items we will have \eqref{eq.upper bound for zero lambda appendix}.
 \end{proof}
 \paragraph{Proof to the Total Complexity of Algorithm~\ref{alg.accelerated utr}}
-Since the iteration complexity results of Theorem~\ref{thm.convergence outer loop} is a direct consequence of Lemma~\ref{lem.property of phi} and the number of total subproblems solved is a direct consequence of the above Lemma~\ref{lem.inner loop terminate} and the complexity of the bisection search, we will direct prove the main theorem which demonstrates the complexity.
+Since the iteration complexity results of Theorem~\ref{thm.convergence outer loop} is a direct consequence of Lemma~\ref{lem.property of phi} and the number of total subproblems solved is a direct consequence of the above Lemma~\ref{lem.inner loop terminate} and the complexity of the bisection search, we will focus on the proof of Lemma~\ref{lem.property of phi}.
 
 Here are some basic properties of the estimating sequence, which is modified from \citet{nesterov_lectures_2018}.
 \begin{lemma}
@@ -1085,13 +1087,13 @@ We call a differentiable function $d(x)$ on $\mathbb{R}^n$ uniformly convex \cit
     The first claim is from the definition of $\phi_0$ in \eqref{eq.update phi}, for analysis of uniform convex functions, please refer to \citet[Section 4.2.2]{nesterov_lectures_2018}. For the second claim, we have
     \begin{equation}
         \label{eq.phi recursive}
-        \phi_k(x) = \phi_0(x)+\sum_{i\in \mathcal{N}_{k}}a_i\left (f(y_i)+\langle \nabla f(y_i),x-y_i\rangle \right)+\sum_{j\in \mathcal{Z}_{k}}a_j\left (f(x_j)+\langle \nabla f(x_j),x-x_j\rangle \right).
+        \phi_k(x) = \phi_0(x)+\sum_{i\in \mathcal{N},i<k}a_i\left (f(y_i)+\langle \nabla f(y_i),x-y_i\rangle \right)+\sum_{j\in \mathcal{Z},j<k}a_j\left (f(x_{j+1})+\langle \nabla f(x_{j+1}),x-x_{j+1}\rangle \right).
     \end{equation}
     From optimality condition
     \begin{equation*}
         \begin{aligned}
-            \nabla \phi_k(x) & = \nabla \phi_0(x)+\sum_{i\in \mathcal{N}_k}a_i\nabla f(y_i)+ \sum_{j\in \mathcal{Z}_k}a_j\nabla f(x_j)                \\
-                             & = \frac{3M}{\ell}\|x-x_0\|(x-x_0)+\sum_{i\in \mathcal{N}_k}a_i\nabla f(y_i)+ \sum_{j\in \mathcal{Z}_k}a_j\nabla f(x_j) \\
+            \nabla \phi_k(x) & = \nabla \phi_0(x)+\sum_{i\in \mathcal{N},i<k}a_i\nabla f(y_i)+ \sum_{j\in \mathcal{Z},j<k}a_j\nabla f(x_{j+1})                \\
+                             & = \frac{3M}{\ell}\|x-x_0\|(x-x_0)+\sum_{i\in \mathcal{N},i<k}a_i\nabla f(y_i)+ \sum_{j\in \mathcal{Z},j<k}a_j\nabla f(x_{j+1}) \\
                              & =0.
         \end{aligned}
     \end{equation*}
@@ -1099,7 +1101,7 @@ We call a differentiable function $d(x)$ on $\mathbb{R}^n$ uniformly convex \cit
     \begin{equation*}
         x = v_0 - \sqrt{\frac{\ell}{3M\|s_{k-1}\|}}s_{k-1},
     \end{equation*}
-    which is $v_k$. Then \eqref{eq.phi_k phi_low} comes from the factor that $\phi_k(x)$ is uniformly convex of degree 3.
+    which is $v_k$. Setting $d(x)=\phi_k(x)$, $q=\frac{3M}{2\ell}$ in \eqref{eq.uniformly convex of p} gives \eqref{eq.phi_k phi_low}.
 \end{proof}
 During the update of the algorithm, we can show that the following properties hold
 \begin{lemma}\label{lem.estimate sequence}
@@ -1124,7 +1126,7 @@ During the update of the algorithm, we can show that the following properties ho
     \end{equation*}
     The first inequality is from the induction hypothesis. The proof for the case $k\in \mathcal{Z}$ is exactly the same.
 
-    We now check $\phi_{k+1}^* \geq A_{k+1}f(x_{k+1})$,
+    We now check $\phi_{k+1}^* \geq A_{k+1}f(x_{k+1})$, in the following inequalities, $z_k=y_k$ if $k\in\mathcal{N}$ and $z_k=x_{k+1}$ if $k\in\mathcal{Z}$
     \begin{equation*}
         \begin{aligned}
             \phi_{k+1}^* & = \min \left \{ \phi_k(x)+a_k \left (f(z_k)+\langle \nabla f(z_k),x-z_k\rangle \right)\right \}                                                                                                    \\
@@ -1135,14 +1137,15 @@ During the update of the algorithm, we can show that the following properties ho
                          & = A_{k+1} f(z_k)+A_{k+1} \langle \nabla f(z_k),\frac{A_k}{A_{k+1}}x_k+\frac{a_k}{A_{k+1}}v_k-z_k\rangle-\frac{2\sqrt{2}\sqrt{\ell}\cdot a_k^{3/2}}{3\sqrt{3}\cdot\sqrt{M}}\|\nabla f(z_k)\|^{3/2}.
         \end{aligned}
     \end{equation*}
-    In the above analysis, the first line is because of the uniform convexity of $\phi_k$, the second line is from the induction hypothesis, and the third line is from the convexity of $f$. Note that we set $z_k = y_k$ if $k\in \mathcal{N}$, otherwise, $z_k=x_k$. When $k\in \mathcal{N}$, we have
+    In the above analysis, the first line is because of the uniform convexity of $\phi_k$, the second line is from the induction hypothesis, and the third line is from the convexity of $f$. When $k\in \mathcal{N}$, we have
     \begin{equation*}
         \begin{aligned}
             \phi_{k+1}^* & \geq A_{k+1}f(y_k)-\frac{2\sqrt{2}\sqrt{\ell}\cdot a_k^{3/2}}{3\sqrt{3}\cdot\sqrt{M}}\|\nabla f(y_k)\|^{3/2} \\
-                         & \geq f(x_{k+1}).
+                         & = A_{k+1}\left(f(y_k)-A_{k+1}^{-1}\frac{2\sqrt{2}\sqrt{\ell}\cdot a_k^{3/2}}{3\sqrt{3}\cdot\sqrt{M}}\|\nabla f(y_k)\|^{3/2}\right)\\
+                         & \geq A_{k+1}f(x_{k+1}).
         \end{aligned}
     \end{equation*}
-    The second inequality is from the way we set $\ell$, \eqref{eq.decrease of order 1.5}, and \eqref{eq.magnitude a and A}.
+    The second inequality is from the way we set $\ell$, \eqref{eq.decrease of order 1.5 appendix}, and \eqref{eq.magnitude a and A}.
 
     When $k\in \mathcal{Z}$, we have
     \begin{equation*}
@@ -1162,12 +1165,13 @@ During the update of the algorithm, we can show that the following properties ho
         \left (\nabla ^2 f(y_k)+\mu_k I\right)d_k = -\nabla f(y_k)\\
         M\|d_k\| \leq \mu_k \leq 2M\|d_k\|.
     \end{gather*}
-    As a result of \eqref{eq.inner product g d advanced}, we have
+    As a result of \eqref{eq.inner product g d advanced appendix}, we have
     \begin{equation*}
         \langle f(x_{k+1}),y_k-x_{k+1} \rangle -\frac{2\sqrt{\ell}}{\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2} \geq \frac{\sqrt{6}}{6\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2}-\frac{2\sqrt{\ell}}{\sqrt{3}\cdot\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2} \geq 0.
     \end{equation*}
     Thus the proof is finished.
 \end{proof}
+Till now we have finished proof for the recursive relation in the estimating sequence technique. The $O(\epsilon^{-1/3})$ iteration complexity is a consequence of the recursive relation and the fact $A_k = \Omega(k^3)$.
 \end{document}
 
 
