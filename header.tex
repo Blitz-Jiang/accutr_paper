@@ -17,14 +17,17 @@
 \usepackage[nameinlink]{cleveref}
 % \usepackage[parfill]{parskip}
 \usepackage[margin=1.5in]{geometry}
-\usepackage[numbers]{natbib}
-\usepackage{authblk}
+\usepackage[sort&compress,numbers]{natbib}
+% \usepackage{authblk}
 \usepackage{algorithm,algorithmic}
 \usepackage{pifont}
 \usepackage{appendix}
 \usepackage{multirow}
 \usepackage{tabularx}
 \usepackage{makecell}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
 % \usepackage[inline]{showlabels}
 % \renewcommand{\showlabelfont}{\tiny\color{blue}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -73,17 +76,26 @@ minimum height=2em, text centered,color=black!50]
 \newcommand{\lk}{\lambda_{k+1}}
 \newcommand{\cmark}{\ding{51}}%
 \newcommand{\xmark}{\ding{55}}%
-
+\newcommand{\arca}{\texttt{CubicReg-A}}
 
 \newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{xca}[theorem]{Exercise}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
 \newtheorem{corollary}{Corollary}[section]
-\newtheorem{lemma}{Lemma}[section]
+% \newtheorem{lemma}{Lemma}[section]
 \newtheorem{proposition}{Proposition}[section]
 \newtheorem{condition}{Condition}[section]
-\newtheorem{definition}{Definition}[section]
-\newtheorem{example}{Example}[section]
+% \newtheorem{definition}{Definition}[section]
+% \newtheorem{example}{Example}[section]
 \newtheorem{question}{Question}[section]
-\newtheorem{remark}{Remark}[section]
+% \newtheorem{remark}{Remark}[section]
 \newtheorem{assumption}{Assumption}[section]
 \newtheorem{strategy}{Strategy}[section]
 
@@ -110,6 +122,7 @@ minimum height=2em, text centered,color=black!50]
 \newcommand{\newtontr}{\texttt{Newton-TR}}
 \newcommand{\cg}{\texttt{CG}}
 \newcommand{\arc}{\texttt{ARC}}
+\newcommand{\atrms}{\texttt{NO-ATR}}
 \newcommand{\itrace}{\texttt{TRACE}}
 \newcommand{\gd}{\texttt{GD}}
 \newcommand{\utr}{\texttt{UTR}}
@@ -117,3 +130,11 @@ minimum height=2em, text centered,color=black!50]
 \newcommand{\newtontrst}{\texttt{Newton-TR-STCG}}
 \newcommand{\iutr}{\texttt{iUTR(Hessian)}}
 \newcommand{\iutrhvp}{\texttt{iUTR}}
+
+\newcommand{\atr}{\texttt{GL-ATR}}
+
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}%
+  \z@ \z@ {-.5em}%
+  {\normalfont\normalsize\bfseries}}%
+\makeatother
