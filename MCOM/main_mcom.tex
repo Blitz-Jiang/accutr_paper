@@ -32,7 +32,7 @@
 
 \begin{document}
 
-\title[Accelerating Trust-Region Oracles]{Accelerating Trust-Region Oracles: Global Complexity Guarantees and Local Convergence Analysis}
+\title[Accelerating Trust-Region Oracles]{Accelerating Trust-Region Oracles: Balancing Global Efficiency and Local Convergence}
 
 %    Only \author and \address are required; other information is
 %    optional.  Remove any unused author tags.
@@ -76,7 +76,7 @@
 \keywords{Trust-Region Method, Acceleration, Global Complexity, Local Analysis}
 %    Abstract is required.
 \begin{abstract}
-We study whether second-order methods can be accelerated without compromising their rapid local convergence. Focusing on trust-region oracles, whose Lagrange multiplier reflects local geometric properties, enabling strong local behavior, we develop the first accelerated trust-region-type methods that explicitly address the global-local trade-off. The first, \emph{Global-Local Accelerated Trust-Region Method}, uses this multiplier to detect local regions and achieves $\tilde{O}(\epsilon^{-1/3})$ global oracle complexity with quadratic local convergence. The second, \emph{Near-Optimal Accelerated Trust-Region Method}, attains the near-optimal global oracle complexity of $\tilde{O}(\epsilon^{-2/7})$, though with weaker local behavior. Our results provide a constructive resolution to the global-local acceleration dilemma and establish the first accelerated trust-region methods. Numerical experiments further demonstrate clear advantages over existing accelerated and classical second-order algorithms.
+Although accelerated second-order methods achieve improved global complexity in theory, they often underperform in high-accuracy tasks where rapid local convergence is crucial, as reported by~\citet{carmon2022optimal,chen2022accelerating,jiang2020unified}. We study whether second-order methods can be accelerated without sacrificing their local efficiency. Focusing on trust-region oracles, whose Lagrange multipliers reveal local geometric information and thus  enable strong local behavior, we develop the first accelerated trust-region-type methods that explicitly address the global-local trade-off. Our primary contribution is the \emph{Global-Local Accelerated Trust-Region Method}, which leverages the Lagrange multiplier to detect local regions and achieves $\tilde{O}(\epsilon^{-1/3})$ global oracle complexity while preserving quadratic local convergence. We also propose the \emph{Near-Optimal Accelerated Trust-Region Method}, which pushes global complexity to the near-optimal rate of $\tilde{O}(\epsilon^{-2/7})$, though at the cost of weaker local performance. Together, these results offer a constructive solution to the global-local acceleration dilemma and establish the first accelerated trust-region framework. Numerical experiments further demonstrate the practical advantages of our methods over existing accelerated and classical second-order algorithms.
 \end{abstract}
 \maketitle
 \section{Introduction}
@@ -85,30 +85,25 @@ In this paper, we consider the unconstrained convex optimization problem
 \begin{equation} \label{eq.main problem}
 f^* = \min_{x\in \mathbb{R}^n} f(x),
 \end{equation}
-where $f:\mathbb{R}^n \to \mathbb{R}$ is a convex function with a Lipschitz continuous and bounded Hessian.
+where $f:\mathbb{R}^n \to \mathbb{R}$ is a convex function with a Lipschitz continuous Hessian.
 
 When the Hessian information of the objective function is available, second-order methods (SOMs) become powerful tools for solving~\eqref{eq.main problem}, particularly when high-accuracy solutions are required. Their strength lies in a fundamental property: Newton’s method enjoys quadratic convergence in a neighborhood of a local minimum~\cite{polyak2007newton,more1982newton,nocedal1999numerical}. Many SOMs are designed to approximate the Newton direction locally, thereby inheriting this rapid convergence. This superior local performance is one of the main advantages of SOMs.
 
-Beyond local behavior, another important criterion for evaluating optimization algorithms is their non-asymptotic global complexity, which measures the number of oracle calls needed to compute an $\epsilon$-approximate solution~\cite{cartis2022evaluation}. While SOMs are well known for their fast local convergence, whether they can also deliver strong global guarantees has long been a central question in the field.
+Beyond local behavior, another important criterion for evaluating optimization algorithms is their non-asymptotic global complexity, which measures the number of second-order oracle calls needed to compute an $\epsilon$-approximate solution~\cite{cartis2022evaluation}. Over the past decades, several globally convergent SOMs have been developed~\cite{nesterov2006cubic,curtis2017trust,curtis2021trust,gratton2023yet,hamad2022consistently,mishchenko_regularized_2023,cartis2011adaptive1,cartis2011adaptive2,jiang2024nonconvexityuniversaltrustregionmethod}, yet their global complexity results still fall short of the known lower bound of $O(\epsilon^{-2/7})$ for SOMs when applied to the convex optimization problem~\eqref{eq.main problem}~\cite{arjevani2019oracle}. To further enhance global performance, acceleration techniques become indispensable.
 
-Over the past decades, several globally convergent SOMs have been developed~\cite{nesterov2006cubic,curtis2017trust,curtis2021trust,gratton2023yet,hamad2022consistently,mishchenko_regularized_2023,cartis2011adaptive1,cartis2011adaptive2,jiang2024nonconvexityuniversaltrustregionmethod}, yet their global complexity results still fall short of the known lower bound of $O(\epsilon^{-2/7})$ for SOMs when applied to the convex optimization problem~\eqref{eq.main problem}~\cite{arjevani2019oracle}. To further enhance global performance, acceleration techniques become indispensable.
+In this context, two major approaches have emerged. The accelerated cubic regularized Newton (CRN) method~\cite{nesterov2008accelerating}, which builds on the cubic regularization oracle~\cite{nesterov2006cubic}, achieves a global oracle complexity of $O(\epsilon^{-1/3})$. The accelerated Newton proximal extragradient (A-NPE) method~\cite{monteiro2013accelerated} uses an approximate Newton oracle and improves the oracle complexity to $\tilde{O}(\epsilon^{-2/7})$. Later, the oracle complexity of the A-NPE method was improved to be optimal~\cite{carmon2022optimal,NEURIPS2022_e56f394b}. These developments, largely based on the estimating sequence technique~\cite{nesterovMethodSolvingConvex1983a,baesEstimateSequenceMethods2009a}, have inspired a wide range of follow-up work~\cite{jiang2021optimal,chen2022accelerating,lin2022explicit,agafonov2023inexact,agafonov2024advancing,jiang2024accelerated,huang2024inexact,doikov2020contracting}.
 
-In this context, two major approaches have emerged. The accelerated cubic regularized Newton (CRN) method~\cite{nesterov2008accelerating}, which builds on the cubic regularization oracle~\cite{nesterov2006cubic}, achieves a global oracle complexity of $O(\epsilon^{-1/3})$. The accelerated Newton proximal extragradient (A-NPE) method~\cite{monteiro2013accelerated} uses an approximate Newton oracle and improves the oracle complexity to $\tilde{O}(\epsilon^{-2/7})$. Later, the oracle complexity of the A-NPE method was improved to be optimal~\cite{carmon2022optimal,NEURIPS2022_e56f394b}. These developments, largely based on the estimating sequence technique~\cite{nesterovMethodSolvingConvex1983a,baesEstimateSequenceMethods2009a}, have inspired a wide range of follow-up work~\cite{jiang2021optimal,chen2022accelerating,lin2022explicit,agafonov2023inexact,agafonov2024advancing,jiang2024accelerated,huang2024inexact}. More recently, it was shown that the gradient-regularized Newton method~\cite{mishchenko_regularized_2023} can also be accelerated to $\tilde{O}(\epsilon^{-1/3})$~\cite{doikov2020contracting}.
+However, these improvements in global complexity often come at the expense of local efficiency. Accelerated methods offer stronger worst-case guarantees but consistently underperform in high-accuracy regimes where classical SOMs excel. Theoretically, for problem~\eqref{eq.main problem}, while classical SOMs typically achieve quadratic local convergence under second-order sufficient optimality, no existing accelerated SOM retains this property. Empirical studies further support this limitation: in logistic regression problems, accelerated methods are frequently outperformed by Newton’s method~\cite{carmon2022optimal}, and manually switching to Newton’s method is often necessary to achieve highly accurate solutions~\cite{jiang2020unified,huang2024inexact,chen2022accelerating}. This gap between global complexity theory and local practical performance remains unresolved and highlights a fundamental dilemma in accelerating second-order methods.
 
-However, these improvements in global complexity often come at the expense of local efficiency. Although accelerated methods offer stronger worst-case guarantees, they tend to underperform in the high-accuracy regime where classical SOMs shine. Restarting techniques have been proposed to recover linear convergence under stronger assumptions~\cite[Sections 4.2.5–4.2.6]{nesterov_lectures_2018}, but there is limited evidence that these methods retain superlinear or quadratic convergence near a local minimizer of problem~\eqref{eq.main problem}. Empirical studies confirm this observation: in logistic regression problems, accelerated methods are often outperformed by Newton’s method~\cite{carmon2022optimal}, and switching manually to Newton's method is typically required to attain highly accurate solutions~\cite{jiang2020unified,huang2024inexact}.
+For the sake of rigor, we briefly review some accelerated SOMs that achieve convergence rates beyond sublinear. In strongly convex minimization settings, restarting techniques have been applied to the accelerated CRN method to establish linear convergence~\cite[Sections 4.2.5–4.2.6]{nesterov_lectures_2018}. Under similar assumptions, \citet{marques2022variants} demonstrated that the A-NPE method can achieve global linear and local superlinear convergence. For self-concordant functions, \citet{dvurechensky2024improved} analyzed the convergence of accelerated CRN method and proved superlinear convergence. Additionally, for strongly monotone variational inequalities, \citet{jiang2022generalized,lin2025perseus,huang2022cubic,huang2025approximation,ostroukhov2020tensor} developed different accelerated SOMs and established quadratic convergence. We refer readers to their papers for further details. It is important to emphasize that all of these results rely on stronger assumptions than ours. None of them directly apply to the convex problem \eqref{eq.main problem} under only the second-order sufficient optimality condition.
 
-These findings highlight a key insight: although existing accelerated SOMs offer improved worst-case global complexity bounds, they often sacrifice the very property that makes SOMs practically powerful, that is, their rapid local convergence. In high-accuracy regimes, where local behavior dominates performance, these methods frequently underperform compared to classical approaches such as Newton’s method. In fact, empirical studies consistently report that accelerated methods lag behind in practical settings~\cite{carmon2022optimal}, often requiring a manual switch to Newton’s method to achieve satisfactory accuracy~\cite{jiang2020unified, huang2024inexact}. This disconnect between theoretical guarantees and practical effectiveness limits the applicability of accelerated second-order methods in real-world problems.
-
-This raises a fundamental question:
+The above phenomenon raises a fundamental question:
 \begin{center}
-\emph{Can we design an accelerated second-order method that balances global efficiency with fast local convergence?}
+\emph{Can we simultaneously achieve acceleration in global complexity and maintain the rapid local convergence of SOMs?}
 \end{center}
 
-The strong local performance of SOMs ultimately stems from the Newton step. Thus, to design accelerated methods that retain this efficiency, it is natural to seek oracles that closely approximate the Newton step near the solution. One particularly promising candidate is the trust-region (TR) oracle.
 
-The TR oracle exhibits two distinct strengths that make it a compelling foundation for accelertaed SOM design. On the theoretical side, it enjoys a unique structural property: within a neighborhood where SOMs typically exhibit quadratic convergence, the Lagrange multiplier associated with the TR constraint vanishes. This allows the TR step to coincide exactly with the Newton step, thereby preserving fast local convergence. This observation reveals an important insight: unlike other second-order oracles, the TR formulation implicitly encodes information about the local convergence region, offering a natural mechanism to detect and exploit such regions. On the practical side, TR methods have demonstrated strong empirical performance and form the algorithmic core of widely used solvers such as Knitro~\cite{byrd2006k}, COPT~\cite{geCardinalOptimizerCOPT2022}, and PDFO~\cite{ragonneau2024pdfo}. They have also found success in diverse applications ranging from adversarial training~\cite{yao2019trust} to reinforcement learning~\cite{schulman2015trust}. Moreover, the TR subproblem admits efficient solvers and favorable properties that facilitate extensions to constrained and structured optimization settings~\cite{jiangHolderianErrorBounds2022,yenewcomplexityresult1991}. These strengths, both theoretical and practical, motivate a deeper exploration of how to harness the TR oracle within accelerated SOM frameworks.
-
-Motivated by these considerations, we now turn our attention to the class of TR-type methods~\cite{More1983,conn2000trust,yuan2015recent}, which are all built upon a common oracle. At a given point \( x \in \mathbb{R}^n \), this oracle solves the following subproblem:
+To address the above question, we first review that the strong local performance of SOMs ultimately stems from the Newton step. Thus, to design accelerated methods with improved local performance, it is natural to seek oracles that closely approximate the Newton step near the solution. One particularly promising candidate is the trust-region (TR) oracle~\cite{More1983,conn2000trust,yuan2015recent}. At a given point \( x \in \mathbb{R}^n \), the classic TR oracle solves the following subproblem:
 \begin{equation}
 \label{eq.classic tr subproblem}
 \begin{aligned}
@@ -116,70 +111,80 @@ Motivated by these considerations, we now turn our attention to the class of TR-
 \text{s.t.} \quad  \|d\| &\le \Delta,
 \end{aligned}
 \end{equation}
-where \( B(x) \) approximates the Hessian \( \nabla^2 f(x) \), and \( \Delta \) denotes the trust-region radius. The classical TR method~\cite{conn2000trust} updates \( \Delta \) based on the agreement between the model and actual function values. Various TR-type algorithms have been proposed by modifying the rules for updating \( B(x) \), \( \Delta \), or the iterative scheme of the oracle.
+where \( B(x) \) approximates the Hessian \( \nabla^2 f(x) \), and \( \Delta \) denotes the trust-region radius.
 
-Despite their wide adoption and strong empirical performance, the global complexity of TR methods remains not fully characterized, especially in convex settings. Most complexity results focus on nonconvex problems. For example, the standard TR method achieves an oracle complexity of \( O(\epsilon^{-2}) \) for finding approximate second-order stationary points~\cite{conn2000trust,nocedal1999numerical,cartisComplexitySteepestDescent2010,cartisComplexityBoundsSecondorder2012}, which is worse than the \( O(\epsilon^{-3/2}) \) bound of other second-order methods~\cite{nesterov2006cubic,carmon2021lower}. This gap has motivated numerous refinements of TR methods~\cite{yeSecondOrderOptimization2005,curtis2017trust,curtis2021trust,zhangHomogeneousSecondorderDescent2025,heHomogeneousSecondorderDescent2025,hamad2022consistently,hamad2024simplepracticaladaptivetrustregion}.
+It exhibits two distinct strengths that make it a compelling foundation for accelerated SOM design. On the theoretical side, it enjoys a unique structural property: within a neighborhood where Newton's method typically exhibits quadratic convergence, the Lagrange multiplier associated with the TR constraint vanishes. This allows the TR step with choice $B(x) = \nabla^2 f(x)$ to coincide exactly with the Newton step, thereby preserving fast local convergence. This observation reveals an important insight: unlike other second-order oracles, the TR formulation implicitly encodes information about the local convergence region, offering a natural mechanism to detect and exploit such regions. On the practical side, TR methods have demonstrated strong empirical performance and form the algorithmic core of widely used solvers such as Knitro~\cite{byrd2006k}, COPT~\cite{geCardinalOptimizerCOPT2022}, and PDFO~\cite{ragonneau2024pdfo}. They have also found success in diverse applications ranging from adversarial training~\cite{yao2019trust} to reinforcement learning~\cite{schulman2015trust}. Moreover, the TR subproblem admits efficient solvers and favorable properties that facilitate extensions to constrained and structured optimization settings~\cite{jiangHolderianErrorBounds2022,yenewcomplexityresult1991}. These strengths, both theoretical and practical, motivate a deeper exploration of how to harness the TR oracle within accelerated SOM frameworks.
 
-For convex optimization, while second-order methods can theoretically achieve a rate of \( O(\epsilon^{-1/2}) \)~\cite{nesterov2006cubic,nesterov2008accelerating,mishchenko_regularized_2023}, whether TR-type methods can match this remained unanswered until very recently~\cite{jiang2024nonconvexityuniversaltrustregionmethod}. However, it is still unknown whether the TR oracle can be accelerated in the same way as other second-order oracles. If it can, the benefits would be twofold: not only might we retain or even enhance the strong local convergence properties of SOMs, but we could also improve the global complexity guarantees of TR-type methods.
+Despite the wide adoption and strong empirical success of TR oracles, their theoretical understanding, especially in global complexity, remains incomplete. This gap has motivated several early efforts focusing on nonconvex problems~\cite{yeSecondOrderOptimization2005,curtis2017trust,curtis2021trust,zhangHomogeneousSecondorderDescent2025,heHomogeneousSecondorderDescent2025,hamad2022consistently,hamad2024simplepracticaladaptivetrustregion}.
+
+In the convex setting, the theoretical global complexity of TR methods still lags behind the optimal benchmark. While SOMs are known to achieve a convergence rate of \( O(\epsilon^{-1/2}) \)~\cite{nesterov2006cubic,nesterov2008accelerating,mishchenko_regularized_2023}, whether TR methods could match this rate remained unresolved until the recent progress in~\cite{jiang2024nonconvexityuniversaltrustregionmethod}. However, whether TR oracles can benefit from acceleration, as achieved for other SOMs, remains an open question. Addressing this would not only have the potential to improve the global complexity of TR methods but may also preserve their strong local convergence properties.
+
 
 
 \paragraph{Challenges and our approach}
-The proposal of accelerating the TR oracle leads to a central technical challenge: existing acceleration techniques are primarily developed for unconstrained oracles, whereas TR-type oracles impose a ball constraint that substantially complicates both algorithm design and theoretical analysis.
+The proposal of using the TR oracle to address the global-local balance in accelerated SOMs introduces a central technical challenge: the Lagrange multiplier introduced by the TR constraint acts as a \textit{double-edged sword}.
 
-A key obstacle arises from what we term the ratio condition (or ratio pass), a critical structural property underpinning estimate sequence techniques for SOMs, which will be introduced Section~\ref{sec.priliminary}. This condition enables the derivation of recursive function value relationships between successive iterates, which are essential for achieving accelerated convergence guarantees.
+On one hand, as previously discussed, this multiplier captures valuable local geometric information and naturally vanishes near the optimal solution, allowing the TR oracle to closely recover pure Newton steps. To preserve this desirable local behavior, it is essential to exploit the multiplier's local feedback without imposing excessive intervention that could distort its geometric indication. In particular, maintaining the ability to approach Newton directions near the solution requires that the multiplier be allowed to adapt freely to the local landscape.
 
-However, the very structure that grants TR oracles desirable local properties also presents a major obstacle to acceleration. In particular, the Lagrange multiplier introduced by the ball constraint serves as a double-edged sword. On one hand, as previously discussed, it contributes to strong local convergence. On the other hand, being a posterior quantity, it disrupts the link between the regularization strength and step size, often violating the ratio condition critical for existing acceleration frameworks. This inherent tension complicates efforts to simultaneously achieve global efficiency and local rapidity.
+On the other hand, from the perspective of global convergence, it is often crucial to establish a stable relationship between the multiplier and the step size. This relationship underpins the ratio conditions commonly used in accelerated frameworks to control global progress. However, the multiplier, as a posterior quantity determined by the solution of the TR subproblem, tends to disrupt this ratio linkage, making it difficult to apply standard acceleration techniques and risking instability in the global complexity analysis.
 
-To address this challenge, we modify the recently proposed TR oracle of~\citet{jiang2024nonconvexityuniversaltrustregionmethod}, which stabilizes the relationship between regularization and step size. The modifications lie in that we allow more freedom in the choice of the parameters $\sigma$ and $r$.
+This inherent tension reveals the core difficulty of our problem: achieving global acceleration requires regulating the multiplier’s influence to stabilize global progress, while preserving rapid local convergence demands minimal interference to retain its geometric sensitivity. Striking this balance calls for a careful refinement of the TR oracle to harmonize its global and local behaviors.
+
+To address this challenge, we build upon the recently proposed TR oracle of~\citet{jiang2024nonconvexityuniversaltrustregionmethod}, which stabilizes the relationship between the regularization and step size. However, directly applying this oracle is insufficient to resolve the tension between global stability and local precision, as the Lagrange multiplier can still destabilize the acceleration process if not carefully managed.
+
+We introduce new strategies for adjusting the key parameters $\sigma$ (regularization strength) and $r$ (trust-region radius) in the TR oracle, which we call trust-region oracle for acceleration~(TROA):
 \begin{subequations}\label{eq.newTR}
     \begin{align}
-        \min_{d \in \mathbb{R}^n} \quad m^{\text{TROA}}(d) &:=\nabla f(x)^T d + \tfrac{1}{2}d^T (\nabla^2 f(x) + \sigma I) d, \\\label{eq.sa.ballconstraint} \operatorname{s.t.} ~ \|d\| &\le r.
+        \min_{d \in \mathbb{R}^n} \quad m^{\text{TROA}}(d) &:= \nabla f(x)^T d + \tfrac{1}{2} d^T (\nabla^2 f(x) + \sigma I) d, \\\label{eq.sa.ballconstraint}
+        \text{s.t.} \quad \|d\| &\le r.
     \end{align}
 \end{subequations}
-The above formulation mitigates the unpredictability of the multiplier while preserving its informative value, laying the foundation for accelerated methods that successfully navigate the global-local trade-off.
+By carefully designing the adjustment of $\sigma$ and $r$, we allow the multiplier to retain its local geometric informativeness near optimality, which is crucial for recovering Newton-like behavior. At the same time, we ensure that the multiplier is globally stabilized through its interaction with the step size, which is essential for supporting acceleration.
 
-Building upon this oracle, we introduce tailored modifications to classical acceleration techniques. Specifically, for each of our two proposed variants, we redesign the estimate sequence to accommodate multiplier-dependent behavior and carefully tune the parameters of the TR oracle to ensure compatibility with the acceleration dynamics.
+In addition, we modify classical acceleration frameworks to accommodate the unique structure of the TR oracle. Specifically, we redesign the estimate sequence to handle multiplier-dependent behavior and ensure the validity of the acceleration dynamics under our modified oracle.
+
+This combined strategy, which consists of adaptive parameter control and compatible acceleration design, enables us to balance the multiplier’s global and local influences and successfully overcome the core difficulty of applying acceleration to TR-type methods.
 
 \paragraph{Contribution}
-This work provides a constructive answer to the question posed earlier: we demonstrate, for the first time, that acceleration is achievable for TR oracles while preserving their hallmark local efficiency. To this end, we extend the TR oracle proposed in~\citet{jiang2024nonconvexityuniversaltrustregionmethod} by incorporating greater flexibility in parameter selection, and develop two accelerated TR methods that reveal different aspects of the trade-off between global complexity and local convergence.
+This work provides a constructive answer to the question posed earlier: we demonstrate, for the first time, that acceleration is achievable for second-order oracles while preserving their hallmark local efficiency. To this end, we extend the TR oracle proposed in~\citet{jiang2024nonconvexityuniversaltrustregionmethod} by incorporating greater flexibility in parameter selection, and develop two accelerated TR methods that reveal different aspects of the trade-off between global complexity and local convergence.
 
-Our primary contribution is the \emph{Global-Local Accelerated Trust-Region Method (GL-ATR)} (Algorithm~\ref{alg.accelerated utr}), which directly targets the challenge of balancing global and local performance. GL-ATR is motivated by the observation that the Lagrange multiplier associated with the TR constraint encodes geometric proximity to optimality—its vanishing indicates that the algorithm is operating in a region where Newton-type behavior emerges. Leveraging this insight, we introduce a local detection mechanism (Algorithm~\ref{alg.local detection}) that dynamically activates acceleration when near-optimal regions are identified. This design yields an improved global oracle complexity of $\tilde{O}(\epsilon^{-1/3})$, while achieving a local convergence rate of $O(\log\log(1/\epsilon))$, consistent with quadratic convergence in high-accuracy regimes. To our knowledge, this is the first accelerated second-order method that provably achieves both optimal global complexity and fast local convergence within the TR framework.
+Our primary contribution is the \emph{Global-Local Accelerated Trust-Region Method (GL-ATR)} (Algorithm~\ref{alg.accelerated utr}), which directly targets the challenge of balancing global and local performance. GL-ATR is motivated by the observation that the Lagrange multiplier associated with the TR constraint encodes geometric proximity to optimality—its vanishing indicates that the algorithm is operating in a region where Newton-type behavior emerges. Leveraging this insight, we introduce a local detection mechanism (Algorithm~\ref{alg.local detection}) that dynamically activates acceleration when quadratic convergence regions are identified. This design yields an improved global worst-case oracle complexity of $\tilde{O}(\epsilon^{-1/3})$, while achieving a local convergence rate of $O(\log\log(1/\epsilon))$, consistent with quadratic convergence in high-accuracy regimes. To our knowledge, this is the first accelerated SOM that provably achieves both optimal global complexity and fast local convergence.
 
-To further explore the global-local trade-off, we develop a second variant: the \emph{Near-Optimal Accelerated Trust-Region Method (NO-ATR)} (Algorithm~\ref{alg.ms accelerated utr}). NO-ATR is designed to push the limits of global performance, reaching the near-optimal global oracle complexity of $\tilde{O}(\epsilon^{-2/7})$ for convex problems. This is achieved by implementing an implicit search procedure tailored to the TR structure (Algorithm~\ref{alg.bisection ms}). However, our analysis and experiments reveal that this global optimality comes at the cost of local efficiency: unlike GL-ATR, NO-ATR does not retain superlinear convergence near the solution. This observation aligns with prior empirical findings~\cite{carmon2022optimal,jiang2020unified,huang2024inexact} and helps delineate the inherent trade-off between achieving global acceleration and preserving the fast local behavior of second-order methods.
+To further explore the global-local trade-off, we develop a second variant: the \emph{Near-Optimal Accelerated Trust-Region Method (NO-ATR)} (Algorithm~\ref{alg.ms accelerated utr}). NO-ATR is designed to push the limits of global performance, reaching the near-optimal global oracle complexity of $\tilde{O}(\epsilon^{-2/7})$ for convex problems. This is achieved by implementing an implicit search procedure tailored to the TR structure (Algorithm~\ref{alg.bisection ms}). However, our analysis and experiments reveal that this global optimality comes at the cost of local efficiency: unlike GL-ATR, NO-ATR does not retain superlinear convergence near the solution. This observation aligns with prior empirical findings~\cite{carmon2022optimal,huang2024inexact} and helps delineate the inherent trade-off between achieving global acceleration and preserving the fast local behavior of second-order methods.
 
-A comprehensive comparison of existing second-order accelerated methods and their complexity bounds is provided in Table~\ref{table.summary}. We remark that only our GL-ATR method exhibits strong local convergence performance among the methods in the table.
+% A comprehensive comparison of existing second-order accelerated methods and their complexity bounds is provided in Table~\ref{table.summary}. We remark that only our GL-ATR method exhibits strong local convergence performance among the methods in the table.
 
 Our theoretical findings are corroborated by numerical experiments. On a global scale, both GL-ATR and NO-ATR perform comparably to the Accelerated Cubic Regularization method~\cite{nesterov2008accelerating} and the A-NPE method~\cite{monteiro2013accelerated}, while consistently outperforming the non-accelerated trust-region method~\cite{jiang2024nonconvexityuniversaltrustregionmethod} and the standard Cubic Newton method~\cite{nesterov2006cubic}. Locally, GL-ATR exhibits quadratic convergence, offering significant improvements over the local behavior of existing accelerated frameworks.
 
-\begin{table*}[t]
-    \caption{A Summary of the Mainstream Second-Order Oracles}
-    \label{table.summary}
-    \vskip 0.15in
-    \begin{center}
-        \begin{small}
-            \begin{sc}
-                \begin{tabular}{lcccr}
-                    \toprule
-                    Oracle         & Nonconvex                 & Convex                                                  & Acceleration                     \\
-                    \midrule
-                    Cubic Newton      & $O(\epsilon^{-3/2})$~\cite{nesterov2006cubic} & $O(\epsilon^{-1/2})$\cite{nesterov2006cubic}                               & $O(\epsilon^{-1/3})$~\cite{nesterov2008accelerating}, $O(\epsilon^{-2/7})$~\cite{carmon2022optimal} \\
-                    GR Newton & $\tilde{O} (\epsilon^{-3/2})$~\cite{gratton2023yet}    & $O(\epsilon^{-1/2})$\cite{mishchenko_regularized_2023}                     & $\tilde O(\epsilon^{-1/3})$~\cite{doikov2020contracting}    \\
-                    Trust-region      & $O(\epsilon^{-3/2})^\dagger$                 & $O(\epsilon^{-1/2})$\cite{jiang2024nonconvexityuniversaltrustregionmethod} & $\tilde O(\epsilon^{-1/3})$, $\tilde O(\epsilon^{-2/7})$, this Paper                       \\
-                    \bottomrule
-                \end{tabular}
-            \end{sc}
-        \end{small}
-    \end{center}
-    \vskip -0.1in
-    \begin{tablenotes}
-        \small
-        \item $\dagger$ denotes the works~\cite{curtis2017trust,curtis2021trust,luenberger_linear_2021,hamad2022consistently,hamad2024simplepracticaladaptivetrustregion,jiang2024nonconvexityuniversaltrustregionmethod}.
-    \end{tablenotes}
-\end{table*}
+% \begin{table*}[t]
+%     \caption{A Summary of the Mainstream Second-Order Oracles}
+%     \label{table.summary}
+%     \vskip 0.15in
+%     \begin{center}
+%         \begin{small}
+%             \begin{sc}
+%                 \begin{tabular}{lcccr}
+%                     \toprule
+%                     Oracle         & Nonconvex                 & Convex                                                  & Acceleration                     \\
+%                     \midrule
+%                     Cubic Newton      & $O(\epsilon^{-3/2})$~\cite{nesterov2006cubic} & $O(\epsilon^{-1/2})$\cite{nesterov2006cubic}                               & $O(\epsilon^{-1/3})$~\cite{nesterov2008accelerating}, $O(\epsilon^{-2/7})$~\cite{carmon2022optimal} \\
+%                     GR Newton & $\tilde{O} (\epsilon^{-3/2})$~\cite{gratton2023yet}    & $O(\epsilon^{-1/2})$\cite{mishchenko_regularized_2023}                     & $\tilde O(\epsilon^{-1/3})$~\cite{doikov2020contracting}    \\
+%                     Trust-region      & $O(\epsilon^{-3/2})^\dagger$                 & $O(\epsilon^{-1/2})$\cite{jiang2024nonconvexityuniversaltrustregionmethod} & $\tilde O(\epsilon^{-1/3})$, $\tilde O(\epsilon^{-2/7})$, this Paper                       \\
+%                     \bottomrule
+%                 \end{tabular}
+%             \end{sc}
+%         \end{small}
+%     \end{center}
+%     \vskip -0.1in
+%     \begin{tablenotes}
+%         \small
+%         \item $\dagger$ denotes the works~\cite{curtis2017trust,curtis2021trust,luenberger_linear_2021,hamad2022consistently,hamad2024simplepracticaladaptivetrustregion,jiang2024nonconvexityuniversaltrustregionmethod}.
+%     \end{tablenotes}
+% \end{table*}
 
 
 \paragraph{Organization of the paper}
-The remainder of the paper is organized as follows. Section~\ref{sec.priliminary} reviews the background on trust-region-type oracles and the use of estimate sequence techniques in second-order optimization. In Section~\ref{sec.first variant}, we present the GL-ATR, which achieves an oracle complexity of $\tilde O(\epsilon^{-1/3})$ and exhibits quadratic convergence in high-accuracy regimes. Section~\ref{sec.second variant} introduces the NO-ATR, which attains a near-optimal oracle complexity of $\tilde O(\epsilon^{-2/7})$. Section~\ref{sec.experiments} reports numerical results on both worst-case hard instances and practical tasks, confirming the theoretical advantages of our proposed methods.
+The remainder of the paper is organized as follows. Section~\ref{sec.priliminary} reviews the background on TR-type oracles and the use of estimate sequence techniques in second-order optimization. In Section~\ref{sec.first variant}, we present the GL-ATR, which achieves an oracle complexity of $\tilde O(\epsilon^{-1/3})$ and exhibits quadratic convergence in high-accuracy regimes. Section~\ref{sec.second variant} introduces the NO-ATR, which attains a near-optimal oracle complexity of $\tilde O(\epsilon^{-2/7})$. Section~\ref{sec.experiments} reports numerical results on both worst-case hard instances and practical tasks, confirming the theoretical advantages of our proposed methods.
 \section{Preliminaries}
 \label{sec.priliminary}
 Let $\|\cdot\|$ denote the standard Euclidean norm in $\mathbb{R}^n$, and let $x^T y$ and $\langle x,y\rangle$ represent the inner product between $x, y \in \mathbb{R}^n$. For a matrix $X \in \mathbb{R}^{n \times n}$, $\|X\|$ denotes the induced $\ell_2$ norm. We use the standard asymptotic notations $O(\cdot), \Omega(\cdot), \Theta(\cdot)$ in their conventional sense, where $\tilde{O}(\cdot)$ hides logarithmic terms within $O(\cdot)$. Specifically, for two numerical quantities $A$ and $B$, we say that $A = O(B)$ if there exists an absolute constant $c > 0$ such that $A \leq c \cdot B$, and $A = \Omega(B)$ if there exists an absolute constant $c > 0$ such that $A \geq c \cdot B$. We write $A = \Theta(B)$ if both $A = O(B)$ and $A = \Omega(B)$ hold. Unless otherwise stated, all logarithmic functions $\log(x)$ in this paper refer to the base-2 logarithm.
@@ -193,7 +198,7 @@ We are interested in finding $\epsilon$-approximate solutions of \eqref{eq.main 
         f(x) - f^* \leq \epsilon \quad \text{or} \quad \|\nabla f(x)\| \leq \epsilon.
     \end{equation}
 \end{definition}
-The following assumptions are used throughout the paper. They are invoked only when necessary and will be explicitly stated when in use.
+The following assumptions are used throughout the paper. Some of them are invoked only when necessary and will be explicitly stated when in use.
 \begin{assumption}
     \label{assm.lipschitz}
     The objective function $f: \mathbb{R}^n \to \mathbb{R}$ is twice continuously differentiable, and its Hessian is Lipschitz continuous. That is, there exists a constant $M > 0$ such that for all $x, y \in \mathbb{R}^n$,
@@ -219,13 +224,13 @@ As a direct consequence of Assumption~\ref{assm.lipschitz}, we have
         \end{align}
     \end{subequations}
 \end{lemma}
-\paragraph{Essential condition: ratio pass}
-First, let us introduce an essential condition for second-order oracles to be accelerated. In fact, almost all the second-order oracle updates the step at $x$ in a similar form as follows:
+
+First, let us introduce a common characteristic of SOMs. In fact, almost all the second-order oracle updates the step at a given point $x$ in a similar form as follows:
 \begin{equation}
     \label{eq.second-order update}
     \left (\nabla^2 f(x) + \mu I \right )d = -\nabla f(x),
 \end{equation}
-where $\mu$ is a generic regularizer that varies among different methods. In the standard TR oracle~\eqref{eq.classic tr subproblem}, the decisive condition for the step is exactly~\eqref{eq.second-order update} with $\mu$ being the Lagrangian multiplier to the ball constraint. While in the CRN oracle~\cite{nesterov2006cubic}, which has the following form
+where $\mu$ is a generic regularizer that varies among different SOMs. In the standard TR oracle~\eqref{eq.classic tr subproblem}, the decisive condition for the step is exactly~\eqref{eq.second-order update} with $\mu$ being the Lagrangian multiplier to the ball constraint. In the CRN oracle~\cite{nesterov2006cubic}, which has the following form
 \begin{equation}
     \label{eq.cr update}
     \min_{d\in\mathbb{R}^n} m^{\text{CR}}(d):=\nabla f(x)^Td+\tfrac{1}{2}d^T\nabla^2 f(x)d+\tfrac{M}{6}\|d\|^3,
@@ -234,11 +239,13 @@ The optimality condition of \eqref{eq.cr update} reads
 \begin{equation}\label{eq.cropt}
     (\nabla^2 f(x) + \tfrac{M}{2}\|d\| I)d = -\nabla f(x).
 \end{equation}
-As we can see, in the CRN oracle we have $\mu = \frac{M}{2}\|d\|$, this further implies 
+As we can see, in the CRN oracle we have $\mu = \frac{M}{2}\|d\|$.
+
+From the global perspective, the reason why the CRN oracle can be accelerated is that the step $d$ and the multiplier $\mu>0$ satisfies
 \begin{equation}\label{eq.def ratio pass}
 \frac{\mu}{\|d\|} = \Theta(1).
 \end{equation}
-We call \textit{ratio pass} holds for $d$ if there exists $\mu$ such that \eqref{eq.second-order update} and \eqref{eq.def ratio pass} hold. This is a favorable property that is utilized in the analyses of many mainstream accelerated methods, in accelerated CRN method, it is used to guarantee sufficient function decrease (see~\citet[Lemma 4.2.5]{nesterov2008accelerating}); in the A-NPE method~\cite{monteiro2013accelerated}, there is an implicit search procedure for the update direction with the ratio pass holds. We clarify how the ratio pass helps the analysis in the following lemma.
+We call \textit{ratio pass} holds for $d$ if there exists $\mu>0$ such that \eqref{eq.second-order update} and \eqref{eq.def ratio pass} hold. This is a favorable property that is utilized in the analyses of many mainstream accelerated methods, in accelerated CRN method, it is used to guarantee sufficient function decrease (see~\citet[Lemma 4.2.5]{nesterov2008accelerating}); in the A-NPE method~\cite{monteiro2013accelerated}, there is an implicit search procedure for the update direction with the ratio pass holds. We clarify how the ratio pass helps the analysis in the following lemma.
 \begin{lemma}
     \label{lem.inner product g and d}
     Suppose Assumption~\ref{assm.lipschitz} holds, and 
@@ -283,11 +290,18 @@ We call \textit{ratio pass} holds for $d$ if there exists $\mu$ such that \eqref
     \end{equation*}
     Consider an auxiliary function $h(t) = \frac{\|f(x+d)\|^2}{4Mt}+\frac{3}{16}Mt^3$ where $t\geq 0$, taking derivatives gives $h(t)$ achieves its minimum at $t^*= \frac{\sqrt{2}\|\nabla f(x+d)\|^{1/2}}{\sqrt{3M}}$, plugging $t^*$ back gives \eqref{eq.inner product g d advanced}.
 \end{proof}
-Unfortunately, the ratio pass does not hold in general for standard TR oracles, since $\mu$ is determined a posteriori and may vary unpredictably. This instability motivates the need to modify the TR oracle to better support acceleration.
-\paragraph{Trust-region oracles for acceleration}
-To stabilize the above-mentioned ratio, we use the TR oracle~\eqref{eq.newTR}, which we call the TR oracle for acceleration (TROA) here.
+From a local perspective, we hope that the multiplier vanishes rapidly near the optimal solution, while also providing informative signals that help us detect when the algorithm is approaching convergence. 
 
-The TROA corresponds to $B(x)= \nabla^2 f(x)+\sigma I $ and $\Delta = r$ in \eqref{eq.classic tr subproblem}. The advantage of TROA over the standard TR oracle and the one used in \cite{jiang2024nonconvexityuniversaltrustregionmethod} is that we allow more freedom in tuning $(\sigma,r)$ as the algorithm evolves. As a result, we can stabilize the ratio to some degree and make it more compatible with the acceleration techniques.
+However, achieving this global-local balance is far from straightforward. On one hand, the multiplier in standard TR oracles is not stable and is determined a posteriori, making it difficult to consistently satisfy the ratio pass condition required by existing acceleration frameworks. On the other hand, existing accelerated SOMs often lack local detection mechanisms and therefore tend to adopt globally conservative strategies by default. As a result, their local steps remain overly cautious even when faster convergence is possible.
+
+Combining these two perspectives, we adopt the oracle~\eqref{eq.newTR} as the core of our algorithmic design, aiming to simultaneously stabilize global behavior and capture informative local signals, which we call the TR oracle for acceleration (TROA) for short. We present it again for ease of reading.
+\begin{equation*}
+    \begin{aligned}
+        \min_{d \in \mathbb{R}^n} \quad m^{\text{TROA}}(d) &:= \nabla f(x)^T d + \tfrac{1}{2} d^T (\nabla^2 f(x) + \sigma I) d, \\
+        \text{s.t.} \quad \|d\| &\le r.
+    \end{aligned}
+\end{equation*}
+The TROA corresponds to $B(x)= \nabla^2 f(x)+\sigma I $ and $\Delta = r$ in \eqref{eq.classic tr subproblem}. The advantage of TROA over the standard TR oracle and the one used in \cite{jiang2024nonconvexityuniversaltrustregionmethod} is that we allow more freedom in tuning $(\sigma,r)$ as the algorithm evolves. As a result, we can set parameters to stabilize the ratio and make it more compatible with the acceleration techniques in the global sense. Also, we can use the information of the multiplier of the ball constraint to detect the local geometry around the current point.
 
 We now write the optimality conditions of \eqref{eq.newTR}. The proof is omitted for brevity since it is analogous to the one for the standard trust-region oracle outlined in~\citet[Section 3]{conn2000trust}.
 \begin{lemma}\label{lem.optimal condition}
@@ -325,29 +339,10 @@ For convenience, we denote the primal-dual solution pair of \eqref{eq.newTR} by 
     Note $\|d\|\leq r$, apply the triangle inequality and rearrange items, we can derive \eqref{eq.bound next gradient}.
 \end{proof}
 
-\section{Variant~I: Improved Global Complexity and Quadratic Local Convergence}\label{sec.first variant}
-\subsection{Algorithm design}
+\section{Variant~I: Resolving the Global-Local Trade-off}\label{sec.first variant}
 In this section, we propose the first variant of the accelerated TR-type method, which applies the acceleration techniques in~\cite{nesterov2008accelerating} to the TROA. The global oracle complexity of this variant is improved to $\tilde O(\epsilon^{-1/3})$ and the local convergence to the high-accuracy solution is quadratic.
-
-When using the techniques in~\cite{nesterov2008accelerating}, the global convergence result is guaranteed by maintaining the following two relations across iterations
-\begin{subequations}\label{eq.es relation}
-\begin{align}
-    \label{eq.es relation 1}
-     & \mathcal{R}_k^1: \ \phi_k^*  \geq A_k f(x_k), \  \phi_k^*= \phi_k(v_k) =\min_{x\in\mathbb{R}^n}\phi_k(x) \\
-    \label{eq.es relation 2}
-     & \mathcal{R}_k^2: \ \phi_k(x)\leq A_kf(x)+\phi_0(x), \ \forall x\in\mathbb{R}^n.
-\end{align}
-\end{subequations}
-Here $\phi_k(x)$ is a sequence of functions that approximate $f(x)$ from both upper and below with $v_k$ being their optimum, $A_k$ is a sequence that measures the convergence rate of the sequence $x_k$. As a result of $\mathcal{R}_k^{1}$, $\mathcal{R}_k^2$, we have
-\begin{equation*}
-    f(x_k)-f^*\leq \frac{1}{A_k}\phi_k(x^*).
-\end{equation*}
-Therefore, the global complexity directly follows from the choice of $A_k$ and $\phi_0(x)$. Algorithm~\ref{alg.accelerated utr} is responsible for updating $x_k$ and $v_k$ in the algorithm, while $A_k$ and $\phi_k(x)$ are used only in the analysis.
-
-As discussed in the previous section, achieving the ratio pass is essential for acceleration. However, this property cannot be inherently guaranteed in TR oracles due to the presence of the multiplier, which introduces complications. As a result, directly applying acceleration schemes to the TR oracle without appropriate modifications may lead to a breakdown of the required recursive relation.
-
-Fortunately, by carefully tuning algorithmic parameters and leveraging key properties of the proposed TROA, we can ensure that the ratio pass approximately holds for each step. Moreover, a simple follow-up correction procedure can enforce that the ratio pass condition holds exactly. In particular, the iterations in Algorithm~\ref{alg.accelerated utr} are handled using two distinct strategies, depending on the value of $\lambda_k$.
-
+\subsection{Algorithm design}
+The main Algorithm~\ref{alg.accelerated utr} and its local detection phase Algorithm~\ref{alg.local detection} are shown below.
 \begin{algorithm}[ht]
     \caption{Global-Local Accelerated Trust-Region Method (\atr{})}\label{alg.accelerated utr}
     \begin{algorithmic}[1]
@@ -405,29 +400,66 @@ Fortunately, by carefully tuning algorithmic parameters and leveraging key prope
         \label{line.left bracketing point}
         }
         \ENDIF
-        \WHILE{True}
-        \STATE{$r = \tfrac{r_-+r_+}{2}$
+        % \WHILE{True}
+        % \STATE{$r = \tfrac{r_-+r_+}{2}$
+        % \hfill\texttt{\# Bisection starts}
+        % }
+        % \STATE{$(d,\mu) = \operatorname{TROA}(y,0,r)$
+        % \label{line.linear system oracle}
+        % }
+        % \IF{$\frac{\mu}{\|d\|}<M$}
+        % \STATE{$r_+=r$}
+        % \ELSIF{$\tfrac{\mu}{\|d\|}>2M$}
+        % \STATE{$r_- = r$}
+        % \ELSE
+        % \STATE{\textbf{output} None, $d$, $\mu$, ET= False}
+        % \ENDIF
+        % \ENDWHILE
+        \WHILE{$\frac{\mu}{\|d\|} \not\in [M, 2M]$}
+        \STATE{Use bisection method to find $r \in [r_-, r_+]$}
         \hfill\texttt{\# Bisection starts}
-        }
+        
         \STATE{$(d,\mu) = \operatorname{TROA}(y,0,r)$
         \label{line.linear system oracle}
         }
-        \IF{$\frac{\mu}{\|d\|}<M$}
-        \STATE{$r_+=r$}
-        \ELSIF{$\tfrac{\mu}{\|d\|}>2M$}
-        \STATE{$r_- = r$}
-        \ELSE
-        \STATE{\textbf{output} None, $d$, $\mu$, ET= False}
-        \ENDIF
+        % \IF{$\frac{\mu}{\|d\|}<M$}
+        % \STATE{$r_+=r$}
+        % \ELSIF{$\tfrac{\mu}{\|d\|}>2M$}
+        % \STATE{$r_- = r$}
+        % \ELSE
+        % \STATE{\textbf{output} None, $d$, $\mu$, ET= False}
+        % \ENDIF
         \ENDWHILE
+        \STATE{\textbf{output} None, $d$, $\mu$, ET= False}
     \end{algorithmic}
 \end{algorithm}
-When the current multiplier $\lambda_k > 0$, we will later show that the ratio pass condition holds automatically (see~Lemma~\ref{lem.ratio pass nonzero}). In this case, we can directly update the estimate sequence, and the recursive relation naturally propagates to the next iterate.
+As previously discussed, the Lagrange multiplier $\lambda_k$ associated with the TR constraint serves as a double-edged sword. If properly handled, however, it becomes a powerful instrument for balancing global efficiency and local rapidity. By carefully tuning the algorithmic parameters of TROA and exploiting its structural properties, we design our algorithm to dynamically switch between two distinct strategies based on the value of $\lambda_k$.
 
-In contrast, when $\lambda_k = 0$, this is interpreted as an indication that the current point $y_k$ may lie within the region of quadratic convergence for Newton's method (see~Lemma~\ref{lem.detection of local quadratic}). This opens the possibility for an early termination of Algorithm~\ref{alg.accelerated utr}. To verify this, we invoke the local detection procedure described in Algorithm~\ref{alg.local detection}, which comprises two parallel tracks designed to probe the local geometry around $y_k$. In \textbf{Track 1}, we run Newton’s method initialized at $y_k$. As shown in Section~\ref{sec.local}, if $y_k$ indeed lies in the quadratic convergence region, the resulting sequence will exhibit quadratic convergence, justifying early termination. In \textbf{Track 2}, we attempt to find a step $d_k$ such that the ratio pass condition holds. If successful, the recursive relation defined by the estimate sequence can continue and propagate to the next iteration.
-\subsection{Iteration complexity of Algorithm~\ref{alg.accelerated utr}}
-In this section, we analyze the iteration complexity of Algorithm~\ref{alg.accelerated utr} for computing an approximate solution as defined in Definition~\ref{def.approximate solution}. Let $K_\epsilon$ denote the index of the first iterate that satisfies Definition~\ref{def.approximate solution}. We will show that $K_\epsilon = O(\epsilon^{-1/3})$.
+When the multiplier satisfies $\lambda_k > 0$, it typically indicates that the current point is far from optimality. In this regime, we will later show that the ratio pass condition holds automatically (see Lemma~\ref{lem.ratio pass nonzero}). This allows us to safely update the estimate sequence, ensuring that the acceleration framework proceeds correctly and enables global acceleration.
 
+In contrast, when $\lambda_k = 0$, this serves as a valuable signal that the current point $y_k$ may have entered the quadratic convergence region of Newton’s method (see Lemma~\ref{lem.detection of local quadratic}). To verify this, we invoke the local detection procedure described in Algorithm~\ref{alg.local detection}, which consists of two parallel tracks that probe the local geometry around $y_k$. In \textbf{Track 1}, we run Newton’s method initialized at $y_k$. As shown in Section~\ref{sec.local}, if $y_k$ indeed lies within the quadratic convergence region, the resulting sequence will exhibit quadratic convergence, justifying early termination of Algorithm~\ref{alg.accelerated utr}. In \textbf{Track 2}, we seek a step $d_k$ that satisfies the ratio pass condition. This process is straightforward and guaranteed to succeed, allowing us to continue updating the estimate sequence and proceed with global acceleration.
+
+We will later prove that when $y_k$ enters the local quadratic convergence region, Algorithm~\ref{alg.accelerated utr} terminates early with the flag ET$=$True. Otherwise, the algorithm continues its global acceleration with ET$=$False.
+\subsection{Worst-case oracle complexity of Algorithm~\ref{alg.accelerated utr}}
+In this section, we analyze the worst-case oracle complexity of Algorithm~\ref{alg.accelerated utr} for computing an approximate solution as defined in Definition~\ref{def.approximate solution}. 
+
+\paragraph{Iteration complexity of Algorithm~\ref{alg.accelerated utr}}
+Let $K_\epsilon$ denote the index of the first iterate in Algorithm~\ref{alg.accelerated utr} that satisfies Definition~\ref{def.approximate solution}. We will show that $K_\epsilon = O(\epsilon^{-1/3})$.
+
+When using the techniques in~\cite{nesterov2008accelerating}, the global convergence result is guaranteed by maintaining the following two relations across iterations
+\begin{subequations}\label{eq.es relation}
+\begin{align}
+    \label{eq.es relation 1}
+     & \mathcal{R}_k^1: \ \phi_k^*  \geq A_k f(x_k), \  \phi_k^*= \phi_k(v_k) =\min_{x\in\mathbb{R}^n}\phi_k(x) \\
+    \label{eq.es relation 2}
+     & \mathcal{R}_k^2: \ \phi_k(x)\leq A_kf(x)+\phi_0(x), \ \forall x\in\mathbb{R}^n.
+\end{align}
+\end{subequations}
+Here $\phi_k(x)$ is a sequence of functions that approximate $f(x)$ from both upper and below with $v_k$ being their optimum, $A_k$ is a sequence that measures the convergence rate of the sequence $x_k$. As a result of $\mathcal{R}_k^{1}$, $\mathcal{R}_k^2$, we have
+\begin{equation*}
+    f(x_k)-f^*\leq \frac{1}{A_k}\phi_k(x^*).
+\end{equation*}
+Therefore, the global complexity directly follows from the choice of $A_k$ and $\phi_0(x)$.
 
 To proceed, we categorize the iterates generated by Algorithm~\ref{alg.accelerated utr} into two disjoint sets based on the value of the multiplier:
 \begin{equation}
@@ -467,7 +499,7 @@ Since our goal here is to analyze the worst-case global complexity, we assume th
     \end{equation*}
     Therefore, \eqref{eq.output of alg2} holds.
 \end{proof}
-To maintain the flow of the current complexity analysis, we temporarily assume that the bisection track of Algorithm~\ref{alg.local detection} always returns a direction $d_k$ satisfying the ratio pass condition~\eqref{eq.output of alg2}. This assumption will be rigorously verified in Section~\ref{sec.bisection}.
+To maintain the flow of the current complexity analysis, we temporarily assume that the bisection track of Algorithm~\ref{alg.local detection} always returns a direction $d_k$ satisfying the ratio pass condition~\eqref{eq.output of alg2}. This assumption will be rigorously verified in our analysis for Algorithm~\ref{alg.local detection}.
 
 For the upcoming analysis, we first complete the definition of $A_k,\phi_k(x)$ in the estimating sequence framework that was not explicitly presented in the algorithm.
 \begin{equation}
@@ -604,7 +636,7 @@ As a direct consequence, we have the following iteration complexity result of Al
 \begin{proof}
     This theorem is easily derived by obersving that either Algorithm~\ref{alg.local detection} outputs ET=True before $K_\epsilon$-th iteration, or Lemma~\ref{lem.estimate sequence} holds.
 \end{proof}
-\subsection{Oracle complexity of Algorithm~\ref{alg.local detection}}\label{sec.bisection}
+\paragraph{Oracle complexity of Algorithm~\ref{alg.local detection}}
 In this section, we analyze the oracle complexity of Algorithm~\ref{alg.local detection}. In the previous section, we already figured out how many iterations of Algorithm~\ref{alg.accelerated utr} are needed, it remains to analyze how many oracles are needed to be called in Algorithm~\ref{alg.local detection} to find a direction that satisfies \eqref{eq.output of alg2}. We will show the number of TR oracles called to find the $\epsilon$-approximate solutions is bounded by $\tilde{O}(\epsilon^{-1/3})$. We remark that the additional logarithmic number of TR oracles are called as a price for the local information at the current solution.
 
 To begin with, we first assess the most distinguished property for the iterates $k\in\mathcal{Z}$.
@@ -1046,7 +1078,7 @@ Last, we show that when the target tolerance $\epsilon$ is small enough, Algorit
     \end{equation*}
     iterations to find $\epsilon$-approximate solutions. Overall, the local convergence is quadratic.
 \end{proof}
-\section{Variant~II: Near-Optimal Global Complexity}\label{sec.second variant}
+\section{Variant~II: Pushing Global Efficiency to the Limit}\label{sec.second variant}
 \subsection{Algorithm design}
 We now consider a variant of the accelerated TR method that incorporates the acceleration techniques proposed by \citet{monteiro2013accelerated}. Unlike Algorithm~\ref{alg.accelerated utr}, this variant employs a quadratic estimating sequence and improves the global complexity of the TR oracle to the near-optimal rate of $\tilde O(\epsilon^{-2/7})$ for finding $\epsilon$-approximate solutions, as defined in Definition~\ref{def.approximate solution}. We refer to this method as the Near-Optimal Accelerated Trust-Region (NO-ATR) Method.
 
@@ -1608,6 +1640,10 @@ due to the large smoothness constant. Generally, smaller $\mu$ produces better a
 \end{figure}
 
 \Cref{fig.softmax} illustrates the results. In terms of iteration complexity, we see \atr{} is highly comparable to \arca{}. In addition to comparing iterations (panel (a)), we also present runtime in seconds (panel (b)). Notably, the per-iteration time of \atr{} (0.02 seconds) is only one-fourth of \arca{} (0.08 seconds), primarily because there are more mature techniques to solve the trust-region subproblem \eqref{eq.newTR} than to solve the cubic regularized subproblem \eqref{eq.cr update}, see \cite{yenewcomplexityresult1991, nesterov_lectures_2018, cartis2022evaluation} for further discussions.
+
+Logistic regression
+Estimating the Hessian Lipschitz constant. For all algorithms that require an estimate for the Lipschitz constant $H$ of $\nabla^2 f$ (i.e., all the algorithms that use $O _{ cr }$ ), we set $H=\frac{1}{10} \bar{H}$, where $\left\|\frac{1}{n} \sum_{i=1}^n \phi_i \phi_i^{\top}\right\|_{\text {op }} \max _{i \in[n]}\left\|\phi_i\right\|$ is a conservative upper bound on the Lipschitz constant of $\nabla^2 f$ for logistic regression [42]. We explore the effect of varying the estimate $H$ in Appendix D.4. Note that value of $M$ given to $O _{ cr }$ is typically $2 H$ : for Algorithms 0 and 1 it is $H / \sigma$ and $\sigma=2$, while CR and ACR also use $M=2 H$. We also use $H$ as the initial guess for Adaptive ACR.
+
 \clearpage
 \addcontentsline{toc}{section}{References}
 
@@ -1615,8 +1651,9 @@ due to the large smoothness constant. Generally, smaller $\mu$ produces better a
 \bibliography{ref}
 
 \clearpage
-\section*{Appendix}
 \appendix
+\section{Technical Proofs in Section~\ref{sec.first variant}}
+\section{Technical Proofs in Section~\ref{sec.second variant}}
 \subsection*{Proof to Lemma~\ref{lem.growth of Ak}}
 \begin{proof}
     First note that for $i\geq 0$
