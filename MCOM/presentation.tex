@@ -1,0 +1,208 @@
+\documentclass{mcom-l}
+\input{header}
+% \usepackage[inline]{showlabels}
+%     If you need symbols beyond the basic set, uncomment this command.
+%\usepackage{amssymb}
+
+%     If your article includes graphics, uncomment this command.
+%\usepackage{graphicx}
+
+%     If the article includes commutative diagrams, ...
+%\usepackage[cmtip,all]{xy}
+
+
+%     Update the information and uncomment if AMS is not the copyright
+%     holder.
+%\copyrightinfo{2009}{American Mathematical Society}
+
+\numberwithin{equation}{section}
+
+\begin{document}
+
+\title{Our Projects on Second-Order Optimization}
+
+%    Only \author and \address are required; other information is
+%    optional.  Remove any unused author tags.
+
+%    author one information
+% \author[Jiang et al.]{Yuntian Jiang, Chuwen Zhang, Bo Jiang, Yinyu Ye}
+\author{Y. Jiang \ C. He \ C. Zhang \ B. Jiang \ D. Ge \ Y. Ye}
+% \address{School of Information Management and Engineering, Shanghai University of Finance and Economics, Shanghai 200433, China}
+
+
+%    \subjclass is required.
+% \subjclass[2020]{Primary 65K05, 90C25, 90C30}
+
+% \date{}
+
+% \dedicatory{}
+
+% \keywords{Trust-Region Method, Acceleration, Global Complexity, Local Analysis}
+\maketitle
+\section{Universal Trust-Region Method}
+We aim to find second-order stationary points~(SOSPs) of the nonconstrained optimization problem:
+\begin{equation*}
+    \min_{x\in \mathbb{R}^n} f(x).
+\end{equation*}
+$x$ is a SOSP if
+\begin{align*}
+             & \|\nabla f(x) \| \leq O(\epsilon)                            \\
+             & \lambda_{\min}(\nabla ^2 f(x)) \geq \Omega(-\epsilon^{1/2}).
+\end{align*}
+\subsection{Motivation}
+\begin{enumerate}
+    \item The standard trust-region method converges to SOSPs with complexity $O(\epsilon^{-2})$, which is unsatisfactory.
+    \item Many variants have been proposed, e.g., \citet{luenberger_linear_2021,curtis2021trust,curtis2017trust,hamad2022consistently}. Their methods are guaranteed to find SOSPs in $O(\epsilon^{-3/2})$ iterations.
+    \item It remains unknown if the above variants have improved complexity in the convex setting. Note the cubic Newton method~\citet{nesterov2006cubic} finds $x$ with
+    \begin{equation*}
+        f(x) - f^* \leq \epsilon
+    \end{equation*}
+    in $O(\epsilon^{-1/2})$ iterations.
+    \item So the question is that can we design a trust-region variant that improves the complexity results in both cases simultaneously?
+\end{enumerate}
+\subsection{Our Method}
+We assume the Hessian of $f$ is $M$-Lipschitz. We propose to use the following trust-region oracle:
+\begin{equation}
+    \begin{aligned}
+        \min_{d \in \mathbb{R}^n} \quad &  \frac{1}{2}d^T\left (\nabla^2 f(\xk) + \sigma_k \left \|\nabla f(\xk)\right\|^{1/2} I \right ) d + \nabla f(\xk)^T d\\
+        \text{s.t. } \quad & \|d\| \le \Delta_k := r_k \|\nabla f(\xk)\|^{1/2}.
+        \label{eq.newTR}
+    \end{aligned}
+\end{equation}
+Our algorithm is
+\begin{algorithm}[!h]
+\caption{A \textbf{U}niversal \textbf{T}rust-\textbf{R}egion Method (UTR)}\label{alg.conceptual utr}
+\begin{algorithmic}[1]
+    \STATE \textbf{Input:} Initial point $x_0 \in \mathbb{R}^n$
+    \FOR{$k = 0, 1, \ldots, j_f$}
+        \STATE Adjust $(\sigma_k, r_k)$ by a proper strategy
+        \STATE Solve the subproblem \eqref{eq.newTR} and obtain the direction $d_k$
+        \IF{the decrease is sufficient}
+            \STATE $x_{k+1} = x_k + d_k$
+        \ELSE
+            \STATE Go to Line 2
+        \ENDIF
+    \ENDFOR
+\end{algorithmic}
+\end{algorithm}
+\subsection{The contribution}
+\begin{enumerate}
+    \item When $M$ is available, we show that we can always set $(\sigma_k,r_k) = (\frac{\sqrt{M}}{3},\frac{1}{3\sqrt{M}})$. When we apply this strategy, we find first-order stationary points~(FOSPs) in $O(\epsilon^{-3/2})$ iterations in the nonconvex case. Also, when $f$ is convex, we find $\epsilon$-approximate solutions in terms of function value in $O(\epsilon^{-1/2})$ iterations.
+    \item When we do not know $M$, we can design an search procedure over $M$. As a result, we devised an adaptive version, which has the same complexity as the fixed version. Differently, the adaptive version guarantees that we find an SOSP.
+    \item Compared to other trust-region variants, our assumption is weaker. Except \citet{curtis2021trust}, other methods more or less rely on additional assumptions like $L$-smoothness. 
+\end{enumerate}
+\section{Accelerated Trust-Region Method}
+Based on the above method, we take one step further: consider the accelerated variant of the trust-region method in the convex setting.
+\subsection{Motivation}
+\begin{enumerate}
+    \item There are no existing accelerated trust-region-type methods.
+    \item Existing accelerated second-order methods have no strong local convergence.
+\end{enumerate}
+\subsection{Our Method}
+We assume $f$ has $M$-Lipschitz Hessian, and $L$-Lipschitz gradient. We use the more general oracle, which no longer tight the parameter to the current gradient norm.
+\begin{equation*}
+    \begin{aligned}
+        \min_{d \in \mathbb{R}^n} \quad m^{\text{TROA}}(d) &:= \nabla f(x)^T d + \tfrac{1}{2} d^T (\nabla^2 f(x) + \sigma I) d, \\
+        \text{s.t.} \quad \|d\| &\le r.
+    \end{aligned}
+\end{equation*}
+We base our algorithm on the outcome of the multiplier $\lambda$:
+\begin{enumerate}
+    \item When $\lambda>0$, we can directly guarantee the global acceleration.
+    \item When $\lambda = 0$, we view it as a hint that the algorithm may enter the local convergence region of Newton's method.
+\end{enumerate}
+\begin{algorithm}[ht]
+    \caption{Global-Local Accelerated Trust-Region Method (\atr{})}\label{alg.accelerated utr}
+    \begin{algorithmic}[1]
+        \STATE \textbf{input:} initial point $x_0=v_0\in \mathbb{R}^n$, $s_0=0$, tolerance $\epsilon>0$
+        \FOR{$k=0, 1, \ldots, K_\epsilon$}
+        \STATE $y_k = \frac{k}{k+3}x_k+\frac{3}{k+3}v_k$
+        \STATE $(\sigma_k,r_k) = (\tfrac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2},\tfrac{1}{\sqrt{2M}}\|\nabla f(y_k)\|^{1/2})$
+        \STATE $(d_k,\lambda_k) = \operatorname{TROA}(y_k,\sigma_k,r_k)$ 
+        % \noindent\rule{8cm}{0.4pt} 
+        \IF{$\lambda_k=0$} \label{line.if}
+        % \STATE $x_{k+1}=y_k+d_k$ \label{line.nonzero multiplier}
+        \STATE \textbf{\# Local Detection Begins}
+        % \STATE $z_k,\text{ET}=\operatorname{Newton}(y_k,\left \lceil\frac{\log \|\nabla f(y_k)\|}{\epsilon} \right\rceil)$ 
+        \STATE $(z_k,d_k,\mu_k,\text{ET}) = \operatorname{LD}(y_k,\tfrac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2},d_k,\epsilon)$
+        \label{line.early terminate main}
+        \IF{$\text{ET}$}
+        \STATE \textbf{terminate and output $z_k$}
+        \ENDIF
+        % \IF{$\textrm{ET}$} \STATE\textbf{terminate} \ENDIF
+        \ENDIF
+        \STATE $x_{k+1}=y_k+d_k$
+        \STATE $s_{k+1} = s_{k}+\tfrac{(k+1)(k+2)}{2}\nabla f(x_{k+1})$
+        \STATE $v_{k+1} = v_0-\sqrt{\tfrac{8}{3M\|s_{k+1}\|}}s_{k+1}$
+        \ENDFOR
+    \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[!ht]
+    \caption{Local Detection for Algorithm~\ref{alg.accelerated utr}}\label{alg.local detection}
+    \begin{algorithmic}[1]
+        \STATE{\textbf{input:} $z_0=y\in \mathbb{R}^n$, $\mu_+$, $d_+$, $\epsilon$;
+        \label{line.right bracket point}
+        }
+        \IF{$\|d_+\| \leq \min\{\frac{\epsilon}{2\kappa_H}, \sqrt{\frac{\epsilon}{M}}\}$}
+        \STATE{\textbf{output} $y+d_+$, None, None, ET =True
+        \label{line.et 2}
+        }
+        \ENDIF
+        \STATE{\textbf{\# Track 1: Local Region Detection}}
+        \FOR{$i=1,\ldots,\left \lceil\log\frac{\|\nabla f(y)\|}{\epsilon} \right\rceil$}
+        \STATE{$z_k = z_{k-1}-\nabla^2f(z_{k-1})^{-1}\nabla f(z_{k-1})$}
+        \IF{$\|\nabla f(z_k)\|\leq \epsilon$}
+        \STATE{\textbf{output} $z_k$, None, None, ET=True
+        \label{line.et 1}
+        }
+        \ENDIF
+        \ENDFOR
+        \STATE{\textbf{\# Track 2: Ratio Pass Search}}
+        \IF{$\frac{\mu_+}{\|d_+\|}\leq 2M$
+        \label{line.check right bracket point}}
+        \STATE{\textbf{output} None, $d_+$, $\mu_+$, ET =False
+        \hfill\texttt{\# Check if the bisection is needed}
+        }
+        \ELSE
+        \STATE{$r_- = \|d_+\|$, $r_+ = \left \|\left(\nabla^2f(y)+M\|d_+\| I\right)^{-1}\nabla f(y)\right\|$
+        \label{line.left bracketing point}
+        }
+        \ENDIF
+        % \WHILE{True}
+        % \STATE{$r = \tfrac{r_-+r_+}{2}$
+        % \hfill\texttt{\# Bisection starts}
+        % }
+        % \STATE{$(d,\mu) = \operatorname{TROA}(y,0,r)$
+        % \label{line.linear system oracle}
+        % }
+        % \IF{$\frac{\mu}{\|d\|}<M$}
+        % \STATE{$r_+=r$}
+        % \ELSIF{$\tfrac{\mu}{\|d\|}>2M$}
+        % \STATE{$r_- = r$}
+        % \ELSE
+        % \STATE{\textbf{output} None, $d$, $\mu$, ET= False}
+        % \ENDIF
+        % \ENDWHILE
+        \WHILE{$\frac{\mu}{\|d\|} \not\in [M, 2M]$}
+        \STATE{Use bisection method to find $r \in [r_-, r_+]$}
+        \hfill\texttt{\# Bisection starts}
+        
+        \STATE{$(d,\mu) = \operatorname{TROA}(y,0,r)$
+        \label{line.linear system oracle}
+        }
+
+        \ENDWHILE
+        \STATE{\textbf{output} None, $d$, $\mu$, ET= False}
+    \end{algorithmic}
+\end{algorithm}
+\subsection{Contribution}
+\begin{enumerate}
+    \item Our first trust-region variant, which combines our new trust-region oracle with Nesterov's acceleration~\citet{nesterov2008accelerating}, shows a global complexity of $\tilde O(\epsilon^{-1/3})$ and a local convergence of $O(\log\log 1/\epsilon)$~(under sufficient second-order condition).
+    \item Our second trust-region variant, which combines our oracle with the Monteiro-Svaiter acceleration~\citet{monteiro2013accelerated}, achieves a near-optimal global complexity of $\tilde O(\epsilon^{-2/7})$.
+\end{enumerate}
+\clearpage
+\addcontentsline{toc}{section}{References}
+
+\bibliographystyle{plainnat}
+\bibliography{ref}
+\end{document}
