@@ -26,8 +26,13 @@
 \usepackage{tabularx}
 \usepackage{makecell}
 \usepackage{tikz}
+\usepackage{pgfplots}
 \usetikzlibrary{arrows}
 \usetikzlibrary{calc}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{backgrounds}
+\usepgfplotslibrary{patchplots}
+\usepgfplotslibrary{fillbetween}
 % \usepackage[inline]{showlabels}
 % \renewcommand{\showlabelfont}{\tiny\color{blue}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,7 +43,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% tikz
-\usepackage{tikz}
 \definecolor{ao(english)}{rgb}{0.0, 0.5, 0.0}
 \definecolor{cadmiumgreen}{rgb}{0.0, 0.42, 0.24}
 \definecolor{darkpastelgreen}{rgb}{0.01, 0.75, 0.24}
@@ -53,6 +57,22 @@
   line/.style={draw, thick, color=black!50, -LaTeX},
   ur/.style={draw, text centered, minimum height=0.01em},
   back group/.style={fill=white!20,rounded corners, draw=black!50, dashed, inner xsep=15pt, inner ysep=10pt},
+}
+\pgfplotsset{%
+  layers/standard/.define layer set={%
+      background,axis background,axis grid,axis ticks,axis lines,axis tick labels,pre main,main,axis descriptions,axis foreground%
+    }{
+      grid style={/pgfplots/on layer=axis grid},%
+      tick style={/pgfplots/on layer=axis ticks},%
+      axis line style={/pgfplots/on layer=axis lines},%
+      label style={/pgfplots/on layer=axis descriptions},%
+      legend style={/pgfplots/on layer=axis descriptions},%
+      title style={/pgfplots/on layer=axis descriptions},%
+      colorbar style={/pgfplots/on layer=axis descriptions},%
+      ticklabel style={/pgfplots/on layer=axis tick labels},%
+      axis background@ style={/pgfplots/on layer=axis background},%
+      3d box foreground style={/pgfplots/on layer=axis foreground},%
+    },
 }
 
 \newcommand{\etape}[2]{node (p#1) [etape] {#2}}

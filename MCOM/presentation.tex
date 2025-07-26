@@ -46,50 +46,50 @@ We aim to find second-order stationary points~(SOSPs) of the nonconstrained opti
 \end{equation*}
 $x$ is a SOSP if
 \begin{align*}
-             & \|\nabla f(x) \| \leq O(\epsilon)                            \\
-             & \lambda_{\min}(\nabla ^2 f(x)) \geq \Omega(-\epsilon^{1/2}).
+     & \|\nabla f(x) \| \leq O(\epsilon)                            \\
+     & \lambda_{\min}(\nabla ^2 f(x)) \geq \Omega(-\epsilon^{1/2}).
 \end{align*}
 \subsection{Motivation}
 \begin{enumerate}
     \item The standard trust-region method converges to SOSPs with complexity $O(\epsilon^{-2})$, which is unsatisfactory.
     \item Many variants have been proposed, e.g., \citet{luenberger_linear_2021,curtis2021trust,curtis2017trust,hamad2022consistently}. Their methods are guaranteed to find SOSPs in $O(\epsilon^{-3/2})$ iterations.
     \item It remains unknown if the above variants have improved complexity in the convex setting. Note the cubic Newton method~\citet{nesterov2006cubic} finds $x$ with
-    \begin{equation*}
-        f(x) - f^* \leq \epsilon
-    \end{equation*}
-    in $O(\epsilon^{-1/2})$ iterations.
+          \begin{equation*}
+              f(x) - f^* \leq \epsilon
+          \end{equation*}
+          in $O(\epsilon^{-1/2})$ iterations.
     \item So the question is that can we design a trust-region variant that improves the complexity results in both cases simultaneously?
 \end{enumerate}
 \subsection{Our Method}
 We assume the Hessian of $f$ is $M$-Lipschitz. We propose to use the following trust-region oracle:
 \begin{equation}
     \begin{aligned}
-        \min_{d \in \mathbb{R}^n} \quad &  \frac{1}{2}d^T\left (\nabla^2 f(\xk) + \sigma_k \left \|\nabla f(\xk)\right\|^{1/2} I \right ) d + \nabla f(\xk)^T d\\
-        \text{s.t. } \quad & \|d\| \le \Delta_k := r_k \|\nabla f(\xk)\|^{1/2}.
+        \min_{d \in \mathbb{R}^n} \quad & \frac{1}{2}d^T\left (\nabla^2 f(\xk) + \sigma_k \left \|\nabla f(\xk)\right\|^{1/2} I \right ) d + \nabla f(\xk)^T d \\
+        \text{s.t. } \quad              & \|d\| \le \Delta_k := r_k \|\nabla f(\xk)\|^{1/2}.
         \label{eq.newTR}
     \end{aligned}
 \end{equation}
 Our algorithm is
 \begin{algorithm}[!h]
-\caption{A \textbf{U}niversal \textbf{T}rust-\textbf{R}egion Method (UTR)}\label{alg.conceptual utr}
-\begin{algorithmic}[1]
-    \STATE \textbf{Input:} Initial point $x_0 \in \mathbb{R}^n$
-    \FOR{$k = 0, 1, \ldots, j_f$}
+    \caption{A \textbf{U}niversal \textbf{T}rust-\textbf{R}egion Method (UTR)}\label{alg.conceptual utr}
+    \begin{algorithmic}[1]
+        \STATE \textbf{Input:} Initial point $x_0 \in \mathbb{R}^n$
+        \FOR{$k = 0, 1, \ldots, j_f$}
         \STATE Adjust $(\sigma_k, r_k)$ by a proper strategy
         \STATE Solve the subproblem \eqref{eq.newTR} and obtain the direction $d_k$
         \IF{the decrease is sufficient}
-            \STATE $x_{k+1} = x_k + d_k$
+        \STATE $x_{k+1} = x_k + d_k$
         \ELSE
-            \STATE Go to Line 2
+        \STATE Go to Line 2
         \ENDIF
-    \ENDFOR
-\end{algorithmic}
+        \ENDFOR
+    \end{algorithmic}
 \end{algorithm}
 \subsection{The contribution}
 \begin{enumerate}
     \item When $M$ is available, we show that we can always set $(\sigma_k,r_k) = (\frac{\sqrt{M}}{3},\frac{1}{3\sqrt{M}})$. When we apply this strategy, we find first-order stationary points~(FOSPs) in $O(\epsilon^{-3/2})$ iterations in the nonconvex case. Also, when $f$ is convex, we find $\epsilon$-approximate solutions in terms of function value in $O(\epsilon^{-1/2})$ iterations.
     \item When we do not know $M$, we can design an search procedure over $M$. As a result, we devised an adaptive version, which has the same complexity as the fixed version. Differently, the adaptive version guarantees that we find an SOSP.
-    \item Compared to other trust-region variants, our assumption is weaker. Except \citet{curtis2021trust}, other methods more or less rely on additional assumptions like $L$-smoothness. 
+    \item Compared to other trust-region variants, our assumption is weaker. Except \citet{curtis2021trust}, other methods more or less rely on additional assumptions like $L$-smoothness.
 \end{enumerate}
 \section{Accelerated Trust-Region Method}
 Based on the above method, we take one step further: consider the accelerated variant of the trust-region method in the convex setting.
@@ -102,8 +102,8 @@ Based on the above method, we take one step further: consider the accelerated va
 We assume $f$ has $M$-Lipschitz Hessian, and $L$-Lipschitz gradient. We use the more general oracle, which no longer tight the parameter to the current gradient norm.
 \begin{equation*}
     \begin{aligned}
-        \min_{d \in \mathbb{R}^n} \quad m^{\text{TROA}}(d) &:= \nabla f(x)^T d + \tfrac{1}{2} d^T (\nabla^2 f(x) + \sigma I) d, \\
-        \text{s.t.} \quad \|d\| &\le r.
+        \min_{d \in \mathbb{R}^n} \quad m^{\text{TROA}}(d) & := \nabla f(x)^T d + \tfrac{1}{2} d^T (\nabla^2 f(x) + \sigma I) d, \\
+        \text{s.t.} \quad \|d\|                            & \le r.
     \end{aligned}
 \end{equation*}
 We base our algorithm on the outcome of the multiplier $\lambda$:
@@ -118,7 +118,7 @@ We base our algorithm on the outcome of the multiplier $\lambda$:
         \FOR{$k=0, 1, \ldots, K_\epsilon$}
         \STATE $y_k = \frac{k}{k+3}x_k+\frac{3}{k+3}v_k$
         \STATE $(\sigma_k,r_k) = (\tfrac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2},\tfrac{1}{\sqrt{2M}}\|\nabla f(y_k)\|^{1/2})$
-        \STATE $(d_k,\lambda_k) = \operatorname{TROA}(y_k,\sigma_k,r_k)$ 
+        \STATE $(d_k,\lambda_k) = \operatorname{TROA}(y_k,\sigma_k,r_k)$
         % \noindent\rule{8cm}{0.4pt} 
         \IF{$\lambda_k=0$} \label{line.if}
         % \STATE $x_{k+1}=y_k+d_k$ \label{line.nonzero multiplier}
@@ -141,11 +141,11 @@ We base our algorithm on the outcome of the multiplier $\lambda$:
     \caption{Local Detection for Algorithm~\ref{alg.accelerated utr}}\label{alg.local detection}
     \begin{algorithmic}[1]
         \STATE{\textbf{input:} $z_0=y\in \mathbb{R}^n$, $\mu_+$, $d_+$, $\epsilon$;
-        \label{line.right bracket point}
+            \label{line.right bracket point}
         }
         \IF{$\|d_+\| \leq \min\{\frac{\epsilon}{2\kappa_H}, \sqrt{\frac{\epsilon}{M}}\}$}
         \STATE{\textbf{output} $y+d_+$, None, None, ET =True
-        \label{line.et 2}
+            \label{line.et 2}
         }
         \ENDIF
         \STATE{\textbf{\# Track 1: Local Region Detection}}
@@ -153,19 +153,19 @@ We base our algorithm on the outcome of the multiplier $\lambda$:
         \STATE{$z_k = z_{k-1}-\nabla^2f(z_{k-1})^{-1}\nabla f(z_{k-1})$}
         \IF{$\|\nabla f(z_k)\|\leq \epsilon$}
         \STATE{\textbf{output} $z_k$, None, None, ET=True
-        \label{line.et 1}
+            \label{line.et 1}
         }
         \ENDIF
         \ENDFOR
         \STATE{\textbf{\# Track 2: Ratio Pass Search}}
         \IF{$\frac{\mu_+}{\|d_+\|}\leq 2M$
-        \label{line.check right bracket point}}
+            \label{line.check right bracket point}}
         \STATE{\textbf{output} None, $d_+$, $\mu_+$, ET =False
-        \hfill\texttt{\# Check if the bisection is needed}
+            \hfill\texttt{\# Check if the bisection is needed}
         }
         \ELSE
         \STATE{$r_- = \|d_+\|$, $r_+ = \left \|\left(\nabla^2f(y)+M\|d_+\| I\right)^{-1}\nabla f(y)\right\|$
-        \label{line.left bracketing point}
+            \label{line.left bracketing point}
         }
         \ENDIF
         % \WHILE{True}
@@ -186,9 +186,9 @@ We base our algorithm on the outcome of the multiplier $\lambda$:
         \WHILE{$\frac{\mu}{\|d\|} \not\in [M, 2M]$}
         \STATE{Use bisection method to find $r \in [r_-, r_+]$}
         \hfill\texttt{\# Bisection starts}
-        
+
         \STATE{$(d,\mu) = \operatorname{TROA}(y,0,r)$
-        \label{line.linear system oracle}
+            \label{line.linear system oracle}
         }
 
         \ENDWHILE
