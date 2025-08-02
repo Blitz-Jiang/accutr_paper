@@ -14,7 +14,8 @@
 \setlist[itemize]{noitemsep, topsep=2pt}
 % \usepackage[linesnumbered,boxruled,lined,commentsnumbered]{algorithm2e}
 \usepackage[colorlinks,citecolor=purple,linkcolor=blue]{hyperref}
-\usepackage[nameinlink]{cleveref}
+% \usepackage[nameinlink]{cleveref}
+\usepackage{cleveref}
 % \usepackage[parfill]{parskip}
 \usepackage[margin=1.5in]{geometry}
 \usepackage[sort&compress,numbers]{natbib}
@@ -158,3 +159,18 @@ minimum height=2em, text centered,color=black!50]
   \z@ \z@ {-.5em}%
   {\normalfont\normalsize\bfseries}}%
 \makeatother
+
+
+\usepackage{float}
+\usepackage{etoolbox}
+\usepackage{cleveref}
+
+% Define subroutine float
+\newfloat{subroutine}{htbp}{los}
+\floatname{subroutine}{Subroutine}
+
+% Define cref name for subroutine
+\crefname{subroutine}{subroutine}{subroutines}
+\Crefname{subroutine}{Subroutine}{Subroutines}
+
+\allowdisplaybreaks
