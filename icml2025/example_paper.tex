@@ -154,7 +154,7 @@ Therefore, based on the results in \citet{jiang2024nonconvexityuniversaltrustreg
 In terms of accelerated second-order methods, \citet{nesterov2008accelerating} showed that it is possible to accelerate the cubic regularized Newton method~\cite{nesterov2006cubic}. Specifically, its iteration complexity can be improved to $O(\epsilon^{-1/3})$ from $O(\epsilon^{-1/2})$ for convex problems. Beyond cubic regularization, other accelerated second-order approaches have been developed~\cite{monteiro2013accelerated,doikov2020contracting,carmon2022optimal,NEURIPS2022_e56f394b}. Those algorithms have also spawned a series of studies, each focusing on different aspects, to name a few, see~\citet{jiang2020unified,jiang2021optimal,chen2022accelerating,lin2022explicit,agafonov2023inexact,agafonov2024advancing,jiang2024accelerated,huang2024inexact}.
 \paragraph{Challenge for acceleration with constraint}
 It is worth mentioning that all the above accelerated methods stick with \emph{unconstrained subproblems}.
-However, trust-region-type methods remain obviously absent from this landscape in the presence of the ball constraint of trust-region subproblems, which makes the analysis more challenging. To illustrate the difficulty of accelerating trust-region-type methods, we recall a key property required for acceleration, referred to as the \emph{sufficient decrease condition} (Definition~\ref{def.sufficient decrease condition}) in this paper. This condition plays a crucial role in enabling the estimate sequence technique \cite{baesEstimateSequenceMethods2009a,nesterov_lectures_2018}, which recursively connects the function values among the previous iterations, ensuring consistent progress that ultimately leads to acceleration. The sufficient decrease condition is fundamentally tailored for the accelerated scheme.
+However, trust-region-type methods remain obviously absent from this landscape in the presence of the ball constraint of trust-region subproblems, which makes the analysis more challenging. To illustrate the difficulty of accelerating trust-region-type methods, we recall a key property required for acceleration, referred to as the \emph{sufficient decrease condition} (\Cref{def.sufficient decrease condition}) in this paper. This condition plays a crucial role in enabling the estimate sequence technique \cite{baesEstimateSequenceMethods2009a,nesterov_lectures_2018}, which recursively connects the function values among the previous iterations, ensuring consistent progress that ultimately leads to acceleration. The sufficient decrease condition is fundamentally tailored for the accelerated scheme.
 
 
 
@@ -176,7 +176,7 @@ However, trust-region-type methods remain obviously absent from this landscape i
 
 % However, trust-region-type methods remain obviously absent from this landscape in the presence of the ball constraint of trust-region subproblems, where suitable treatment for the \emph{dual multiplier} $\lambda$ is required.
 
-% To illustrate the difficulty of accelerating trust-region-type methods, we begin by revisiting a key property required for acceleration, referred to as the \emph{sufficient decrease condition} (Definition~\ref{def.sufficient decrease condition}).
+% To illustrate the difficulty of accelerating trust-region-type methods, we begin by revisiting a key property required for acceleration, referred to as the \emph{sufficient decrease condition} (\Cref{def.sufficient decrease condition}).
 
 % The sufficient decrease condition plays a crucial role in enabling the estimate sequence technique \cite{baesEstimateSequenceMethods2009a,nesterov_lectures_2018}, which serves as a key tool for accelerating algorithms. This technique relies on establishing a recursive relationship involving the function value across iterations, ensuring consistent cumulative progress that ultimately leads to acceleration. The cumulative progress in function value is naturally ensured by the sufficient decrease condition, which is specifically designed to support this kind of iterative setting.
 
@@ -286,7 +286,7 @@ We are interested in finding $\epsilon$-approximate solutions as below.
     \end{equation}
 \end{definition}
 \paragraph{Subproblems in second-order methods}
-We employ trust-region-type methods to find the approximate solution of~\eqref{eq.main problem} as in Definition~\ref{def.approximate solution}.
+We employ trust-region-type methods to find the approximate solution of~\eqref{eq.main problem} as in \Cref{def.approximate solution}.
 the standard trust-region method \cite{conn2000trust} operates on the local quadratic approximation of $f$ at point $x\in\mathbb{R}^n$ within a trust-region ball:
 \begin{equation}
     \label{eq.classic tr subproblem} \begin{aligned} \min_{d \in \mathbb{R}^n} \   m^{\text{TR}}(d) & := \nabla f(x)^T d+\tfrac{1}{2}d^T \nabla^2 f(x) d, \\ \operatorname{s.t.} \ &\|d\|\le \Delta.
@@ -611,7 +611,7 @@ For ease of understanding, we plot the following Roadmap (Figure~\ref{fig.roadma
     \label{fig.roadmap tr}
 \end{figure}
 \section{Convergence Analysis}\label{sec.convergence}
-In this section, we analyze the complexity of \cref{alg.accelerated utr}. Let $K_\epsilon$ denote the index of the first iterate that satisfies Definition~\ref{def.approximate solution}. We will show that the number of iterations needed is $K_\epsilon = O(\epsilon^{-1/3})$, and the number of trust-region-subproblems solved within these iterations is bounded by $\tilde{O}(\epsilon^{-1/3})$. We note that, in the worst-case case, an additional logarithmic number of trust-region subproblems may have to be solved. However, since the Hessian and gradient of these subproblems remain the same, the additional computational cost is minimal.
+In this section, we analyze the complexity of \cref{alg.accelerated utr}. Let $K_\epsilon$ denote the index of the first iterate that satisfies \Cref{def.approximate solution}. We will show that the number of iterations needed is $K_\epsilon = O(\epsilon^{-1/3})$, and the number of trust-region-subproblems solved within these iterations is bounded by $\tilde{O}(\epsilon^{-1/3})$. We note that, in the worst-case case, an additional logarithmic number of trust-region subproblems may have to be solved. However, since the Hessian and gradient of these subproblems remain the same, the additional computational cost is minimal.
 
 
 First, we formally divide the iterates produced by \Cref{alg.accelerated utr} into two sets:
