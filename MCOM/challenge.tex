@@ -1,6 +1,6 @@
 \subsection{Motivation and our approach}
 In this paper, we answer the above question by developing new accelerated SOMs and, at the same time, highlighting the tradeoffs between global and local efficiency.
-We observe that the strong local performance of SOMs ultimately stems from the Newton step. Thus, to design accelerated methods with improved local performance, it is natural to seek second-order oracles that closely approximate the Newton step near the solution. One particularly promising candidate is the trust-region (TR) oracle~\cite{More1983,conn2000trust}. At a given point \( x \in \mathbb{R}^n \), the classic TR oracle solves the following subproblem:
+We observe that the strong local performance of SOMs ultimately stems from the Newton step. Thus, to design accelerated methods with improved local performance, the first task is to seek second-order oracles that closely approximate the Newton step near the solution. For that sake, one possible particular candidate is the trust-region (TR) oracle~\cite{More1983,conn2000trust}. At a given point \( x \in \mathbb{R}^n \), the classic TR oracle solves the following subproblem:
 \begin{equation}
     \label{eq.classic tr subproblem}
     \begin{aligned}
@@ -8,14 +8,15 @@ We observe that the strong local performance of SOMs ultimately stems from the N
         \text{s.t.}                          & \quad  \|d\| \le \Delta,
     \end{aligned}
 \end{equation}
-where \( \Delta \) denotes the trust-region radius. For an overview of TR methods, we refer the readers to two excellent monographs \cite{yuan2000review,yuan2015recent}.
+where \( \Delta \) denotes the trust-region radius. We denote $(d,\lambda) = \tr(x, \Delta)$ as the primal-dual solution of this problem. For an overview of TR methods, we refer the readers to two excellent monographs \cite{yuan2000review,yuan2015recent}.
 
-Two distinct strengths make TR oracle a compelling candidate for solving the fundamental question. On the theoretical side, \tr{} oracles can be solved in $O(\log\log(\epsilon^{-1}))$ arithmetic operations \cite{vavasisProvingPolynomialtimeSphereconstrained1990,yenewcomplexityresult1991}.
-Moreover, the ball constraint becomes inactive (which can be detected by the Lagrangian multiplier being zero) near a non-degenerate minimizer, so the step reduces to the pure Newton direction, automatically revealing a region of quadratic convergence, which is an advantage absent from other second-order oracles. This unique feature offers an algorithmic mechanism for local detection and exploitation.
+Two distinct strengths make \eqref{eq.classic tr subproblem} a compelling candidate for answering the fundamental question. On the theoretical side, \tr{} oracles can be solved in $O(n^3 + n^2\log\log(\epsilon^{-1}))$ arithmetic operations \cite{vavasisProvingPolynomialtimeSphereconstrained1990,yenewcomplexityresult1991}, incurring no significant overhead than a Newton equation.
+Moreover, when the ball constraint becomes inactive (which can be detected by $\lambda$ being zero) near a non-degenerate minimizer, the step reduces to the pure Newton direction, automatically revealing a region of quadratic convergence --- an advantage absent from other second-order oracles. This unique feature offers a possibility for local detection and exploitation.
 On the practical side, the TR oracle has been thoroughly analyzed \cite{jiangHolderianErrorBounds2022,rojasNewMatrixfreeAlgorithm2001}, so that highly competitive solvers have been developed \cite{rojasNewMatrixfreeAlgorithm2001, adachiSolvingTrustregionSubproblem2017, adachiEigenvaluebasedAlgorithmAnalysis2019} for it and its extensions.
-To this end, TR forms the algorithmic core of general-purpose nonlinear programming solvers such as Knitro~\cite{byrd2006k}, COPT~\cite{geCardinalOptimizerCOPT2022}, and PDFO~\cite{ragonneau2024pdfo}. Similar success can be found in diverse applications ranging from adversarial training~\cite{yao2019trust} to reinforcement learning~\cite{schulman2015trust}. These advantages serve as the motivation to use \tr{} to address the global-local balance in accelerated SOMs.
+To this end, TR forms the algorithmic core of general-purpose nonlinear programming solvers such as Knitro~\cite{byrd2006k}, COPT~\cite{geCardinalOptimizerCOPT2022}, and PDFO~\cite{ragonneau2024pdfo}. Similar success can be found in other cross-cutting applications ranging from adversarial training~\cite{yao2019trust} to reinforcement learning~\cite{schulman2015trust}. These advantages serve as the motivation to use \tr{} to address the global-local balance in accelerated SOMs.
 
-However, using TR oracles introduces a central technical challenge: the Lagrange multiplier introduced by the TR constraint acts as a \textit{double-edged sword}.
+However, how to use TR oracles introduces a central technical challenge. 
+\cz{While the dual variable $\lambda$ encodes the geometry that allows local convergence, it is a double-edged sword that complicates the analysis for global efficiency. In fact, classical TR methods cannot match the global complexity of unaccelerated SOMs in convex optimization.} \cz{Maybe add a footnote saying that it is no better than GD; Cartis said so}. This is because $\lambda$ is an a posteriori estimate and so requires a monitoring process \cite{curtis2017trust}. 
 \cz{For short, one is to stabilize the dual, another one is to make use of the ``local detection'' feature of TR. At the same time, why can't NPE use this?}
 
 \cz{-------------}
@@ -86,22 +87,30 @@ Our theoretical findings are corroborated by numerical experiments. On a global 
 % \end{table*}
 
 \subsection{Related works}
+
+\cz{Still needs some reorganization}
 % \cz{1. review the most related acc SOMs}
 % For unconstrained optimization problem, \cite{dvurechensky2024improved,marques2022variants,nesterov_lectures_2018} established global linear and local superlinear convergence under the assumption of global strong convexity or similar global regularity conditions. Beyond unconstrained minimization, a number of works~\cite{nesterov_lectures_2018, marques2022variants, dvurechensky2024improved, jiang2022generalized, lin2025perseus, huang2025approximation, ostroukhov2020tensor} have studied accelerated SOMs under stronger global assumptions. These include global regularity conditions like global strong convexity, under which they establish global linear, and local superlinear (or quadratic) convergence. \cz{what are \cite{marques2022variants, huang2025approximation} for? they are not linear? \cite{jiang2022generalized, lin2025perseus, ostroukhov2020tensor} are for min-max, which one is superlinear? the only superlinear result should be Dvurechensky's global superlinear results for self-concordant functions?} 
+% \cz{I think we should be more careful about the references we choose and present. Below is what's on my mind:
+%     \begin{itemize}
+%         \item talk about the \cite{nesterov_lectures_2018, marques2022variants, huang2025approximation}. A number of works have been proposed to study accelerated SOMs under stronger regularity conditions (e.g., global strongly convex functions), in which it is possible to achieve global linear...
+%               More general settings have also been extensively discussed \cite{jiang2022generalized, lin2025perseus, ostroukhov2020tensor}.
+%         \item In general, accelerated methods lose local superlinear convergence both theoretically and empirically. For example, \citet{jiang2024accelerated} proposed an accelerated quasi-Newton method that achieves the ..., while it underperforms the standard BFGS, which is known for superlinear local convergence. An exception is \cite{dvurechensky2024improved} developed for strictly self-concordant functions.
+%     \end{itemize}
+% }
+% \cz{somewhat duplicate text, we already mentioned this in the challenge and contribution: shorten the text, remove the repeated words}
+When some global regularity condition such as
+$
+    \nabla^2 f(x) \geq \nu I, \ \nu\geq0
+$
+holds uniformly in $x$,  a growing body of work has investigated how accelerated SOMs can leverage the uniform constant $\nu$ to achieve faster-than-sublinear convergence. One prominent approach is to apply restart strategies to classical accelerated methods~\cite{ostroukhov2020tensor, lin2025perseus, nesterov_lectures_2018, huang2025approximation}, where the restart frequency is tuned based on the value of $\nu$. Another line of research avoids restarts and instead modifies the algorithmic framework to explicitly incorporate strong regularity information, such as the constant $\nu$ itself~\cite{jiang2022generalized, marques2022variants}. 
 
-\cz{I think we should be more careful about the references we choose and present. Below is what's on my mind:
-    \begin{itemize}
-        \item talk about the \cite{nesterov_lectures_2018, marques2022variants, huang2025approximation}. A number of works have been proposed to study accelerated SOMs under stronger regularity conditions (e.g., global strongly convex functions), in which it is possible to achieve global linear...
-              More general settings have also been extensively discussed \cite{jiang2022generalized, lin2025perseus, ostroukhov2020tensor}.
-        \item In general, accelerated methods lose local superlinear convergence both theoretically and empirically. For example, \citet{jiang2024accelerated} proposed an accelerated quasi-Newton method that achieves the ..., while it underperforms the standard BFGS, which is known for superlinear local convergence. An exception is \cite{dvurechensky2024improved} developed for strictly self-concordant functions.
-    \end{itemize}
-}
+While these approaches represent important advances in leveraging strong regularity to accelerate convergence, they do not address the global-local trade-off in the general convex problem: in practice, one must set $\nu=0$ to ensure global applicability, which can be overly conservative near a non-degenerate solution.
 
-\cz{somewhat duplicate text, we already mentioned this in the challenge and contribution: shorten the text, remove the repeated words}
-In contrast, our work focuses on the general convex problem~\eqref{eq.main problem} with a non-degenerate minimizer, without assuming global strong convexity. Our method initiates local detection automatically when the constraint becomes inactive, rather than relying on restart mechanisms or prior knowledge of strong convexity parameters. As a result, it applies to a significantly broader class of convex problems.
+Taking one step further, our method automatically initiates local detection once the constraint becomes inactive, without relying on any global regularity constant such as $\nu$, thereby achieving broader applicability.
 
 % \cz{2. review the TR literature}
-From a historical perspective, despite the strong empirical success of TR methods, the global complexity analyses remain incomplete. This gap has motivated several early efforts that focus on nonconvex problems~\cite{yeSecondOrderOptimization2005,curtis2017trust,curtis2021trust,zhangHomogeneousSecondorderDescent2025,hamad2022consistently,grapiglia2015convergence}.
+For TR-type methods, despite their strong empirical success, the global complexity analyses remain incomplete. This gap has motivated several early efforts that focus on nonconvex problems~\cite{yeSecondOrderOptimization2005,curtis2017trust,curtis2021trust,zhangHomogeneousSecondorderDescent2025,hamad2022consistently,grapiglia2015convergence}.
 % \cz{Here I added the 2015 MP paper, but bot by gratton. Check it.} 
 While in convex optimization, other (non-accelerated) SOMs are known to achieve a convergence rate of \( O(\epsilon^{-1/2}) \) ~\cite{nesterov2006cubic,nesterov2008accelerating,mishchenko_regularized_2023}, the first TR method that matches this rate appeared only recently~\cite{jiang2024nonconvexityuniversaltrustregionmethod}. However, whether TR oracles can further benefit from acceleration, as achieved for other SOMs, remains an open question.
 % In this paper, we close this gap between TR methods and other accelerated SOMs. 
