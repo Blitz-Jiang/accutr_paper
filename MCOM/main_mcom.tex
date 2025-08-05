@@ -120,7 +120,7 @@ The above phenomenon raises a fundamental question:
 
 \section{Preliminaries}
 \label{sec.priliminary}
-Let $\|\cdot\|$ denote the standard Euclidean norm in $\mathbb{R}^n$, and let $x^T y$ and $\langle x,y\rangle$ represent the inner product between $x, y \in \mathbb{R}^n$. For a matrix $X \in \mathbb{R}^{n \times n}$, $\|X\|$ denotes the induced $\ell_2$ norm. We use the standard asymptotic notations $O(\cdot), \Omega(\cdot), \Theta(\cdot)$ in their conventional sense, where $\tilde{O}(\cdot)$ hides logarithmic terms within $O(\cdot)$. Specifically, for two numerical quantities $A$ and $B$, we say that $A = O(B)$ if there exists an absolute constant $c > 0$ such that $A \leq c \cdot B$, and $A = \Omega(B)$ if there exists an absolute constant $c > 0$ such that $A \geq c \cdot B$. We write $A = \Theta(B)$ if both $A = O(B)$ and $A = \Omega(B)$ hold. Unless otherwise stated, all logarithmic functions $\log(x)$ in this paper refer to the base-2 logarithm.
+Let $\|\cdot\|$ denote the standard Euclidean norm in $\mathbb{R}^n$, and let $x^T y$ and $\langle x,y\rangle$ represent the inner product between $x, y \in \mathbb{R}^n$. For a matrix $X \in \mathbb{R}^{n \times n}$, $\|X\|$ denotes the induced $\ell_2$ norm. We use the standard notations $O(\cdot), \Omega(\cdot), \Theta(\cdot)$ in their conventional sense, where $\tilde{O}(\cdot)$ hides logarithmic terms within $O(\cdot)$. Specifically, for two numerical quantities $A$ and $B$, we say that $A = O(B)$ if there exists an absolute constant $c > 0$ such that $A \leq c \cdot B$, and $A = \Omega(B)$ if there exists an absolute constant $c > 0$ such that $A \geq c \cdot B$. We write $A = \Theta(B)$ if both $A = O(B)$ and $A = \Omega(B)$ hold. Unless otherwise stated, all logarithmic functions $\log(x)$ in this paper refer to the base-2 logarithm.
 
 We are interested in finding $\epsilon$-approximate solutions of \eqref{eq.main problem} as defined below.
 \begin{definition}
@@ -250,7 +250,7 @@ For convenience, we denote the primal-dual solution pair of \eqref{eq.newTR} by 
     Suppose Assumption~\ref{assm.lipschitz} holds and $(d,\lambda)= \trp(x,\sigma,r)$ , then we have
     \begin{equation}
         \label{eq.bound next gradient}
-        \|\nabla f(x+d)\| \leq \frac{M}{2}r^2+(\sigma+\lambda)r.
+        \|\nabla f(x+d)\| \leq \frac{M}{2}r^2+(\sigma+\lambda)r = \frac{M}{2}r^2+\mu r.
     \end{equation}
 \end{lemma}
 \begin{proof}
@@ -342,7 +342,7 @@ In this section, we propose the first accelerated TR method, which applies the a
         % \ENDIF
         % \ENDWHILE
         \WHILE{$\frac{\mu}{\|d\|} \not\in [M, 2M]$}
-        \STATE{Use bisection method to find $r \in [r_-, r_+]$}
+        \STATE{Perform bisection over $r \in [r_-, r_+]$}
         \hfill\texttt{\# Bisection starts}
 
         \STATE{$(d,\mu) = \trp(y,0,r)$
@@ -359,9 +359,9 @@ In this section, we propose the first accelerated TR method, which applies the a
         \STATE{\textbf{output} None, $d$, $\mu$, ET= False}
     \end{algorithmic}
 \end{subroutine}
-By carefully tuning $(\sigma_k, r_k)$ of $\trp$ and exploiting its local geometry, we make the multiplier $\lambda_k$ a powerful instrument to reveal information of possibly fast local convergence.
+By carefully tuning $(\sigma_k, r_k)$ of $\trp$, we make the multiplier $\lambda_k$ a powerful instrument to reveal information of possibly fast local convergence.
 
-We categorize the algorithmic behavior based on whether the multiplier $\lambda_k$ is zero. When $\lambda_k > 0$, it typically indicates that the current iterate is still far from optimality. In this regime, as shown later in Lemma~\ref{lem.ratio pass nonzero}, the overall regularization parameter $\mu_k$ becomes automatically proportional to the step size. This ensures that the estimate sequence \cz{Should be Estimating Sequence?} can be safely updated, allowing the acceleration framework to proceed correctly.
+We categorize the algorithmic update based on whether the multiplier $\lambda_k$ is zero. When $\lambda_k > 0$, it typically indicates that the current iterate is still far from optimality. In this regime, as shown later in Lemma~\ref{lem.ratio pass nonzero}, the overall regularization parameter $\mu_k$ becomes automatically proportional to the step size. This ensures that the estimating sequence can be safely updated, allowing the acceleration framework to proceed correctly.
 
 By contrast, when $\lambda_k = 0$, it provides a valuable signal that the current extrapolation point $y_k$ may have entered the local quadratic convergence region of Newton's method (see Lemma~\ref{lem.detection of local quadratic}). In this case, we invoke the local detection procedure described in \Cref{alg.local detection}, which consists of two parallel tracks probing the local geometry around $y_k$. In \textbf{Track 1} (local exploitation), we run Newton’s method starting from $y_k$. As discussed in Section~\ref{sec.local}, if $y_k$ indeed lies within the quadratic convergence region, the resulting sequence will exhibit quadratic convergence, which justifies early termination of \Cref{alg.accelerated utr}.  In \textbf{Track 2} (ratio bracketing), we attempt to find a step $d_k$ whose size is proportional to the regularization parameter $\mu_k$. This step is easy to compute and always succeeds, ensuring that we can continue updating the estimate sequence and preserve global acceleration.
 
@@ -374,7 +374,7 @@ In this section, we analyze the worst-case oracle complexity,
 \cz{the number of $\trp$ oracles needed}, of \Cref{alg.accelerated utr} for computing an approximate solution as defined in Definition~\ref{def.approximate solution}.
 
 \paragraph{Iterations complexity of \Cref{alg.accelerated utr}}
-Since our goal here is to analyze the worst-case global complexity, we assume the early termination path does not occur. Denote $K_\epsilon$ as the iteration number Algorithm~\ref{alg.accelerated utr} takes to find an approximate solution as in Definition~\ref{def.approximate solution}. We will show that $K_\epsilon = O(\epsilon^{-1/3})$.
+Since our goal here is to analyze the worst-case global complexity, we assume the early termination path does not occur. Denote $K_\epsilon$ as the iteration number Algorithm~\ref{alg.accelerated utr} takes to find an $\epsilon$-approximate solution as in Definition~\ref{def.approximate solution}. We will show that $K_\epsilon = O(\epsilon^{-1/3})$.
 
 When using the techniques in~\cite{nesterov2008accelerating}, the global convergence result is guaranteed by maintaining the following two relations across iterations
 \begin{subequations}\label{eq.es relation}
@@ -461,7 +461,7 @@ To proceed, we categorize the iterates generated by \Cref{alg.accelerated utr} i
 We first examine the ratio between the regularizer and the step size.
 \begin{lemma}
     \label{lem.ratio pass nonzero}
-    In the $k$-th iteration of \Cref{alg.accelerated utr}, if $k\in\mathcal{N}$, then $\mu_k=\sigma_k+\lambda_k$ such that
+    In the $k$-th iteration of \Cref{alg.accelerated utr}, if $k\in\mathcal{N}$, then
     \begin{subequations}
         \label{eq.output of alg2}
         \begin{gather}
@@ -488,7 +488,7 @@ To maintain the flow of the current complexity analysis, we temporarily assume t
 
 Now we are able to show that, during the update of \Cref{alg.accelerated utr} the relation \eqref{eq.es relation} holds.
 \begin{lemma}\label{lem.estimate sequence}
-    Suppose Assumption~\ref{assm.lipschitz} holds, and \Cref{alg.local detection} outputs ET=False and a direction $d$ with \eqref{eq.output of alg2} holds. Then we can guarantee the following for all $k\geq 0$, we have
+    Suppose Assumption~\ref{assm.lipschitz} holds, and \eqref{eq.output of alg2} holds for the output of \Cref{alg.local detection}. Then we can guarantee the following for all $k\geq 0$, we have
     \begin{equation}
         \label{eq.estimating sequence relation}
         A_k f(x_k)\leq \phi_k^*  \leq \phi_k(x)\leq A_k f(x)+\phi_0(x), \ \forall x\in \mathbb{R}^n.
@@ -552,13 +552,14 @@ Now we are able to show that, during the update of \Cref{alg.accelerated utr} th
 As a direct consequence, we have the following iteration complexity result of \Cref{alg.accelerated utr},
 \begin{theorem}
     \label{thm.convergence outer loop}
-    Suppose Assumption~\ref{assm.lipschitz} holds and \Cref{alg.local detection} can output a direction that satisfies \eqref{eq.output of alg2}, then \Cref{alg.accelerated utr} finds a point $x\in\mathbb{R}^n$ that satisfies \eqref{eq.approximate solution} in $K_\epsilon=O(\epsilon^{-1/3})$ iterations.
+    Suppose Assumption~\ref{assm.lipschitz} holds, and \eqref{eq.output of alg2} holds for the output of \Cref{alg.local detection}, then \Cref{alg.accelerated utr} finds a point $x\in\mathbb{R}^n$ that satisfies \eqref{eq.approximate solution} in $K_\epsilon=O(\epsilon^{-1/3})$ iterations.
 \end{theorem}
 \begin{proof}
-    This theorem is easily derived by obersving that either \Cref{alg.local detection} outputs ET=True before $K_\epsilon$-th iteration, or Lemma~\ref{lem.estimate sequence} holds.
+    This theorem is a direct consequence of \eqref{eq.update a and A} and Lemma~\ref{lem.estimate sequence}.
 \end{proof}
 \paragraph{Oracle complexity of \Cref{alg.local detection}}
-In this section, we analyze the oracle complexity of \Cref{alg.local detection}. In the previous section, we already figured out how many iterations of \Cref{alg.accelerated utr} are needed, it remains to analyze how many oracles are needed to be called in \Cref{alg.local detection} to find a direction that satisfies \eqref{eq.output of alg2}. We will show the number of TR oracles called to find the $\epsilon$-approximate solutions is bounded by $\tilde{O}(\epsilon^{-1/3})$. We remark that the additional logarithmic number of TR oracles are called as a price for the local information at the current solution.
+In the previous analysis, we already figured out how many iterations of \Cref{alg.accelerated utr} are needed, it remains to analyze how many oracles are needed to be called in \Cref{alg.local detection} to find a direction that satisfies \eqref{eq.output of alg2}. We will show the number of TR oracles called to find the $\epsilon$-approximate solutions is bounded by $\tilde{O}(\epsilon^{-1/3})$. 
+% We remark that the additional logarithmic number of TR oracles are called as a price for the local information at the current solution.
 
 To begin with, we first assess the most distinguished property for the iterates $k\in\mathcal{Z}$.
 \begin{lemma}
