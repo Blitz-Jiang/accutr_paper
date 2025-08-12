@@ -98,7 +98,7 @@ When the Hessian information of the objective function is available, second-orde
 
 Beyond local behavior, another important criterion for evaluating optimization algorithms is their non-asymptotic global complexity, which measures the number of second-order oracle calls needed to compute an $\epsilon$-approximate solution~\cite{cartis2022evaluation}. Over the past decades, several globally convergent SOMs have been developed~\cite{nesterov2006cubic,mishchenko_regularized_2023,jiang2024nonconvexityuniversaltrustregionmethod,heHomogeneousSecondorderDescent2025}, yet there remains room for improving their global complexity through acceleration techniques.
 
-In this context, two major approaches have emerged. The accelerated cubic regularized Newton (CRN) method~\cite{nesterov2008accelerating}, which builds on the cubic regularization oracle~\cite{nesterov2006cubic}, achieves a global oracle complexity of $O(\epsilon^{-1/3})$. The accelerated Newton proximal extragradient (A-NPE) method~\cite{monteiro2013accelerated} uses an approximate Newton oracle and improves the oracle complexity to $\tilde{O}(\epsilon^{-2/7})$.
+In this context, two major approaches have emerged. The accelerated cubic regularized Newton (CRN) method~\cite{nesterov2008accelerating}, which builds on the cubic regularization oracle~\cite{nesterov2006cubic}, achieves a global oracle complexity of $O(\epsilon^{-1/3})$\footnote{Oracle complexity refers to the number of second-order subproblems (the oracle calls) needed to find an approximate solution.}. The accelerated Newton proximal extragradient (A-NPE) method~\cite{monteiro2013accelerated} uses an approximate Newton oracle and improves the oracle complexity to $\tilde{O}(\epsilon^{-2/7})$.
 These developments, largely based on the estimating sequence technique~\cite{nesterovMethodSolvingConvex1983a,baesEstimateSequenceMethods2009a}, have inspired a wide range of enhancements~\cite{jiang2021optimal,chen2022accelerating,lin2022explicit,agafonov2023inexact,agafonov2024advancing,jiang2024accelerated,huang2024inexact,doikov2020contracting}.
 Later, the oracle complexity of the A-NPE method was improved to be an optimal rate in $O(\epsilon^{-2/7})$~\cite{carmon2022optimal,NEURIPS2022_e56f394b}.
 
@@ -113,8 +113,9 @@ However, stronger worst-case complexity results of accelerated methods often com
 
 \section{Preliminaries}
 \label{sec.priliminary}
-Let $\|\cdot\|$ denote the standard Euclidean norm in $\mathbb{R}^n$, and let $x^T y$ and $\langle x,y\rangle$ represent the inner product between $x, y \in \mathbb{R}^n$. For a matrix $X \in \mathbb{R}^{n \times n}$, $\|X\|$ denotes the induced $\ell_2$ norm. We use the standard notations $O(\cdot), \Omega(\cdot), \Theta(\cdot)$ in their conventional sense, where $\tilde{O}(\cdot)$ hides logarithmic terms within $O(\cdot)$. Specifically, for two numerical quantities $A$ and $B$, we say that $A = O(B)$ if there exists an absolute constant $c > 0$ such that $A \leq c \cdot B$, and $A = \Omega(B)$ if there exists an absolute constant $c > 0$ such that $A \geq c \cdot B$. We write $A = \Theta(B)$ if both $A = O(B)$ and $A = \Omega(B)$ hold.
-Oracle complexity refers to the number of TR-type oracles needed to find approximate solutions. Unless otherwise stated, all logarithmic functions $\log(x)$ in this paper refer to the base-2 logarithm.
+Let $\|\cdot\|$ denote the standard Euclidean norm in $\mathbb{R}^n$, and let $x^T y$ and $\langle x,y\rangle$ represent the inner product between $x, y \in \mathbb{R}^n$. For a matrix $X \in \mathbb{R}^{n \times n}$, $\|X\|$ denotes the induced $\ell_2$ norm.
+% We use the standard notations $O(\cdot), \Omega(\cdot), \Theta(\cdot)$ in their conventional sense, where $\tilde{O}(\cdot)$ hides logarithmic terms within $O(\cdot)$. Specifically, for two numerical quantities $A$ and $B$, we say that $A = O(B)$ if there exists an absolute constant $c > 0$ such that $A \leq c \cdot B$, and $A = \Omega(B)$ if there exists an absolute constant $c > 0$ such that $A \geq c \cdot B$. We write $A = \Theta(B)$ if both $A = O(B)$ and $A = \Omega(B)$ hold.
+Unless otherwise stated, all logarithmic functions $\log(x)$ in this paper refer to the base-2 logarithm.
 
 We are interested in finding $\epsilon$-approximate solutions of \eqref{eq.main problem} as defined below.
 \begin{definition}
@@ -138,7 +139,8 @@ The following assumptions are used throughout the paper. Some of them are invoke
     The Hessian of the objective function is bounded. That is, there exists a constant $\kappa_H > 0$ such that for all $x \in \mathbb{R}^n$, \begin{equation}
         \label{eq.bounded hessian}
         \|\nabla^2 f(x)\| \leq \kappa_H.
-    \end{equation} \end{assumption}
+    \end{equation}
+\end{assumption}
 As a direct consequence of Assumption~\ref{assm.lipschitz}, we have
 \begin{lemma}[Lemma 4.1.1, \citet{nesterov_lectures_2018}]\label{lem.lipschitz}
     If \(f:\mathbb{R}^n \mapsto \mathbb{R}\) satisfies Assumption~\ref{assm.lipschitz}, then for all \(x,y\in \mathbb{R}^n\), we have
@@ -152,14 +154,14 @@ As a direct consequence of Assumption~\ref{assm.lipschitz}, we have
     \end{subequations}
 \end{lemma}
 
-First, let us introduce a unifying view of updates for second-order methods. In fact, almost all of them choose the step at a given point $x$ as follows:
+To begin with, let us introduce a unifying view of the updates of the second-order methods. In fact, almost all of them choose the step at some given point $x$ as follows:
 \begin{equation}
     \label{eq.second-order update}
-    \left (\nabla^2 f(x) + \mu I \right )d = -\nabla f(x),
+    \left (\nabla^2 f(x) + \mu I \right )d = -\nabla f(x).
 \end{equation}
-where $\mu$ is a generic regularizer which plays a critical role in the convergence analysis and varies among different SOMs.
-In the TR methods using the standard oracle ~\eqref{eq.classic tr subproblem}, $\mu$ is an \emph{a posteriori} parameter --- the Lagrangian multiplier to the ball constraint.
-In the regularized Newton methods, $\mu$ can be selected directly as $\Theta(\sqrt{\|\nabla f(x)\|})$ such that a $O(\epsilon^{-1/2})$ method can be designed \cite{mishchenko_regularized_2023}. For accelerated methods, both the CRN method~\cite{nesterov2008accelerating} and the A-NPE method~\cite{monteiro2013accelerated} require a search procedure on $\mu$. The following lemmas clarify the role of $\mu$ for second-order methods.
+The regularization parameter $\mu$ plays a critical role in the convergence analysis and varies among different SOMs.
+In the classical TR method using the standard oracle ~\eqref{eq.classic tr subproblem}, $\mu$ is an \emph{a posteriori} parameter --- the Lagrangian multiplier to the ball constraint.
+In the regularized Newton methods, $\mu$ can be selected directly as $\Theta(\sqrt{\|\nabla f(x)\|})$ such that a $O(\epsilon^{-1/2})$ method can be designed \cite{mishchenko_regularized_2023}. For accelerated methods, both the CRN method~\cite{nesterov2008accelerating} and the A-NPE method~\cite{monteiro2013accelerated} require some search procedures on $\mu$. Nevertheless, the following lemmas clarify the role of $\mu$ for second-order methods.
 \begin{lemma}
     \label{lem.bound next gradient}
     Suppose Assumption~\ref{assm.lipschitz} and \eqref{eq.second-order update} hold, then we have
@@ -177,7 +179,7 @@ In the regularized Newton methods, $\mu$ can be selected directly as $\Theta(\sq
     \begin{equation*}
         \|\nabla f(x+d)+\mu d\| \leq \frac{M}{2}\|d\|^2.
     \end{equation*}
-    Apply the triangle inequality and rearrange items, we can derive \eqref{eq.bound next gradient}.
+    Applying the triangle inequality and rearrange items, we can derive \eqref{eq.bound next gradient}.
 \end{proof}
 \begin{lemma}
     \label{lem.inner product g and d}
@@ -190,10 +192,11 @@ In the regularized Newton methods, $\mu$ can be selected directly as $\Theta(\sq
     Further, if $\mu \leq 2M\|d\|$, we have
     \begin{equation}
         \label{eq.inner product g d advanced}
-        \langle \nabla f(x+d_k),-d \rangle \geq \frac{\sqrt{6}}{6} \frac{\|\nabla f(x+d)\|^{3/2}}{\sqrt{M}}.
+        \langle \nabla f(x+d),-d \rangle \geq \frac{\sqrt{6}}{6} \frac{\|\nabla f(x+d)\|^{3/2}}{\sqrt{M}}.
     \end{equation}
 \end{lemma}
 \begin{proof}
+    \cz{This proof seems to be overlapping with the one above?}
     Set $y=x+d$ in \eqref{eq.first-order exp}, we have
     \begin{equation*}
         \|\nabla f(x+d)-\nabla f(x)-\nabla ^2 f(x) d\| \leq \frac{M}{2}\|d\|^2.
@@ -219,17 +222,16 @@ In the regularized Newton methods, $\mu$ can be selected directly as $\Theta(\sq
     \end{equation*}
     Consider an auxiliary function $h(t) = \frac{\|f(x+d)\|^2}{4Mt}+\frac{3}{16}Mt^3$ where $t\geq 0$, taking derivatives gives $h(t)$ achieves its minimum at $t^*= \frac{\sqrt{2}\|\nabla f(x+d)\|^{1/2}}{\sqrt{3M}}$, plugging $t^*$ back gives \eqref{eq.inner product g d advanced}.
 \end{proof}
-\Cref{lem.bound next gradient} shows that we can bound the gradient norm of the next iterate by controlling $\mu$.
-\Cref{lem.inner product g and d} supports our earlier statement that, for global efficiency, $\mu$ should be selected as $\Theta(\|d\|)$.
-To balance the global-local performance, we recall the $\trp{}$ mentioned in the previous section.
+Generally speaking, \Cref{lem.bound next gradient} shows that we can bound the next-iterate gradient norm by controlling $\mu$.
+\Cref{lem.inner product g and d} serves as a key bridge to establish the global efficiency --- $\mu$ should be selected roughly as $\Theta(\|d\|)$. This condition is maintained by CRN and A-NPE but generally fails for the classical trust-region oracle. For that reason, we turn to the $\trp{}$ oracle introduced in the previous section:
 % However, achieving this global-local balance is far from straightforward. On one hand, the multiplier in standard TR oracles is not stable and is determined a posteriori, making it difficult to consistently satisfy $\mu = \Theta(\|d\|)$ required by persueing better global complexity. On the other hand, existing accelerated SOMs often lack local detection mechanisms and therefore tend to adopt globally conservative strategies by default. As a result, their local steps remain overly cautious even when faster convergence is possible.
 \begin{equation*}
     \begin{aligned}
-        \underset{d \in \mathbb{R}^n}{\min} & \nabla f(x)^T d + \tfrac{1}{2} d^T (\nabla^2 f(x) + \sigma I) d, \\
-        \text{s.t.}                         & ~\|d\| \le r.
+        \underset{d \in \mathbb{R}^n}{\min} ~  & \nabla f(x)^T d + \tfrac{1}{2} d^T (\nabla^2 f(x) + \sigma I) d \\
+        \text{s.t.}                          ~ & \|d\| \le r.
     \end{aligned}
 \end{equation*}
-We denote $(d,\lambda) = \trp(x,\sigma,r)$ as the primal-dual solution of this problem. Its optimality conditions are as follows.
+We denote $(d,\lambda) = \trp(x,\sigma,r)$ as the primal-dual solution of this problem. The global optimality conditions are as follows.
 \begin{lemma}[Section 3,~\citet{conn2000trust}]\label{lem.optimal condition}
     The direction $d$ is the solution to \eqref{eq.newTR} if and only if there exists a dual multiplier $\lambda \geq 0$ of the constraint \eqref{eq.sa.ballconstraint} such that: \begin{subequations}\label{eq.sa}
         \begin{align}
@@ -243,16 +245,16 @@ We denote $(d,\lambda) = \trp(x,\sigma,r)$ as the primal-dual solution of this p
         \end{align}
     \end{subequations}
 \end{lemma}
-
-Indeed, in the $\trp$ framework, $\mu = \sigma + \lambda$. This combination of primal and dual information has the potential to balance global and local behavior. As we will show in the following, by setting the parameters according to Lemma~\ref{lem.inner product g and d}, we can make the method more compatible with acceleration techniques while preserving the valuable local information encoded by the multiplier.
+In the $\trp{}$ oracle, the regularization parameter decomposes as $\mu=\sigma+\lambda$, aggregating primal \emph{a priori} and dual \emph{a posteriori} components. As we will show in the following, this primal-dual combo of information has the potential to balance global and local behavior.
+The central task is, while preserving the local capabilities, to ensure \Cref{lem.inner product g and d} so that the method remains compatible with acceleration techniques.
 
 % \cz{This lemma may better be claimed to $\mu$?}
 
 
 \section{Variant~I: Resolving the Global-Local Trade-off}\label{sec.first variant}
-In this section, we propose the first accelerated TR method, which applies the acceleration techniques in~\cite{nesterov2008accelerating} to the $\trp$. The global oracle complexity of this variant is improved to $\tilde O(\epsilon^{-1/3})$, and the local rate of convergence to the non-degenerate solution is quadratic.
+In this section, we propose the accelerated TR method, which applies the primal-dual structure of $\trp$ into the estimating sequence \cite{nesterov2008accelerating}. The global oracle complexity of this TR variant is improved to $\tilde O(\epsilon^{-1/3})$ as opposed to the recent $\tilde O(\epsilon^{-1/2})$ in convex optimization \cite{jiang2024nonconvexityuniversaltrustregionmethod}, while the local rate of convergence to the non-degenerate solution remains quadratic. To our knowledge, this is also the first time that an accelerated TR method is designed.
 \subsection{Algorithm design}
-\Cref{alg.accelerated utr} and its local detection mechanism (\Cref{alg.local detection}) are shown below.
+\Cref{alg.accelerated utr} and its local detection mechanism (\Cref{alg.local detection}) are presented below.
 \begin{algorithm}[ht]
     \caption{Global-Local Accelerated Trust-Region Method (\atr{})}\label{alg.accelerated utr}
     \begin{algorithmic}[1]
@@ -264,7 +266,7 @@ In this section, we propose the first accelerated TR method, which applies the a
         % \noindent\rule{8cm}{0.4pt} 
         \IF{$\lambda_k=0$} \label{line.if}
         % \STATE $x_{k+1}=y_k+d_k$ \label{line.nonzero multiplier}
-        \STATE \texttt{\# Local Detection Begins: \Cref{alg.local detection}}
+        \STATE \texttt{\# Enter Local Detection (\Cref{alg.local detection})}
         % \STATE $z_k,\text{ET}=\operatorname{Newton}(y_k,\left \lceil\frac{\log \|\nabla f(y_k)\|}{\epsilon} \right\rceil)$ 
         % \STATE $(z_k,d_k,\mu_k,\text{ET}) = \operatorname{LD}(y_k,\tfrac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2},d_k,\epsilon)$
         \STATE $(x_{k+1},\text{ET}) = \operatorname{LD}(y_k,\tfrac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2},d_k,\epsilon)$
@@ -342,23 +344,26 @@ In this section, we propose the first accelerated TR method, which applies the a
         % \ENDIF
         \ENDWHILE
         % \STATE{\textbf{output} None, $d$, $\mu$, ET= False}
-        \STATE{\textbf{output} $y + d$, ET= False} 
+        \STATE{\textbf{output} $y + d$, ET= False}
 
     \end{algorithmic}
 \end{subroutine}
-By carefully tuning $(\sigma_k, r_k)$ of $\trp$, we make the multiplier $\lambda_k$ a powerful instrument to reveal information of possibly fast local convergence.
+As we mentioned previously, the overall regularization in $\trp{}$ is a combination of primal and dual information: $\mu_k = \sigma_k + \lambda_k$.
+% On the one hand, we carefully select $(\sigma_k, r_k)$ to match the conditions in \Cref{lem.inner product g and d}.
+The algorithm proceeds by checking whether the current multiplier $\lambda_k$ is zero.
 
-We categorize the algorithmic update based on whether the multiplier $\lambda_k$ is zero. When $\lambda_k > 0$, it typically indicates that the current iterate is still far from optimality. In this regime, as shown later in Lemma~\ref{lem.ratio pass nonzero}, the overall regularization parameter $\mu_k$ becomes automatically proportional to the step size. This further justifies the updates of the estimating sequence used in the acceleration framework.
+When $\lambda_k > 0$ (or sufficiently bounded away from zero), it typically indicates that the current iterate is still far from a local optimum (at least in view of the gradient norm). In that regime, as shown later in \Cref{lem.ratio pass nonzero}, the overall regularization parameter $\mu_k$ becomes automatically proportional to the step size. This further justifies the updates of the estimating sequence used in the acceleration framework.
+
 
 By contrast, when $\lambda_k = 0$, a signal is provided that the current extrapolation point $y_k$ may have entered the local quadratic convergence region of Newton's method (see Lemma~\ref{lem.detection of local quadratic}). This triggers the local detection procedure (\Cref{alg.local detection}), which consists of two separate tracks probing the local geometry around $y_k$. In \texttt{Track 1} (local exploitation), we run Newton's method starting from $y_k$. As discussed in Section~\ref{sec.local}, if $y_k$ indeed lies within the quadratic convergence region, the resulting sequence will exhibit quadratic convergence, which justifies early termination of \Cref{alg.accelerated utr}.  In \texttt{Track 2} (ratio bracketing), we attempt to find a step $d_k$ whose size is proportional to the regularization parameter $\mu_k$. This step is easy to compute and always succeeds, ensuring that we can continue updating the estimate sequence and preserve global acceleration. In summary, when $y_k$ enters the region of local quadratic convergence, the algorithm detects this and terminates early. Otherwise, it continues to follow the globally accelerated path with $\mathrm{ET} = \mathrm{False}$.
 
 \Cref{alg.accelerated utr} admits two possible termination routes. The first occurs when the local detection procedure confirms fast local convergence: an iterate with a sufficiently small gradient norm is found, triggering the early termination flag $\mathrm{ET} = \mathrm{True}$ (see lines~\ref{line.et 2} and \ref{line.et 1} in \Cref{alg.local detection}). The second route corresponds to standard termination without early stopping, in which case the algorithm maintains its global acceleration mechanism throughout.
 
 \subsection{Global complexity analysis}
-In this section, we analyze the worst-case oracle complexity of \Cref{alg.accelerated utr} for computing an approximate solution as defined in \Cref{def.approximate solution}.
+Now we analyze the worst-case oracle complexity of \Cref{alg.accelerated utr} for computing an approximate solution as defined in \Cref{def.approximate solution}.
 
-\paragraph{Iterations complexity of \Cref{alg.accelerated utr}}
-Since our goal here is to analyze the worst-case global complexity, we assume the \texttt{track 1} of \Cref{alg.local detection} does not occur. \cz{We will later see that it is most relevant to local convergence (cf. \Cref{sec.local}).} Denote $K_\epsilon$ as the iteration number \Cref{alg.accelerated utr} takes to find an approximate solution satisfying \eqref{eq.approximate solution}. We will show that $K_\epsilon = O(\epsilon^{-1/3})$.
+\subsubsection{Iterations complexity of \Cref{alg.accelerated utr}}
+Since our goal here is to analyze the worst-case global complexity, we assume the iterates do not step into \texttt{Track 1} of \Cref{alg.local detection} does not occur, in which case it is mostly relevant to local convergence analysis (cf. \Cref{sec.local}). Denote $K_\epsilon$ as the iteration number \Cref{alg.accelerated utr} takes to find an approximate solution satisfying \eqref{eq.approximate solution}. We next show $K_\epsilon = O(\epsilon^{-1/3})$.
 
 When using the estimating sequence technique in~\cite{nesterov2008accelerating}, the global convergence result is guaranteed by maintaining the following two relations across iterations
 \begin{subequations}\label{eq.es relation}
@@ -432,11 +437,11 @@ We call a differentiable function $d(x)$ on $\mathbb{R}^n$ uniformly convex \cit
     \end{equation*}
     which is $v_k$. Then \eqref{eq.phi_k phi_low} comes from the fact that $\phi_k(x)$ is uniformly convex of degree 3.
 \end{proof}
-To proceed, we categorize the iterates generated by \Cref{alg.accelerated utr} into two disjoint sets based on the value of the multiplier, \cz{according to the iterations with and without local detection}:
+To proceed, we categorize the iterates generated by \Cref{alg.accelerated utr} into two disjoint sets based on the value of the multiplier, according to the iterations with and without local detection:
 \begin{equation}
     \label{eq.outer index catagory}
     \begin{aligned}
-         & \mathcal{Z} = \left \{k |k\leq K_\epsilon,\ \lambda_k=0\right\}, \\
+         & \mathcal{Z} = \left \{k |k\leq K_\epsilon,\ \lambda_k=0\right\},   \\
          & \mathcal{N} = \left \{ k | k\leq K_\epsilon,\ \lambda_k>0\right\}.
     \end{aligned}
 \end{equation}
@@ -589,11 +594,11 @@ Now we focus on the oracle complexity of \texttt{Track 2}, i.e., the complexity 
 
 In each step of the bisection, one oracle $(d,\mu)=\trp(y,0,r)$ with $r\in[r_-,r_+]$ is called at the base point $y$, which gives a corresponding $\mu$. We show that the correspondence between $r$ and $\mu$ over the interval $[r_-,r_+]$ and $[\mu_-,\mu_+]$ is one-to-one, where
 \begin{equation*}
-        \mu_- = M\|d_+\|, \ \mu_+=\frac{\sqrt{2M}}{2}\|\nabla f(y)\|^{1/2}.
-    \end{equation*}
+    \mu_- = M\|d_+\|, \ \mu_+=\frac{\sqrt{2M}}{2}\|\nabla f(y)\|^{1/2}.
+\end{equation*}
 \begin{lemma}
     \label{lem.one-to-one correspondence}
-    For any $r\in [r_-,r_+]$, there exist $\mu\in [\mu_-,\mu_+]$ such that 
+    For any $r\in [r_-,r_+]$, there exist $\mu\in [\mu_-,\mu_+]$ such that
     \begin{equation*}
         r= \left\| \left(\nabla^2 f(y)+ \mu I\right)^{-1}\nabla f(y)\right\|.
     \end{equation*}
@@ -603,13 +608,13 @@ In each step of the bisection, one oracle $(d,\mu)=\trp(y,0,r)$ with $r\in[r_-,r
     \end{equation*}
 \end{lemma}
 \begin{proof}
-Since $\nabla^2 f(y)+\mu I \succ 0$ for any $\mu\in[\mu_-,\mu_+]$, by matrix decomposition, we have
-\begin{equation*}
-    r=\|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|=\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}},
-\end{equation*}
-where $\lambda_i$, $v_i$ denote the eigenvalue and corresponding eigenvector of $\nabla^2 f(y)$, $\beta_i = \nabla f(y)^T v_i$. Since $\lambda_i \geq0$ and $\mu_->0$, we know that the correspondence is one-to-one.
+    Since $\nabla^2 f(y)+\mu I \succ 0$ for any $\mu\in[\mu_-,\mu_+]$, by matrix decomposition, we have
+    \begin{equation*}
+        r=\|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|=\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}},
+    \end{equation*}
+    where $\lambda_i$, $v_i$ denote the eigenvalue and corresponding eigenvector of $\nabla^2 f(y)$, $\beta_i = \nabla f(y)^T v_i$. Since $\lambda_i \geq0$ and $\mu_->0$, we know that the correspondence is one-to-one.
 
-The correspondence between $r_-\to\mu_+$, and $r_+\to\mu_-$ follows from line~\ref{line.left bracketing point}.
+    The correspondence between $r_-\to\mu_+$, and $r_+\to\mu_-$ follows from line~\ref{line.left bracketing point}.
 \end{proof}
 This means when we perform bisection on $r$ over the interval $[r_-,r_+]$, we also implicitly perform bisection on $\mu$ over $[\mu_-,\mu_+]$. The logic of our analyses is to first identify the target interval of $\mu$ and then use the one-to-one correspondence to transfer it to the target interval of $r$. This observation motivates us to introduce the following auxiliary functions of $\mu$.
 % gives
@@ -639,8 +644,8 @@ The goal of bisection to locate the radius $r$ such that the corresponding $\mu$
     M \leq g_y(\mu) \leq 2M.
 \end{equation*}
 % \cz{[remove this]
-    % We remark that $g_y(\mu)$ is also function of $r$ given \eqref{eq.auxiliary function for bisection 2}.
-    % }
+% We remark that $g_y(\mu)$ is also function of $r$ given \eqref{eq.auxiliary function for bisection 2}.
+% }
 The following lemma validates the choices of the bracketing points at line~\ref{line.left bracketing point}.
 \begin{lemma}
     \label{lem.valid bracketing}
@@ -662,8 +667,8 @@ Next, we identify the length of the target interval for $\mu$.
 \begin{lemma}
     \label{lem.bound target interval}
     There exist $\mu_l,\mu_u$ with $\mu_-<\mu_l<\mu_u<\mu_+$ such that
-  \begin{equation}\label{eq.target interval bracketing points}
-    g_{y}(\mu_l)=M, \ g_{y}(\mu_u)=2M,
+    \begin{equation}\label{eq.target interval bracketing points}
+        g_{y}(\mu_l)=M, \ g_{y}(\mu_u)=2M,
     \end{equation}
     and for all $\mu\in[\mu_l,\mu_u]$, we have
     \begin{equation*}
@@ -1451,54 +1456,10 @@ Now we finally come to the oracle complexity of \Cref{alg.ms accelerated utr}.
 \end{proof}
 
 \section{Numerical Experiments}\label{sec.experiments}
-In this section, we implement our accelerated Trust-Region method (\atr{}), to compare with the universal trust-region method (\utr{}, \citet{jiang2024nonconvexityuniversaltrustregionmethod}) which targets at convex optimization, the cubic regularization method (\arc{}, \citet{nesterov2006cubic}) and its accelerated version (\arca{}, \citet{nesterov2008accelerating}). We conduct experiments on the Nesterov's worst case function~\cite{nesterovImplementableTensorMethods2021} and the softmax minimization, which are briefly introduced here; further details and the exact experimental setup can be found in Appendix~\ref{sec.experiments.details}. All experiments are conducted on a single machine with a 14-core Apple M4 Pro CPU  and 48GB LPDDR5 RAM.
-
-We begin by testing performance on Nesterov's worst-case function:
-\[
-    f_k(x) = \eta_{3}\left(A_k x\right) - \left\langle e_1, x\right\rangle, \quad 2 \leq k \leq n,
-\]
-where $\eta_{3}(x) = \frac{1}{3}\sum_{i=1}^n |x^{(i)}|^{3}$, $e_1$ denotes the vector with the first coordinate being $1$ and the others being $0$. The problem gets hard as $k$ increases, and $A_k$ is a parametrized bidiagonal matrix (details in \Cref{sec.experiments.nesterov}).
-
-\begin{figure}[h!]
-    \small
-    \centering
-    \subcaptionbox{$k = 50$}{
-        \includegraphics[width=0.47\columnwidth]{icml2025/figs/e-nesterov-k1.pdf}
-    }
-    \subcaptionbox{$k = 100$}{
-        \includegraphics[width=0.47\columnwidth]{icml2025/figs/e-nesterov-k2.pdf}
-    }
-    \caption{Nesterov's lower bound problem with $n = 150$.}\label{fig.nesterov}
-    \normalsize
-\end{figure}
-
-For this experiment, we fix the problem size $n$ and consider \(k = 50, 100\). As shown in \Cref{fig.nesterov}, accelerated methods outperform their original variants, with \atr{} slightly outperforming \arca{} in both cases.
-
-% Next, we consider softmax minimization, which approximates piecewise linear functions defined by the data points $a_i \in \mathbb{R}^n,b_i \in \mathbb{R}, i\in 1,...,m$:
-% \begin{equation}\label{eq.softmax}
-%     f(x) := \mu \ln \left({\textstyle \sum}_{i=1}^m \exp \left(\tfrac{a_i^Tx - b_i}{\mu}\right)\right).
-% \end{equation}
-% The parameter $\mu$ represents the exactness of approximation:
-% $f(x) \approx \max_{1 \leq i \leq m} \left\{a_i^T x - b_i\right\}.$
-% This problem is notoriously challenging
-% due to the large smoothness constant. Generally, smaller $\mu$ produces better approximation, yet the Lipschitz constant $M$ grows larger \cite{doikov_super-universal_2024}.
-
-% \begin{figure}[h!]
-%     \small
-%     \centering
-%     \subcaptionbox{Iterations}{
-%         \includegraphics[width=0.47\columnwidth]{icml2025/figs/fx-softmax-k.pdf}
-%     }
-%     \subcaptionbox{Runtime (seconds)}{
-%         \includegraphics[width=0.47\columnwidth]{icml2025/figs/fx-softmax-t.pdf}
-%     }
-%     \caption{Softmax minimization, $n = 500$, $m = 1000$, $\mu = 0.1$.}\label{fig.softmax}
-%     \normalsize
-% \end{figure}
-
-% \Cref{fig.softmax} illustrates the results. In terms of iteration complexity, we see \atr{} is highly comparable to \arca{}. In addition to comparing iterations (panel (a)), we also present runtime in seconds (panel (b)). Notably, the per-iteration time of \atr{} (0.02 seconds) is only one-fourth of \arca{} (0.08 seconds), primarily because there are more mature techniques to solve the trust-region subproblem \eqref{eq.newTR} than to solve the cubic regularized subproblem \eqref{eq.cr update}, see \cite{yenewcomplexityresult1991, nesterov_lectures_2018, cartis2022evaluation} for further discussions.
-\subsection{Logistic regression}
-We now test the performance of our method on the logistic regression problem defined as below.
+In this section, we implement our accelerated Trust-Region method (\atr{}), to compare with the universal trust-region method (\utr{}, \citet{jiang2024nonconvexityuniversaltrustregionmethod}) which targets at convex optimization, the cubic regularization method (\arc{}, \citet{nesterov2006cubic}) and its accelerated version (\arca{}, \citet{nesterov2008accelerating}).
+We conduct experiments on the regularized logistic regression problem, in which, numerically, many accelerated SOMs are not as competitive as the classical Newton-type methods \cite{carmon2022optimal,jiang2024accelerated,jiang2020unified}.
+All experiments are conducted on a single machine with a 14-core Apple M4 Pro CPU  and 48GB LPDDR5 RAM.
+The regularized Logistic regression problem is defined as follows.
 \begin{equation}
     \label{eq.logistic regression}
     f(x) = \frac{1}{N} \sum_{i=1}^N \log \left(1 + \exp \left(-b_i a_i^T x\right)\right),
@@ -1530,6 +1491,8 @@ This bound is quite conservative according to \cite{songUnifiedAccelerationHigho
     \caption{Logistic regression}\label{fig.logistic regression}
     \normalsize
 \end{figure}
+
+\section{Conclusion}
 
 
 \clearpage
@@ -1576,12 +1539,12 @@ To prove \Cref{lem.bound target interval}, we first introduce the following lemm
 
 Now we are ready to formally prove \Cref{lem.bound target interval}.
 \begin{proof}
-    From the continuity and monotonicity of $g_y(\mu)$, we know there exists interval $[\mu_l,\mu_u]$ with \eqref{eq.target interval bracketing points} and 
+    From the continuity and monotonicity of $g_y(\mu)$, we know there exists interval $[\mu_l,\mu_u]$ with \eqref{eq.target interval bracketing points} and
     \begin{equation*}
         M\leq g_y(\mu)\leq 2M
     \end{equation*}
-    for all $\mu$ in this interval~(intermediate value theorem). 
-    
+    for all $\mu$ in this interval~(intermediate value theorem).
+
     Now we show that the length of the target interval for $\mu$ is bounded below; By the mean value theorem, there exists $\xi\in \left [\mu_l,\mu_u\right]$, such that
     \begin{equation*}
         M=g_y(\mu_u)-g_y(\mu_l) = g_y'(\xi)(\mu_u-\mu_l),
@@ -1598,7 +1561,7 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
 \end{proof}
 \subsection*{Proof to Lemma~\ref{lem.bound initial interval}}
 \begin{proof}
-    Denote the target interval for $r$ as $[r_l,r_u]$ and 
+    Denote the target interval for $r$ as $[r_l,r_u]$ and
     \begin{equation*}
         r_y(\mu)=\|\left (\nabla^2 f(y)+\mu I\right)^{-1}\nabla f(y)\|,
     \end{equation*}
