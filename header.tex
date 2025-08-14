@@ -121,7 +121,6 @@ minimum height=2em, text centered,color=black!50]
 \newtheorem{strategy}{Strategy}[section]
 
 
-\def\algorithmautorefname{Algorithm}
 \def\subsectionautorefname{Section}
 \def\definitionautorefname{Definition}
 \def\corollaryautorefname{Corollary}
@@ -143,7 +142,6 @@ minimum height=2em, text centered,color=black!50]
 \newcommand{\newtontr}{\texttt{Newton-TR}}
 \newcommand{\cg}{\texttt{CG}}
 \newcommand{\arc}{\texttt{ARC}}
-\newcommand{\atrms}{\texttt{NO-ATR}}
 \newcommand{\itrace}{\texttt{TRACE}}
 \newcommand{\gd}{\texttt{GD}}
 \newcommand{\utr}{\texttt{UTR}}
@@ -152,7 +150,11 @@ minimum height=2em, text centered,color=black!50]
 \newcommand{\iutr}{\texttt{iUTR(Hessian)}}
 \newcommand{\iutrhvp}{\texttt{iUTR}}
 
-\newcommand{\atr}{\texttt{GL-ATR}}
+% \newcommand{\atr}{\texttt{GL-ATR}}
+% \newcommand{\atrms}{\texttt{NO-ATR}}
+
+\newcommand{\atr}{\Cref{alg.accelerated utr}}
+\newcommand{\atrms}{\Cref{alg.ms accelerated utr}}
 
 \makeatletter
 \renewcommand\paragraph{\@startsection{paragraph}{4}%
@@ -173,5 +175,7 @@ minimum height=2em, text centered,color=black!50]
 \crefname{subroutine}{subroutine}{subroutines}
 \crefname{line}{line}{lines}
 \Crefname{subroutine}{Subroutine}{Subroutines}
+\def\algorithmautorefname{Alg.}
+\Crefname{algorithm}{Alg.}{Alg.}
 
 \allowdisplaybreaks
