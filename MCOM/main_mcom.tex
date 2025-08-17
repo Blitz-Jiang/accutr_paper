@@ -218,8 +218,8 @@ Generally speaking, \Cref{lem.bound next gradient} shows that we can bound the n
 \Cref{lem.inner product g and d} serves as a key bridge to establish the global efficiency --- $\mu$ should be selected roughly as $\Theta(\|d\|)$. This condition is maintained by CRN and A-NPE but generally fails for the classical trust-region oracle. For that reason, we turn to the $\trp{}$ oracle:
 % However, achieving this global-local balance is far from straightforward. On one hand, the multiplier in standard TR oracles is not stable and is determined a posteriori, making it difficult to consistently satisfy $\mu = \Theta(\|d\|)$ required by persueing better global complexity. On the other hand, existing accelerated SOMs often lack local detection mechanisms and therefore tend to adopt globally conservative strategies by default. As a result, their local steps remain overly cautious even when faster convergence is possible.
 \begin{align*}
-        \min_{d \in \mathbb{R}^n}~ & \nabla f(x)^T d + \tfrac{1}{2} d^T (\nabla^2 f(x) + \sigma I) d, \\
-        \text{s.t.}                & ~ \|d\|                        \le r.
+    \min_{d \in \mathbb{R}^n}~ & \nabla f(x)^T d + \tfrac{1}{2} d^T (\nabla^2 f(x) + \sigma I) d, \\
+    \text{s.t.}                & ~ \|d\|                        \le r.
 \end{align*}
 We denote $(d,\lambda) = \trp(x,\sigma,r)$ as the primal-dual solution of this problem. The global optimality conditions are as follows.
 \begin{lemma}[Section 3,~\citet{conn2000trust}]\label{lem.optimal condition}
@@ -918,7 +918,7 @@ Last, we show that when the tolerance $\epsilon$ is small enough, \Cref{alg.acce
     Next, we consider the case \Cref{alg.local detection} enters \texttt{Track 1}. We show that \texttt{Track 1} will find $\epsilon$-approximate solutions in $O(\log\log 1/\epsilon)$ iterations, which is strictly less than the maximal number of iteration we defined at line~\ref{line.track 1 number of iter}, i.e., $\left \lceil\log\frac{\|\nabla f(y)\|}{\epsilon} \right\rceil$.
 
     We know from \eqref{eq.psd xk} that when $y_k\in\mathcal{LQ}_g$, $\|\nabla f(y_k)\|\leq \frac{1}{C(M,\nu)}$.
-    
+
     If $\frac{1}{2C(M,\nu)}\leq \|\nabla f(y_k)\|\leq \frac{1}{C(M,\nu)}$, from \eqref{eq.regularity epsilon},
     \begin{equation*}
         \begin{aligned}
@@ -926,7 +926,7 @@ Last, we show that when the tolerance $\epsilon$ is small enough, \Cref{alg.acce
         \end{aligned}
     \end{equation*}
     Note that the LHS is the number it takes for Newton's method to converge, the RHS is the maximal iteration number.
-    
+
     Else if $\|\nabla f(y_k)\|< \frac{1}{2C(M,\nu)}$, we have $\|\nabla f(z_1)\|\leq C(M,\nu)\|\nabla f(y)\|^2\leq \frac{1}{2}\|\nabla f(y)\|$, inductively, we have
     \begin{equation*}
         \|\nabla f(z_k)\| \leq 2^{-2^k+1}\|\nabla f(y)\|,
@@ -965,9 +965,9 @@ To analyze the complexity of \Cref{alg.ms accelerated utr}, we impose the follow
         }
         \ENDIF
         \STATE{
-                $v_{k+1} = v_k-\gamma a_k \nabla f(x_{k+1})$}
+            $v_{k+1} = v_k-\gamma a_k \nabla f(x_{k+1})$}
         \STATE{
-                $A_{k+1} = A_k+a_k$
+            $A_{k+1} = A_k+a_k$
         }
         \ENDFOR
     \end{algorithmic}
@@ -988,8 +988,8 @@ To analyze the complexity of \Cref{alg.ms accelerated utr}, we impose the follow
         \WHILE{i) $\lambda = 0$ and $\|d\| < \frac{\eta}{M}\sigma$, or ii) $\lambda > (\theta-1)\sigma$}\label{line.goal of bisection ms}
         \STATE{Perform bisection over $\sigma\in [\sigma_-,\sigma_+]$}
         \STATE{
-           % \label{eq.ms utr oracle}
-                $(\lambda,d) = \trp(y(\sigma),\sigma,\frac{1}{M}\sigma)$
+            % \label{eq.ms utr oracle}
+            $(\lambda,d) = \trp(y(\sigma),\sigma,\frac{1}{M}\sigma)$
         }
         \ENDWHILE
         \STATE{\textbf{output} $y(\sigma)+d,a(\sigma),\lambda,\sigma,\text{ET=False}$}
@@ -999,13 +999,13 @@ To analyze the complexity of \Cref{alg.ms accelerated utr}, we impose the follow
 
 We make several remarks on \Cref{alg.bisection ms}. First, we define the curve for the search procedure given the current $x$ and $v$:
 \begin{gather}
-                \label{eq.update yk}
-                y(\sigma) = \frac{A}{A+a(\sigma)}x+\frac{a(\sigma)}{A+a(\sigma)}v\\
-                \label{eq.update ak}
-                a(\sigma) =\frac{1+\sqrt{1+4A\sigma}}{2\sigma}.
+    \label{eq.update yk}
+    y(\sigma) = \frac{A}{A+a(\sigma)}x+\frac{a(\sigma)}{A+a(\sigma)}v\\
+    \label{eq.update ak}
+    a(\sigma) =\frac{1+\sqrt{1+4A\sigma}}{2\sigma}.
 \end{gather}
 We refer to the search procedure as implicit because the base point $y_k$ on which we perform $\trp$ depends on $\sigma_k$ and is updated dynamically along the search; see~\eqref{eq.update yk}. Second, the algorithm initializes the bracketing points for bisection at line~\ref{line.def G0}, where
-$$G_0 = \max\{\|\nabla f(x)\| \ \|x-x^*\|\leq \left(\frac{4}{\sqrt{3\gamma}}+1\right)D_0\}, D_0 = \|x_0-x^*\|.$$ 
+$$G_0 = \max\{\|\nabla f(x)\| \ \|x-x^*\|\leq \left(\frac{4}{\sqrt{3\gamma}}+1\right)D_0\}, D_0 = \|x_0-x^*\|.$$
 Finally, \Cref{alg.bisection ms} applies a bisection on $\sigma_k$ at line~\ref{line.goal of bisection ms}, with the goal of finding a value of $\sigma_k$ such that
 \begin{equation}
     \label{eq.relation lambda sigma}
@@ -1041,7 +1041,7 @@ First, similar to the recursive relations~\eqref{eq.es relation 1} and \eqref{eq
     where $B_{k+1} = \frac{3\gamma M}{8}\sum_{i=0}^{k}A_{i+1}\|d_i\|^3.$
 \end{lemma}
 \begin{proof}
-Note the way we update $v_{k+1}$ in \cref{alg.ms accelerated utr}.
+    Note the way we update $v_{k+1}$ in \cref{alg.ms accelerated utr}.
     \begin{align*}
         \|v_{k+1} - x^*\|^2
          & = \|v_k - x^* - \gamma a_k \nabla f(x_{k+1})\|^2                                       \\
@@ -1196,18 +1196,18 @@ We start with proving that the choice of $\sigma_-,\sigma_+$ serves as qualified
     \begin{equation*}
         \begin{aligned}
             \|\nabla f(y(\sigma_-)+d_-)\| & \leq \frac{M}{2}\|d_-\|^2+\| \nabla f(y(\sigma_-))+\nabla^2 f(y(\sigma_-))d_-\| \\
-                              & = \frac{M}{2}\|d_-\|^2+(\sigma_-+\lambda_-) \|d_-\|                         \\
-                              & \leq \frac{1+2\theta}{2M}\sigma_-^2                                         \\
-                              & \leq \epsilon.
+                                          & = \frac{M}{2}\|d_-\|^2+(\sigma_-+\lambda_-) \|d_-\|                             \\
+                                          & \leq \frac{1+2\theta}{2M}\sigma_-^2                                             \\
+                                          & \leq \epsilon.
         \end{aligned}
     \end{equation*}
 \end{proof}
 Next, we check the validity of the bracketing points.
 \begin{lemma}
     \label{lem.bracketing points}
-    Suppose 
+    Suppose
     \begin{equation}\label{eq.bounded gradient y}
-    \|\nabla f(y(\sigma))\|\leq G_0, \ \forall \sigma>0,
+        \|\nabla f(y(\sigma))\|\leq G_0, \ \forall \sigma>0,
     \end{equation}
     and we let
     \begin{equation}
@@ -1256,7 +1256,7 @@ To summarize our derivation so far: if \eqref{eq.bounded gradient y} and \eqref{
 Following some standard analysis for bisection, we can derive the complexity of \Cref{alg.bisection ms}.
 \begin{lemma}
     \label{lem.complexity bisection}
-    Assume that Assumptions~\ref{assm.lipschitz} and \ref{assm.solvable} are satisfied, and that conditions \eqref{eq.bounded gradient y} and \eqref{eq.bounded assm point} also hold, then the number of $\trp$ oracle calls during the bisection is $O(\log 1/\epsilon)$. 
+    Assume that Assumptions~\ref{assm.lipschitz} and \ref{assm.solvable} are satisfied, and that conditions \eqref{eq.bounded gradient y} and \eqref{eq.bounded assm point} also hold, then the number of $\trp$ oracle calls during the bisection is $O(\log 1/\epsilon)$.
 \end{lemma}
 We put a more formal presentation and proof of \Cref{lem.complexity bisection} in \Cref{sec.appendix 2}~(\Cref{coro.bisection bound}).
 
@@ -1365,13 +1365,7 @@ By this lemma, we know \eqref{eq.bounded gradient y} holds, and \eqref{eq.bounde
 \end{proof}
 
 \section{Numerical Experiments}\label{sec.experiments}
-In this section, two different accelerated trust-region methods using the $\trp{}$ oracle (\atr{} and \atrms{}) are implemented, and compared to some state-of-the-art SOMs:
-\begin{itemize}[leftmargin=*]
-    \item The cubic regularization method (\arc{}, \citet{nesterov2006cubic}) \cz{adaptive or not? If not, we should clarify how to choose M. Similarly, how to choose M in the accelerated cubic? Also, I think the subproblem solver varies from different methods. We should clarify our subproblem solver in detail and briefly introduce the one used in cubic newton} and its accelerated version (\arca{}, \citet{nesterov2008accelerating}).
-    \item A non-accelerated trust-region method using the $\trp{}$ oracle, by setting both $(\sigma_k, r_k)$ proportionally to $\|\nabla f(x_k)\|^{1/2}$. This method is termed \utr{} in \cite{jiang2024nonconvexityuniversaltrustregionmethod}.
-\end{itemize}
-All experiments are conducted on a single machine with a 14-core Apple M4 Pro CPU and 48GB LPDDR5 RAM.
-
+In this section, we present the numerical experiments of the proposed methods. All experiments are conducted on a single machine with a 14-core Apple M4 Pro CPU and 48GB LPDDR5 RAM.
 We conduct experiments on the regularized logistic regression problem, which is defined as follows.
 \begin{equation}
     \label{eq.logistic regression}
@@ -1379,9 +1373,21 @@ We conduct experiments on the regularized logistic regression problem, which is 
 \end{equation}
 where $a_i \in \mathbb{R}^n$ and $b_i \in \{-1, 1\}$, $\gamma = 10^{-4}$ is the regularization parameter.
 As mentioned, this problem is a notorious example where many accelerated SOMs are not as competitive as the classical Newton-type methods \cite{carmon2022optimal,jiang2024accelerated,chen2022accelerating} numerically.
-We use a fixed estimate for the Lipschitz constant $\widehat M$ of $\nabla^2 f$. Specifically, we set $$\widehat M = \left\|\frac{1}{N} \sum_{i=1}^N a_i a_i^{\top}\right\| \max _{i \in[N]}\left\|a_i\right\|.$$
-This bound is quite conservative according to \cite{songUnifiedAccelerationHighorder2021}. However, we use it for a fair comparison and eliminate the effect from adaptive adjustments common in the literature. We test two non-accelerated trust-region methods $\utr{}~\texttt{(1)}, \utr{}~\texttt{(2)}$, using different Lipschitz estimates $\tfrac{\widehat M}{2}, \widehat M$, respectively; to present the sensitivity of Lipschitz constants and set a fair comparison to \arc{}. In \Cref{fig.logistic regression}, the performance of the SOMs on the LIBSVM datasets\footnote{For details, see \url{https://www.csie.ntu.edu.tw/cjlin/libsvmtools/datasets/}} are reported. \cz{I suggest we show figures with more iterations, at least make \utr{}~\texttt{(2)} converges to 1e-4}
-\begin{figure}[h!]
+Besides, a well-known estimate for the Lipschitz constant $\widehat M$ of $\nabla^2 f$ can be specified as follows:
+$$\widehat M = \left\|\frac{1}{N} \sum_{i=1}^N a_i a_i^{\top}\right\| \max _{i \in[N]}\left\|a_i\right\|.$$
+This bound is quite conservative according to \cite{songUnifiedAccelerationHighorder2021}.
+However, we use it to single out from other algorithmic improvements such as the adaptive adjustments of Lipschitz constants, which are now common in the literature (e.g., \cite{mishchenko_regularized_2023,cartis2011adaptive1}).
+
+Using this fixed estimate, we implement two different accelerated trust-region methods using the $\trp{}$ oracle (\atr{} and \atrms{}) and compared to some state-of-the-art SOMs:
+\begin{itemize}[leftmargin=*]
+    \item The cubic regularization method (\arc{}, \citet{nesterov2006cubic}) and its accelerated version (\arca{}, \citet{nesterov2008accelerating}).
+    \item A non-accelerated trust-region method using the $\trp{}$ oracle, by setting both $(\sigma_k, r_k)$ proportionally to $\|\nabla f(x_k)\|^{1/2}$ similar to \cite{jiang2024nonconvexityuniversaltrustregionmethod}.
+          We test two non-accelerated trust-region methods $\utr{}~\texttt{(1)}, \utr{}~\texttt{(2)}$, using different Lipschitz estimates $\tfrac{\widehat M}{2}, \widehat M$, respectively. The purpose is to present the sensitivity of Lipschitz constants and set a fair comparison to \arc{}.
+\end{itemize}
+The subproblems arised in \arc{} and \arca{} are solved by a 1-D line-search strategy according to \cite{nesterov_lectures_2018}. Similarly, $\trp{}$ (in \utr{}, \atr{} and \atrms{}) is solved by searching the dual variable. All methods use exact Hessian evaluation and Cholesky factorization to solve the linear systems.
+Since these SOMs use different subproblems, and theoretically, the complexity rates to solve them vary from $O(\log(\epsilon))$ (for subproblems in a cubic regularized method \cite{nesterov2006cubic}) to $O(\log\log(\epsilon))$ (for $\trp{}$ \cite{yenewcomplexityresult1991,vavasisProvingPolynomialtimeSphereconstrained1990}),
+we report the number of Hessian evaluations needed in the method.  In \Cref{fig.logistic regression}, the performance of the SOMs on a few LIBSVM datasets\footnote{For details, see \url{https://www.csie.ntu.edu.tw/cjlin/libsvmtools/datasets/}} are reported.
+\begin{figure}[h]
     \small
     \centering
     \subcaptionbox{\texttt{a4a}}[0.47\columnwidth]{
@@ -1404,8 +1410,12 @@ This bound is quite conservative according to \cite{songUnifiedAccelerationHigho
     \normalsize
 \end{figure}
 
-We could have several observations. Firstly, for non-accelerated methods, a trend of local superlinear convergence can be observed in \utr{}~\texttt{(1)}, \utr{}~\texttt{(2)} and \arc{}.\cz{we don't observe that for \utr{}~\texttt{(2)}} We could conclude that \utr{} and \arc{} are comparable.
-Secondly, in the beginning of the iterations, all accelerated methods, including \atr{}, \atrms{}, and \arca{}, converge faster than the non-accelerated methods (e.g., \utr{}~\texttt{(1)}, \utr{}~\texttt{(2)}, \arc{}). This confirms the effectiveness of the acceleration techniques. However, only \atr{} has the local rate of superlinear convergence. Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \atrms{} is slightly better because of its superior non-asymptotic performance. These results are in accordance with what is predicted in the convergence analysis.
+We could have several observations. Firstly, for non-accelerated methods, a trend of local superlinear convergence can be observed in \utr{}~\texttt{(1)}, \utr{}~\texttt{(2)} and \arc{}. We could conclude that these three methods are comparable.
+Secondly, in the beginning of the iterations, all accelerated methods, including \atr{}, \atrms{}, and \arca{}, converge faster than the non-accelerated methods (e.g., \utr{}~\texttt{(1)}, \utr{}~\texttt{(2)}, \arc{}). This confirms the effectiveness of the acceleration techniques.
+
+However, the global convergence comes at an expense of local superlinear convergence.
+Notably, \atr{} is the only accelerated method that has the local rate of superlinear convergence.
+Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \atrms{} is slightly better because of its superior $\tilde O(\epsilon^{-2/7})$ non-asymptotic performance. These results are in accordance with what is predicted in the convergence analysis.
 
 
 
