@@ -1,8 +1,8 @@
 % \usepackage[notextcomp,nomath]{stix2}
 \usepackage{tcolorbox}
-\usepackage{amsfonts,amscd,amssymb,amsmath,amsthm,enumerate}
+\usepackage{amssymb,amsmath}
 \numberwithin{equation}{section}
-\usepackage{array,mathtools,mathrsfs,bm}
+\usepackage{array,mathtools,bm}
 \usepackage{threeparttable}
 \usepackage{booktabs,caption,longtable,multicol,multirow}
 \usepackage{subcaption,lscape}
@@ -16,11 +16,12 @@
 \usepackage[colorlinks,citecolor=purple,linkcolor=blue]{hyperref}
 % \usepackage[nameinlink]{cleveref}
 \usepackage{cleveref}
+% \usepackage[margin=1in]{geometry}
 % \usepackage[parfill]{parskip}
-\usepackage[margin=1.5in]{geometry}
 \usepackage[sort&compress,numbers]{natbib}
 % \usepackage{authblk}
 \usepackage{algorithm,algorithmic}
+% \usepackage[ruled,linesnumbered]{algorithm2e}
 \usepackage{pifont}
 \usepackage{appendix}
 \usepackage{multirow}
@@ -34,7 +35,7 @@
 \usetikzlibrary{backgrounds}
 \usepgfplotslibrary{patchplots}
 \usepgfplotslibrary{fillbetween}
-% \usepackage[inline]{showlabels}
+\usepackage[inline]{showlabels}
 % \renewcommand{\showlabelfont}{\tiny\color{blue}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{eqparbox}
@@ -83,7 +84,7 @@
 \tikzstyle{matheq} = [node distance=8.75cm, text width=21em, minimum width=1cm,
 minimum height=2em, text centered,color=black!50]
 
-\renewcommand{\baselinestretch}{1.2}
+% \renewcommand{\baselinestretch}{1.2}
 
 %
 \newcommand{\gkc}{\|\gk\|^{1/2}}
@@ -98,26 +99,26 @@ minimum height=2em, text centered,color=black!50]
 \newcommand{\cmark}{\ding{51}}%
 \newcommand{\xmark}{\ding{55}}%
 
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
+% \newtheorem{theorem}{Theorem}[section]
+% \newtheorem{lemma}[theorem]{Lemma}
 
-\theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{example}[theorem]{Example}
-\newtheorem{xca}[theorem]{Exercise}
+% \theoremstyle{definition}
+% \newtheorem{definition}[theorem]{Definition}
+% \newtheorem{example}[theorem]{Example}
+% \newtheorem{xca}[theorem]{Exercise}
 
-\theoremstyle{remark}
-\newtheorem{remark}[theorem]{Remark}
-\newtheorem{corollary}{Corollary}[section]
+% \theoremstyle{remark}
+% \newtheorem{remark}[theorem]{Remark}
+% \newtheorem{corollary}{Corollary}[section]
 % \newtheorem{lemma}{Lemma}[section]
-\newtheorem{proposition}{Proposition}[section]
-\newtheorem{condition}{Condition}[section]
+% \newtheorem{proposition}{Proposition}[section]
+% \newtheorem{condition}{Condition}[section]
 % \newtheorem{definition}{Definition}[section]
 % \newtheorem{example}{Example}[section]
-\newtheorem{question}{Question}[section]
+% \newtheorem{question}{Question}[section]
 % \newtheorem{remark}{Remark}[section]
-\newtheorem{assumption}{Assumption}[section]
-\newtheorem{strategy}{Strategy}[section]
+% \newtheorem{assumption}{Assumption}[section]
+% \newtheorem{strategy}{Strategy}[section]
 
 
 \def\subsectionautorefname{Section}
@@ -180,3 +181,19 @@ minimum height=2em, text centered,color=black!50]
 \Crefname{algorithm}{Alg.}{Alg.}
 
 \allowdisplaybreaks
+
+% Override equation environment with reduced spacing
+\let\oldequation\equation
+\let\endoldequation\endequation
+\renewenvironment{equation}
+{\setlength{\abovedisplayskip}{6pt}\setlength{\belowdisplayskip}{3pt}\oldequation}
+{\endoldequation}
+
+% Override $$ display math with reduced spacing
+\everydisplay{\setlength{\abovedisplayskip}{6pt}\setlength{\belowdisplayskip}{3pt}}
+
+% Reduce spacing in equation environments
+\setlength{\abovedisplayskip}{3pt}
+\setlength{\belowdisplayskip}{3pt}
+\setlength{\abovedisplayshortskip}{3pt}
+\setlength{\belowdisplayshortskip}{3pt}

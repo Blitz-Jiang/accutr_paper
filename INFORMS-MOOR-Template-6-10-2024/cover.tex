@@ -1,0 +1,41 @@
+\documentclass{letter}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{amsmath}
+%\evensidemargin 1cm
+%\oddsidemargin 1cm
+\topmargin      0.0truein
+\headheight     0.0truein
+\headsep        0.0truein
+\textheight     9.0truein
+\textwidth      6.5truein
+\oddsidemargin  0.0truein
+\evensidemargin 0.0truein
+\renewcommand{\baselinestretch}{1.1}
+\longindentation=0pt
+\signature{\mbox{Yuntian Jiang, Chuwen Zhang, Bo Jiang, and Yinyu Ye}}
+\address{Correspondence to: \\
+Bo Jiang \\
+School of Information Management and Engineering, \\
+Shanghai University of Finance and Economics, \\
+Shanghai, 200433, China \\
+\nolinkurl{isyebojiang@gmail.com}}
+\begin{document}
+\begin{letter}{}
+    \opening{Dear MOR Editorial Board,}
+
+    Please find the enclosed manuscript entitled “Accelerating Trust-Region Methods: An Attempt to Balance Global and Local Efficiency”, submitted for consideration in Mathematics of Operations Research.
+Balancing global efficiency and local convergence remains an important challenge in second-order optimization. Newton’s method is known for its rapid local convergence but lacks global robustness, while accelerated second-order methods typically exhibit stronger global complexity guarantees at the expense of local convergence. This raises a fundamental question: to what extent can second-order methods be globally accelerated without destroying their fast local convergence properties?
+In this work, we provide the first theoretical and algorithmic framework that addresses this question within the trust-region paradigm. We introduce a family of accelerated trust-region-type methods that leverage the primal–dual structure inherent in trust-region subproblems. Our main contribution is an approach we term Accelerating with Local Detection, which uses the Lagrange multiplier of the ball constraint to identify when the iterates enter a local region where quadratic convergence can be activated. This yields a global oracle complexity of $\Tilde{O}(\epsilon^{-1/3})$ while maintaining quadratic local convergence.
+We further investigate the limits of global acceleration and develop an Accelerated Trust-Region Extragradient Method, which achieves a near-optimal global rate of $\Tilde{O}(\epsilon^{-2/7})$ but no longer preserves quadratic local convergence. This reveals a phase transition phenomenon of trust-region-type methods: moderate acceleration allows quadratic local convergence to survive, while extreme acceleration inevitably destroys it. We complement our analysis with numerical experiments demonstrating the practical relevance of this trade-off.
+To the best of our knowledge, this work provides the first rigorous theoretical explanation of when and why local fast convergence can coexist with global acceleration in trust-region-type methods.
+
+We believe this manuscript will be of strong interest to the readers of Mathematics of Operations Research, particularly those working in continuous optimization, algorithmic complexity, and numerical optimization methods. The manuscript has not been published elsewhere and is not under review at any other journal.
+Thank you for your consideration. We look forward to your response.
+
+
+    \closing{Yours Sincerely,}
+
+\end{letter}
+
+\end{document}

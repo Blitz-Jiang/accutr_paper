@@ -1,87 +1,33 @@
-%-----------------------------------------------------------------------
-% Beginning of mcom-l-template.tex
-%-----------------------------------------------------------------------
-%
-%     This is a topmatter template file for MCOM for use with AMS-LaTeX.
-%
-%     Templates for various common text, math and figure elements are
-%     given following the \end{document} line.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}
 
-%     Remove any commented or uncommented macros you do not use.
+\input{arxiv_version/header_arxiv}
 
-\documentclass{mcom-l}
-\input{header}
-% \usepackage[inline]{showlabels}
-%     If you need symbols beyond the basic set, uncomment this command.
-%\usepackage{amssymb}
-
-%     If your article includes graphics, uncomment this command.
-%\usepackage{graphicx}
-
-%     If the article includes commutative diagrams, ...
-%\usepackage[cmtip,all]{xy}
+\author[1]{\small Yuntian Jiang}
+\author[2]{\small Chuwen Zhang}
+\author[1]{\small Bo Jiang\thanks{Corresponding author: isyebojiang@gmail.com}}
+\author[3]{\small Yinyu Ye}
 
 
-%     Update the information and uncomment if AMS is not the copyright
-%     holder.
-%\copyrightinfo{2009}{American Mathematical Society}
-\definecolor{rosemary}{RGB}{190,88,69}
-\newcommand{\cz}[1]{{\color{rosemary}\sffamily [#1]}}
-\newcommand{\tr}{\textrm{TR}}
-\newcommand{\trp}{\textrm{TR}_+}
-\numberwithin{equation}{section}
+\affil[1]{\footnotesize School of Information Management and Engineering\\ Shanghai University of Finance and Economics}
+\affil[2]{\footnotesize Booth School of Business\\ University of Chicago}
+\affil[3]{\footnotesize Antai College of Economics and Management\\ Shanghai Jiao Tong University}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \title{Homogeneous Second-Order Descent Method: Generalization and Application}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Accelerating Trust-Region Methods: An Attempt to Balance Global and Local Efficiency}
 
 \begin{document}
 
-% \title[Accelerating Trust-Region Methods]{Accelerating Trust-Region Methods: Balancing Global Efficiency and Local Convergence}
-\title[Accelerating Trust-Region Methods]{Accelerating Trust-Region Methods: An Attempt to Balance Global and Local Efficiency}
-
-%    Only \author and \address are required; other information is
-%    optional.  Remove any unused author tags.
-
-%    author one information
-% \author[Jiang et al.]{Yuntian Jiang, Chuwen Zhang, Bo Jiang, Yinyu Ye}
-\author{Yuntian Jiang}
-\address{School of Information Management and Engineering, Shanghai University of Finance and Economics, Shanghai 200433, China}
-\email{yuntianjiang07@gmail.com}
-% \thanks{}
-
-%    author two information
-\author{Chuwen Zhang}
-\address{Booth School of Business, University of Chicago, Chicago 60637, USA}
-% \curraddr{}
-\email{chuwen.zhang@chicagobooth.edu}
-% \thanks{}
-
-%  author three
-\author{Bo Jiang}
-\address{School of Information Management and Engineering, Shanghai University of Finance and Economics, Shanghai 200433, China}
-% \curraddr{}
-\email{isyebojiang@gmail.com}
-% \thanks{}
-
-%  author four
-\author{Yinyu Ye}
-\address{Antai College of Economics and Management, Shanghai Jiao Tong University, Shanghai 200030, China}
-% \curraddr{}
-\email{yinyuye@sjtu.edu.cn}
-% \thanks{}
-
-
-%    \subjclass is required.
-\subjclass[2020]{Primary 65K05, 90C25, 90C30}
-
-% \date{}
-
-% \dedicatory{}
-
-\keywords{Trust-Region Method, Acceleration, Global Complexity, Local Analysis}
-%    Abstract is required.
-\begin{abstract} Historically speaking, it is hard to balance the global and local efficiency of second-order optimization algorithms. For instance, the classical Newton's method possesses excellent local convergence but lacks global guarantees, often exhibiting divergence when the starting point is far from the optimal solution~\cite{more1982newton,dennis1996numerical}. In contrast, accelerated second-order methods offer strong global convergence guarantees, yet they tend to converge with slower local rate~\cite{carmon2022optimal,chen2022accelerating,jiang2020unified}. Existing second-order methods struggle to balance global and local performance, leaving open the question of how much we can globally accelerate the second-order methods while maintaining excellent local convergence guarantee. In this paper, we tackle this challenge by proposing for the first time the accelerated trust-region-type methods, and leveraging their unique primal-dual information. Our primary technical contribution is \emph{Accelerating with Local Detection}, which utilizes the Lagrange multiplier to detect local regions and achieves a global complexity of $\tilde{O}(\epsilon^{-1/3})$, while maintaining quadratic local convergence. We further explore the trade-off when pushing the global convergence to the limit. In particular, we propose the \emph{Accelerated Trust-Region Extragradient Method} that has a global near-optimal rate of $\tilde{O}(\epsilon^{-2/7})$ but loses the quadratic local convergence. This reveals a phase transition in accelerated trust-region type methods: the excellent local convergence can be maintained when achieving a moderate global acceleration but becomes invalid when pursuing the extreme global efficiency. Numerical experiments further confirm the results indicated by our convergence analysis.
-\end{abstract}
 \maketitle
+\begin{abstract}
+    Historically speaking, it is hard to balance the global and local efficiency of second-order optimization algorithms. For instance,
+    {the classical Newton's method possesses excellent local convergence but lacks global guarantees, often exhibiting divergence when the starting point is far from the optimal solution~\cite{more1982newton,dennis1996numerical}. In contrast, accelerated second-order methods offer strong global convergence guarantees, yet they tend to converge with slower local rate~\cite{carmon2022optimal,chen2022accelerating,jiang2020unified}. Existing second-order methods struggle to balance global and local performance, leaving open the question of how much we can
+    globally accelerate the second-order methods while maintaining excellent local convergence guarantee. In this paper, we tackle this challenge by proposing for the first time the accelerated trust-region-type methods, and leveraging their unique primal-dual information.} Our primary technical contribution is \emph{Accelerating with Local Detection}, which utilizes the Lagrange multiplier to detect local regions and achieves a global complexity of $\tilde{O}(\epsilon^{-1/3})$, while maintaining quadratic local convergence. We further explore the trade-off when pushing the global convergence to the limit. In particular, we propose the \emph{Accelerated Trust-Region Extragradient Method} that has a global near-optimal rate of $\tilde{O}(\epsilon^{-2/7})$ but loses the quadratic local convergence.
+    This reveals a phase transition in accelerated trust-region type methods: the excellent local convergence can be maintained when achieving a moderate global acceleration but becomes invalid when pursuing the extreme global efficiency.  
+    Numerical experiments further confirm the results indicated by our convergence analysis.
+\end{abstract}
+
 \section{Introduction}\label{Intro}
 In this paper, we consider the unconstrained convex optimization problem
 \begin{equation} \label{eq.main problem}
@@ -90,27 +36,82 @@ In this paper, we consider the unconstrained convex optimization problem
 where $f:\mathbb{R}^n \to \mathbb{R}$ is a convex function.
 When the Hessian of the objective is available, second-order methods (SOMs) are particularly effective for solving~\eqref{eq.main problem}, especially when high-accuracy solutions are desired. Their power stems from a central property: Newton’s method achieves quadratic convergence in a neighborhood of any non-degenerate local minimum~\cite{polyak2007newton,more1982newton,nocedal1999numerical}. Many SOMs are thus designed to approximate the Newton direction, allowing them to inherit its excellent local convergence behavior.
 
-In addition to local convergence, another important criterion for evaluating the effectiveness of optimization methods is their non-asymptotic global oracle complexity\footnote{Oracle complexity refers to the number of second-order subproblems (the oracle calls) needed to find an $\epsilon$-approximate solution~\cite{cartis2022evaluation}.}. Over the past decades, a few SOMs have been developed with such emphases ~\cite{nesterov2006cubic,mishchenko_regularized_2023,jiang2024nonconvexityuniversaltrustregionmethod,heHomogeneousSecondorderDescent2025}.  In convex optimization, these methods can be further improved through acceleration techniques.
+In addition to local convergence, another important criterion for evaluating the effectiveness of optimization methods is their non-asymptotic global oracle complexity, which refers to the number of second-order subproblems (the oracle calls) needed to find an $\epsilon$-approximate solution~\cite{cartis2022evaluation}. Over the past decades, a few SOMs have been developed with such emphases ~\cite{nesterov2006cubic,mishchenko_regularized_2023,jiang2024nonconvexityuniversaltrustregionmethod,heHomogeneousSecondorderDescent2025}.  In convex optimization, these methods can be further improved through acceleration techniques.
 
 In this context, two major approaches have emerged. The first approach, accelerated cubic regularized Newton (CRN) method~\cite{nesterov2008accelerating}, achieves a global oracle complexity of $O(\epsilon^{-1/3})$ based on the cubic regularization oracle \cite{nesterov2006cubic}. A different strategy is adopted in the accelerated Newton proximal extragradient (A-NPE) method~\cite{monteiro2013accelerated}, which improves the oracle complexity to $\tilde{O}(\epsilon^{-2/7})$ and is compatible with second-order oracles that satisfy certain error bound conditions~\cite{carmon2022optimal}.
 These developments, largely based on the estimating sequence technique~\cite{nesterovMethodSolvingConvex1983a,baesEstimateSequenceMethods2009a}, have inspired a wide range of enhancements~\cite{jiang2021optimal,chen2022accelerating,lin2022explicit,agafonov2023inexact,agafonov2024advancing,jiang2024accelerated,huang2024inexact,doikov2020contracting}.
-Recently, the oracle complexity of the A-NPE method was improved to be an optimal rate in $O(\epsilon^{-2/7})$~\cite{carmon2022optimal,NEURIPS2022_e56f394b}.
+Recently, the oracle complexity of the A-NPE method was improved to be an optimal rate in $O(\epsilon^{-2/7})$~\cite{carmon2022optimal,NEURIPS2022_e56f394b}. These acceleration techniques are broadly applicable and are by no means limited to the domain of SOMs~\cite{xu2017accelerated,xu2018accelerated,lan2012optimal,ghadimi2016accelerated}.
 
 
 However,  it is hard to balance the global and local efficiency of second-order optimization algorithms. For instance,
-    the classical Newton's method possesses excellent local convergence but lacks global guarantees, often exhibiting divergence when the starting point is far from the optimal solution~\cite{more1982newton,dennis1996numerical}. In constrast, stronger worst-case complexity results of accelerated methods often come at the cost of local efficiency.  
+    the classical Newton's method possesses excellent local convergence but lacks global guarantees, often exhibiting divergence when the starting point is far from the optimal solution~\cite{more1982newton,dennis1996numerical}. In contrast, stronger worst-case complexity results of accelerated SOMs often come at the cost of local efficiency.  
 % While classical SOMs achieve local quadratic convergence, no existing accelerated SOM successfully retains this property. 
-Empirical evidence shows that in many tasks like logistic regression, accelerated SOMs are often outperformed by unaccelerated ones~\cite{jiang2020unified,huang2024inexact,chen2022accelerating,carmon2022optimal} in the local region of the optimal solution, and manually switching to Newton’s method is often necessary to obtain highly accurate solutions~\cite{jiang2020unified,huang2024inexact,chen2022accelerating}. The above phenomenon underscores a fundamental dilemma in accelerated SOMs, and raises the following question:
+Empirical evidence shows that in many tasks like logistic regression, accelerated SOMs are often outperformed by unaccelerated ones~\cite{jiang2020unified,huang2024inexact,chen2022accelerating,carmon2022optimal}, and manually switching to Newton’s method is often necessary to obtain highly accurate solutions~\cite{jiang2020unified,huang2024inexact,chen2022accelerating}. The above phenomenon underscores a fundamental dilemma in accelerated SOMs, and raises the following question:
 \begin{center}
     \emph{How much can we accelerate SOMs globally while maintaining their excellent local convergence?}
 \end{center}
 
-\input{challenge.tex}
+\subsection{Motivation and our approach}\label{sec.motivation}
+It is folklore that the strong local performance of SOMs ultimately stems from the Newton step. Thus, to design an accelerated method with excellent local performance, the second-order oracle should have the ability to detect the local geometry near the optimal solution, providing a signal indicating that the iterates may have
+entered the quadratic convergence region, allowing a Newton step to be active.
+For that sake, one particular choice could be the trust-region (TR) oracle~\cite{More1983,conn2000trust}. At a given point \( x \in \mathbb{R}^n \), the classic TR oracle solves the following subproblem:
+\begin{equation}
+    \label{eq.classic tr subproblem}
+    \begin{aligned}
+        \underset{d \in \mathbb{R}^n}{\min}~ & \nabla f(x)^T d + \tfrac{1}{2} d^T \nabla^2 f(x)  d \\
+        \text{s.t.}                          & \quad  \|d\| \le r,
+    \end{aligned}
+\end{equation}
+where \( r \) denotes the trust-region radius. We denote $(d,\lambda) = \tr(x, r)$ as the primal-dual solution to this problem. For an overview of TR methods, we refer readers to two excellent monographs \cite{yuan2000review,yuan2015recent}.
+
+Two features make \eqref{eq.classic tr subproblem} particularly appealing. Near a non-degenerate minimizer, the step reduces to the pure Newton direction once the ball constraint becomes inactive, preserving quadratic convergence, which is the capability absent from other second-order oracles. 
+Moreover, \tr{} oracles can be solved in $O(n^3 + n^2\log\log(\epsilon^{-1}))$ arithmetic operations \cite{vavasisProvingPolynomialtimeSphereconstrained1990,yenewcomplexityresult1991}, incurring no significant overhead compared to solving a Newton equation.
+% \footnote{In comparison, the cubic Newton oracle requires an $O\left(\log\left(1/\epsilon\right)\right)$-time 1-dimensional search procedure \cite{nesterov2006cubic,cartisChapter8Subproblem2022}.}
+On the practical side, the TR oracle has been thoroughly analyzed \cite{jiangHolderianErrorBounds2022,rojasNewMatrixfreeAlgorithm2001,ho2017second,wang2022generalized}, so that highly competitive solvers have been developed \cite{rojasNewMatrixfreeAlgorithm2001, adachiSolvingTrustregionSubproblem2017, adachiEigenvaluebasedAlgorithmAnalysis2019} for it and its extensions.
+To this end, TR oracles have formed the algorithmic core of general-purpose nonlinear programming solvers such as Knitro~\cite{byrd2006k}, COPT~\cite{geCardinalOptimizerCOPT2022}, and PDFO~\cite{ragonneau2024pdfo}. Similar success can be found in other cross-cutting applications ranging from adversarial training~\cite{yao2019trust} to reinforcement learning~\cite{schulman2015trust}. These advantages serve as the motivation to use \tr{} to address the global-local balance in accelerated SOMs.
+
+
+However, to our best knowledge,  TR methods have not been accelerated yet as
+using TR oracles introduces technical challenges. Classical TR methods cannot match the global oracle complexity of other unaccelerated SOMs~\cite{cartisComplexitySteepestDescent2010,curtis2017trust} because the dual variable $\lambda$ associated with the ball constraint in \eqref{eq.classic tr subproblem} is determined a posteriori and requires careful monitoring~\cite{curtis2018concise}. Achieving global acceleration demands relative stability between this multiplier and the step size, which roughly means that $\lambda$ should not vary too fast relative to the step size, but enforcing such stability can interfere with transitions to Newton steps near the optimum.
+
+To address this challenge, we design, for the first time, the accelerated trust-region methods that leverage a modified TR oracle, which we call the trust-region oracle for acceleration denoted as \ref{eq.newTR}. In particular, at a point $x \in \mathbb{R}^n$, the \ref{eq.newTR} oracle solves
+\begin{equation*}
+\begin{aligned}
+\min_{d \in \mathbb{R}^n}~ & \nabla f(x)^\top d 
+    + \tfrac{1}{2} d^\top (\nabla^2 f(x) + \sigma I) d, \\
+\text{s.t.} &~ \|d\| \le r.
+\end{aligned}
+\tag*{(TR$_+$)}
+\end{equation*}
+The dual variable associated with the ball constraint is denoted by $\lambda$, which can detect local geometric information of the optimal solution. 
+The primal regularization $\sigma$ in \ref{eq.newTR} is used to effectively modulate $\lambda$, and maintains the stability required for global acceleration, enabling our accelerated trust-region method to systematically balance fast local convergence with provable global guarantee.
+\subsection{Contribution}
+This work provides an answer to the question posed earlier: we demonstrate that the compatibility between the global and local efficiency of the SOMs depends on the degree of global acceleration.
+Specifically, based on the \ref{eq.newTR} oracles \cite{jiang2024nonconvexityuniversaltrustregionmethod}, we develop two accelerated TR-type methods for problem~\eqref{eq.main problem}. One can simultaneously achieve both global acceleration and quadratic local convergence, and the other has a faster global convergence rate but loses local efficiency.
+
+The first method, \emph{Accelerated Trust-Region Method with Local Detection} (\Cref{alg.accelerated utr}), implements a local detection mechanism (\Cref{alg.local detection}) that automatically identifies and ``dives into'' the quadratic convergence regions. This design yields an improved global worst-case oracle complexity of $\tilde{O}(\epsilon^{-1/3})$, while achieving a local quadratic rate of convergence. To our best knowledge, this is the first accelerated SOM that provably achieves both $\tilde{O}(\epsilon^{-1/3})$ global oracle complexity and local quadratic convergence. 
+
+The second method, \emph{Accelerated Trust-Region Extragradient Method} (\Cref{alg.ms accelerated utr}), is designed to persuit the limits of global performance, reaching the near-optimal global oracle complexity of $\tilde{O}(\epsilon^{-2/7})$, but loses the excellent local convergence. Thus, our analysis and experiments reveal a phase transition in accelerated trust-region type methods: pushing global efficiency to its limits naturally entails a trade-off with local performance. 
+Such a phase transition occurs due to the loss of local detection in \Cref{alg.ms accelerated utr} when pursuing the near-optimal global convergence rate,
+where the primal regularizer $\sigma$ is set prior to determining the extrapolation point that is used in the \ref{eq.newTR} oracle~(as in \Cref{alg.accelerated utr}).
+
+Our theoretical findings are corroborated by numerical experiments. On a global scale, all accelerated SOMs, including ours and \cite{nesterov2008accelerating,monteiro2013accelerated}, consistently outperform the non-accelerated trust-region method~\cite{jiang2024nonconvexityuniversaltrustregionmethod} and cubic Newton method~\cite{nesterov2006cubic}. Locally, \Cref{alg.accelerated utr} exhibits quadratic convergence, and \atrms{} cannot retain superlinear convergence near the solution, similar to the empirical conclusions in \cite{carmon2022optimal,jiang2024accelerated,huang2024inexact}. These findings again confirm the necessity of local detection.
+
+\subsection{Related works}
+We review related works along two main lines: TR-type methods and accelerated SOMs that aim to achieve faster-than-sublinear efficiency. Despite the strong empirical success of TR-type methods, its theoretical analysis mainly focuses on nonconvex problems~\cite{yeSecondOrderOptimization2005,curtis2017trust,curtis2021trust,zhangHomogeneousSecondorderDescent2025,hamad2022consistently,grapiglia2015convergence,hamad2024simplepracticaladaptivetrustregion}, while  
+its global complexity analysis for convex problems remains incomplete.
+In fact, in convex optimization, the classical TR has worse convergence rates than other unaccelerated mainstream SOMs. This gap was recently closed in~\cite{jiang2024nonconvexityuniversaltrustregionmethod}. However, whether TR oracles can further benefit from acceleration, as achieved for other SOMs, remains an open question.
+
+As discussed earlier, unaccelerated SOMs often exhibit superior local performance near the optimal solution compared with their accelerated counterparts. A common remedy for this issue is to employ restart strategies in accelerated frameworks~\cite{nesterov_lectures_2018}. However, this introduces a new challenge of deciding when to restart since the optimal restart frequency depends on unknown, problem-specific parameters. In contrast, when stronger global regularity conditions (akin to strong convexity) are imposed on the objective function, the restart schedule can be determined in a more structured form~\cite{ostroukhov2020tensor, lin2025perseus, huang2025approximation} or even becomes unnecessary~\cite{jiang2022generalized, marques2022variants}. Under such assumptions, these methods can accommodate global performance, and thus the intrinsic trade-off between global convergence and local efficiency becomes a secondary concern.
+
+\paragraph{Organization of the paper}
+The remaining part of this paper is organized as follows. Section~\ref{sec.priliminary} reviews the background on TR-type oracles and the use of estimate sequence techniques in accelerated second-order optimization. In Section~\ref{sec.first variant}, we present the \Cref{alg.accelerated utr}, which achieves an oracle complexity of $\tilde O(\epsilon^{-1/3})$ and exhibits quadratic convergence in high-accuracy regimes. Section~\ref{sec.second variant} introduces the \Cref{alg.ms accelerated utr}, which explores the phase transition of acceleration and attains a near-optimal oracle complexity of $\tilde O(\epsilon^{-2/7})$. Section~\ref{sec.experiments} reports numerical results on practical tasks, confirming the theoretical advantages of our proposed methods.
 
 
 \section{Preliminaries}
 \label{sec.priliminary}
 Let $\|\cdot\|$ denote the standard Euclidean norm in $\mathbb{R}^n$, and let $x^T y$ and $\langle x,y\rangle$ represent the inner product between $x, y \in \mathbb{R}^n$. For a matrix $X \in \mathbb{R}^{n \times n}$, $\|X\|$ denotes the induced $\ell_2$ norm.
+% We use the standard notations $O(\cdot), \Omega(\cdot), \Theta(\cdot)$ in their conventional sense, where $\tilde{O}(\cdot)$ hides logarithmic terms within $O(\cdot)$. Specifically, for two numerical quantities $A$ and $B$, we say that $A = O(B)$ if there exists an absolute constant $c > 0$ such that $A \leq c \cdot B$, and $A = \Omega(B)$ if there exists an absolute constant $c > 0$ such that $A \geq c \cdot B$. We write $A = \Theta(B)$ if both $A = O(B)$ and $A = \Omega(B)$ hold.
 Unless otherwise stated, all logarithmic functions $\log(x)$ in this paper refer to the base-2 logarithm.
 
 We are interested in finding $\epsilon$-approximate solutions of \eqref{eq.main problem} defined as below.
@@ -191,6 +192,7 @@ The following lemmas clarify $\mu$ plays an important role in the convergence an
 
 Generally speaking, \Cref{lem.bound next gradient} shows that we can bound the next-iterate gradient norm by controlling $\mu$.
 {\Cref{lem.inner product g and d} serves as a key bridge to establish the global efficiency~(in fact, it is a modified version of~\cite[Lemma 4.2.5]{nesterov_lectures_2018} and~\cite[Corollary 1]{nesterovImplementableTensorMethods2021} for TR-type oracle)}, which suggests that $\mu$ should be selected roughly as $\Theta(\|d\|)$. This condition generally fails for the classical TR oracle, as explained in~\Cref{sec.motivation} and also discussed in~\cite{curtis2018concise,curtis2017trust}. For this reason, we adopt the \ref{eq.newTR} oracle:
+% However, achieving this global-local balance is far from straightforward. On one hand, the multiplier in standard TR oracles is not stable and is determined a posteriori, making it difficult to consistently satisfy $\mu = \Theta(\|d\|)$ required by persueing better global complexity. On the other hand, existing accelerated SOMs often lack local detection mechanisms and therefore tend to adopt globally conservative strategies by default. As a result, their local steps remain overly cautious even when faster convergence is possible.
 \begin{equation}\label{eq.newTR}
 \begin{aligned}
     \min_{d \in \mathbb{R}^n}~ & \nabla f(x)^T d 
@@ -229,13 +231,18 @@ In this section, we propose the first accelerated TR method, which applies the p
         \STATE $(d_k,\lambda_k) = \trp(y_k,\sigma_k,r_k)$ 
         % \noindent\rule{8cm}{0.4pt} 
         \IF{$\lambda_k=0$} \label{line.if}
+        % \STATE $x_{k+1}=y_k+d_k$ \label{line.nonzero multiplier}
         \STATE \texttt{\# Enter Local Detection (\Cref{alg.local detection})}
+        % \STATE $z_i,\text{ET}=\operatorname{Newton}(y_k,\left \lceil\frac{\log \|\nabla f(y_k)\|}{\epsilon} \right\rceil)$ 
+        % \STATE $(z_i,d_k,\mu_k,\text{ET}) = \operatorname{LD}(y_k,\tfrac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2},d_k,\epsilon)$
         \STATE $(x_{k+1},\text{ET}) = \operatorname{LD}(y_k,\tfrac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2},d_k,\epsilon)$
         \label{line.early terminate main}
         \IF{$\text{ET}$}
         \STATE \textbf{terminate and output $x_{k+1}$}
         \ENDIF
+        % \IF{$\textrm{ET}$} \STATE\textbf{terminate} \ENDIF
         \ENDIF
+        % \STATE $x_{k+1}=y_k+d_k$
         \STATE $s_{k+1} = s_{k}+\tfrac{(k+1)(k+2)}{2}\nabla f(x_{k+1})$
         \STATE $v_{k+1} = v_0-\sqrt{\tfrac{8}{3M\|s_{k+1}\|}}s_{k+1}$
         \ENDFOR
@@ -309,6 +316,7 @@ In this section, we propose the first accelerated TR method, which applies the p
 \end{subroutine}
 The overall regularization in \ref{eq.newTR} is a combination of primal and dual information: $\mu_k = \sigma_k + \lambda_k$. The primal part $\sigma_k$ is chosen carefully to make the dual part more stable and still carry local information, while the dual part $\lambda_k$ is used as an indicator to check whether the current iterate is close to the local optimum according to the value of $\lambda_k$.
 
+% The algorithm proceeds by checking whether the dual multiplier $\lambda_k$ is zero.
 
 The case $\lambda_k > 0$ typically indicates that the current iterate is still far from a local optimum. In that regime, as shown later in \Cref{lem.ratio pass nonzero}, the overall regularization parameter $\mu_k$ becomes automatically proportional to the step size, which justifies the updates of the estimating sequence in the acceleration framework.
 
@@ -550,6 +558,8 @@ Now we focus on the oracle complexity of R\&B, i.e., the complexity of bisection
 \end{equation}
 We show that this correspondence is one-to-one.
 
+% In each step of the bisection, one oracle $(d,\mu)=\trp(y,0,r)$ with $r\in[r_-,r_+]$ is called at the extrapolation point $y$, which gives a corresponding $\mu$. We show that the correspondence between $r$ and $\mu$ over the interval $[r_-,r_+]$ and $[\mu_-,\mu_+]$ is one-to-one, where
+
 \begin{lemma}
     \label{lem.one-to-one correspondence}
     For any $r \in [r_-, r_+]$, there exists a unique $\mu \in [\mu_-, \mu_+]$ such that
@@ -584,10 +594,28 @@ Consequently, for any $r \in [r_-, r_+]$, there exists a unique $\mu \in [\mu_-,
 Hence, the correspondence between $r$ and $\mu$ is one-to-one, establishing the desired relation $\mu = r_y^{-1}(r)$.
 \end{proof}
 Using this one-to-one correspondence, when we perform bisection on $r$ over the interval $[r_-,r_+]$, we also implicitly perform bisection on $\mu$ over $[\mu_-,\mu_+]$. The logic of our analyses is to first identify the target interval of $\mu$ and then use the one-to-one correspondence again to transfer it to the target interval of $r$. This observation motivates us to introduce the following auxiliary functions of $\mu$.
+% gives
+% \begin{equation}
+%     \label{eq.correspondence}
+%     \|d\|=r=\left\|\left(\nabla^2 f(y)+\mu I\right)^{-1}\nabla f(y)\right\|.
+% \end{equation}
+% \cz{
+%     a bit messy. do you need $r(\mu), \mu(r), g(\mu)$ altogether?
+% }
+% Obviously, such correspondence between $r$ and $\mu$ is one-to-one for $r\in[r_-,r_+]$ and $\mu\in[\mu_-,\mu_+]$, where $\mu_-,\mu_+$ is defined by
+% \begin{equation}
+%     \label{eq.endpoint correspondence}
+%     r_- = \left\|\left(\nabla^2 f(y)+\mu_+ I\right)^{-1}\nabla f(y)\right\|, \ r_+=\left\|\left(\nabla^2 f(y)+\mu_- I\right)^{-1}\nabla f(y)\right\|.
+% \end{equation}
 \begin{equation}
     \label{eq.auxiliary function for bisection}
     g_y(\mu) =\frac{\mu}{r_y(\mu)}=\frac{\mu}{\|\left (\nabla^2 f(y)+\mu I\right)^{-1}\nabla f(y)\|}.
 \end{equation}
+% Or equivalently, \cz{not needed?}
+% \begin{equation}
+%     \label{eq.auxiliary function for bisection 2}
+%     \mu_y(r) = r_y^{-1}(r), r\in[r_-,r_+].
+% \end{equation}
 The goal of bisection is to locate the radius $r$ such that the corresponding $\mu$ as defined in \Cref{lem.one-to-one correspondence} satisfies
 \begin{equation*}
     M \leq g_y(\mu) \leq 2M.
@@ -637,7 +665,8 @@ After using the one-to-one correspondence to transfer the target interval to the
 \end{lemma}
 
 
-Till now, we have established that the oracle complexity of \Cref{alg.local detection} reduces to $\max\{O\left(\log\frac{\kappa_H+\mu_+}{\epsilon}\right),O\left(\log \frac{\|\nabla f(y)\|}{\epsilon}\right)\}$. Since $\mu_+ = \frac{\sqrt{2M}}{2}\|\nabla f(y)\|^{1/2}$ and we already established the boundedness for the gradient norm in \Cref{lem.upper bound for zero lambda}, we can derive the total complexity of \Cref{alg.accelerated utr},
+Till now, we have established that the oracle complexity of \Cref{alg.local detection} reduces to $$\max\{O\left(\log\frac{\kappa_H+\mu_+}{\epsilon}\right),O\left(\log \frac{\|\nabla f(y)\|}{\epsilon}\right)\}.$$
+Since $\mu_+ = \frac{\sqrt{2M}}{2}\|\nabla f(y)\|^{1/2}$ and we already established the boundedness for the gradient norm in \Cref{lem.upper bound for zero lambda}, we can derive the total complexity of \Cref{alg.accelerated utr},
 \begin{theorem}
     \label{thm.total complexity newton}
     Suppose Assumption~\ref{assm.lipschitz}, \Cref{assm.solvable} and Assumption~\ref{assm.bounded hessian} hold, it takes at most
@@ -709,14 +738,12 @@ Now we introduce the region of quadratic convergence for the norm of the gradien
     \end{equation*}
     Noting that $z_{i+1} = z_i-\nabla^2 f(z_i)^{-1}\nabla f(z_i)$, we have
     \begin{equation*}
-        \begin{aligned}
-            \|\nabla f(z_{i+1})\| & \leq \frac{M}{2}\|\nabla^2 f(z_i)^{-1} \nabla f(z_i)\|^2       \\
-                                  & \leq \frac{M}{2}\|\nabla^2 f(z_i)^{-1}\|^2\| \nabla f(z_i)\|^2 \\
-                                  & < \frac{9M}{2\nu^2}\|\nabla f(z_i)\|^2                         \\
-                                  & < \|\nabla f(z_i)\|.
-        \end{aligned}
+    \begin{aligned}
+            \|\nabla f(z_{i+1})\| &\leq \frac{M}{2}\|\nabla^2 f(z_i)^{-1} \nabla f(z_i)\|^2  \leq \frac{M}{2}\|\nabla^2 f(z_i)^{-1}\|^2\| \nabla f(z_i)\|^2\\
+            &< \frac{9M}{2\nu^2}\|\nabla f(z_i)\|^2 < \|\nabla f(z_i)\|.
+    \end{aligned}
     \end{equation*}
-    The third line is from $R_i< \frac{2\nu}{3M}$ and \eqref{eq.psd xk}. The last line is from the fact $z_i\in \mathcal{LQ}_g$. $R_{i+1} \leq \frac{2\nu}{3M}$ follows from \Cref{lem.quadratic point}. Therefore, $z_{i+1}\in \mathcal{LQ}_g$.
+    The third inequality is from $R_i< \frac{2\nu}{3M}$ and \eqref{eq.psd xk}. The last inequality is from the fact $z_i\in \mathcal{LQ}_g$. $R_{i+1} \leq \frac{2\nu}{3M}$ follows from \Cref{lem.quadratic point}. Therefore, $z_{i+1}\in \mathcal{LQ}_g$.
 \end{proof}
 As a result, we know how many iterations are needed to find a point with $\|\nabla f(z_i)\|\leq \epsilon$ if $z_0 \in \mathcal{LQ}_g$ and $\{z_i\}$ is generated by Newton's method initialized at $z_0$.
 \begin{corollary}
@@ -724,20 +751,16 @@ As a result, we know how many iterations are needed to find a point with $\|\nab
     Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.local strongly convex} hold. Let $0<\epsilon< \frac{1}{C(M,\nu)}$, $z_0\in\mathcal{LQ}_g$ and $\{z_i\}$ generated by Newton's method. Then when
     \begin{equation}
         \label{eq.number of iterations newton}
-        i\geq \left\lceil\log\log C(M,\nu)/\epsilon+1\right\rceil \;\, \mbox{with}\;\, C(M,\nu) = \frac{9M}{2\nu^2},
+        i\geq \left\lceil \log\!\left( \frac{\ln\!\left(\tfrac{1}{C(M,\nu)\epsilon}\right)}{\ln\!\left(\tfrac{1}{\eta_0}\right)} \right) \right\rceil \;\, \mbox{with}\;\, C(M,\nu) = \frac{9M}{2\nu^2}, \  \eta_0 = \|\nabla f(z_0)\| C(M,\nu)<1,
     \end{equation}
     we have $\|\nabla f(z_i)\|\leq \epsilon$.
 \end{corollary}
 \begin{proof}
     From \eqref{eq.quadratic convergence gradient} we have
     \begin{equation*}
-        \begin{aligned}
-            \|\nabla f(z_i)\| & \leq C(M,\nu)\|\nabla f(z_{i-1})\|^2              \\
-                              & \leq C(M,\nu)^{2^{i-1}+1} \|\nabla f(z_0)\|^{2^i} \\
-                              & \leq C(M,\nu)^{-2^{i-1}+1}.
-        \end{aligned}
+            \|\nabla f(z_i)\| \leq C(M,\nu)\|\nabla f(z_{i-1})\|^2 \leq C(M,\nu)^{2^{i-1}} \|\nabla f(z_0)\|^{2^i} \leq \frac{(C(M,\nu)\|\nabla f(z_0)\|)^{2^i}}{C(M,\nu)}.
     \end{equation*}
-    Therefore, when $i\geq \left\lceil\log\log C(M,\nu)/\epsilon-\log\log C(M,\nu)+1\right\rceil$, we have $\|\nabla f(z_i)\|\leq \epsilon$.
+    Therefore, when $i$ hits the threshold defined in \eqref{eq.number of iterations newton}, we have $\|\nabla f(z_i)\|\leq \epsilon$.
 \end{proof}
 After all these preparations, we show that \Cref{alg.local detection} can guarantee that we can find an $\epsilon$-approximate solution with a local quadratic rate. The proof consists of the following three steps:
 \begin{enumerate}
@@ -764,57 +787,33 @@ Next, we prove the second step: in \Cref{alg.accelerated utr}, when $y_k\in\math
     \begin{equation*}
         \begin{aligned}
             \|(\nabla^2 f(y_k)+\sigma_k I)^{-1}\nabla f(y_k)\| & = \left\|\left (\nabla^2 f(y_k)+\frac{\sqrt{2M}}{2} \|\nabla f(y_k)\|^{1/2} I\right)^{-1}\nabla f(y_k)\right\|         \\
-                                                               & \leq \left\|\left (\nabla^2 f(y_k)+\frac{\sqrt{2M}}{2} \|\nabla f(y_k)\|^{1/2} I\right)^{-1}\right\| \|\nabla f(y_k)\| \\
-                                                               & \leq \frac{\|\nabla f(y_k)\|}{\frac{\nu}{3}+\frac{\sqrt{2M}}{2} \|\nabla f(y_k)\|^{1/2}}                               \\
-                                                               & <\frac{\|\nabla f(y_k)\|}{\frac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2}+\frac{\sqrt{2M}}{2} \|\nabla f(y_k)\|^{1/2}}      \\
-                                                               & =\frac{\|\nabla f(y_k)\|^{1/2}}{\sqrt{2M}}                                                                             \\
-                                                               & =r_k.
+                                                               & \leq \left\|\left (\nabla^2 f(y_k)+\frac{\sqrt{2M}}{2} \|\nabla f(y_k)\|^{1/2} I\right)^{-1}\right\| \|\nabla f(y_k)\|
         \end{aligned}
     \end{equation*}
-    The third line is because $\nabla^2 f(y_k)\succ \frac{\nu}{3}$ as analyzed in \eqref{eq.psd xk}. The fourth line is because of the definition of $\mathcal{LQ}_g$ in \eqref{eq.local quadratic region gradient}. Therefore, we conclude that the TR constraint is inactive and $\lambda_k=0$.
+    Note $\nabla^2 f(y_k)\succ \frac{\nu}{3}$ as analyzed in \eqref{eq.psd xk}.
+    \begin{equation*}
+    \begin{aligned}
+        \|(\nabla^2 f(y_k)+\sigma_k I)^{-1}\nabla f(y_k)\|  &\leq \frac{\|\nabla f(y_k)\|}{\frac{\nu}{3}+\frac{\sqrt{2M}}{2} \|\nabla f(y_k)\|^{1/2}} \\&<\frac{\|\nabla f(y_k)\|}{\frac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2}+\frac{\sqrt{2M}}{2} \|\nabla f(y_k)\|^{1/2}}\\
+        &=\frac{\|\nabla f(y_k)\|^{1/2}}{\sqrt{2M}} =r_k.
+    \end{aligned}
+    \end{equation*}
+    The second line is because of the definition of $\mathcal{LQ}_g$ in \eqref{eq.local quadratic region gradient}. Therefore, we conclude that the TR constraint is inactive and $\lambda_k=0$.
 \end{proof}
 Last, we show the third step: when the tolerance $\epsilon$ is small enough, \Cref{alg.accelerated utr} will be early terminated, i.e., we have ET$=$True when $y_k$ enters $\mathcal{LQ}_g$. Though the constant in the following theorem may look a bit unwieldy, the high-level idea is that quadratic convergence is faster than linear convergence in the region we defined.
 \begin{theorem}
     \label{thm.local quadratic convergence}
-    Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.local strongly convex} hold, and the tolerance $\epsilon$ is very small in the sense that it satisfies
+    Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.local strongly convex} hold, then there exists $\epsilon^* >0$ such that when
     \begin{equation}
         \label{eq.regularity epsilon}
-        0<\epsilon< \frac{1}{C(M,\nu)}, \ \log\frac{C(M,\nu)}{\epsilon}\leq \frac{1}{8C(M,\nu)\epsilon}.
+        0<\epsilon< \min\{\epsilon^*, \frac{1}{C(M,\nu)}\}
     \end{equation}
-    Then, when $y_k$ enters $\mathcal{LQ}_g$, the $\epsilon$-approximate solutions will be found in $O\left(\log\log\left(1/\epsilon\right)\right)$ iterations, and ET$=$True in \Cref{alg.local detection}.
+    then the $\epsilon$-approximate solutions will be found in $O\left(\log\log\left(1/\epsilon\right)\right)$ iterations when $y_k$ enters $\mathcal{LQ}_g$, and ET$=$True in \Cref{alg.accelerated utr}.
 \end{theorem}
 \begin{proof}
     We first consider the case that the approximate solution is found at line~\ref{line.et 2} of \Cref{alg.local detection}, then $y_k+d_k$ is already an $\epsilon$-approximate solution and there is nothing to prove.
 
-    Next, we consider the case \Cref{alg.local detection} enters local diving. We show that local diving will find $\epsilon$-approximate solutions in $O\left(\log\log \left(1/\epsilon\right)\right)$ iterations, which is strictly less than the maximal number of iteration we defined at line~\ref{line.track 1 number of iter}, i.e., $\left \lceil\log\frac{\|\nabla f(y)\|}{\epsilon} \right\rceil$.
-
-    We know from \eqref{eq.psd xk} that when $y_k\in\mathcal{LQ}_g$, $\|\nabla f(y_k)\|\leq \frac{1}{C(M,\nu)}$.
-
-    If $\frac{1}{2C(M,\nu)}\leq \|\nabla f(y_k)\|\leq \frac{1}{C(M,\nu)}$, 
-    \begin{equation*}
-        \begin{aligned}
-            \left\lceil\log\log C(M,\nu)/\epsilon+1\right\rceil&\leq\log\log C(M,\nu)/\epsilon+2\\
-            &\leq\log\frac{1}{2C(M,\nu)\epsilon}\\
-            &\leq\log\frac{\|\nabla f(y)\|}{\epsilon}.
-        \end{aligned}
-    \end{equation*}
-    Note that the LHS of the first line is the number it takes for Newton's method to converge~(see~\eqref{eq.number of iterations newton}), the RHS of the last line is the maximal iteration number. The second line comes from \eqref{eq.regularity epsilon} and the logarithmic function is 2-based:
-    \begin{equation*}
-        \log\log C(M,\nu)/\epsilon+2 \leq\log\frac{1}{2C(M,\nu)\epsilon} \Longleftrightarrow \log\log C(M,\nu)/\epsilon \leq \log\frac{1}{8C(M,\nu)\epsilon}.
-    \end{equation*}
-
-    Else if $\|\nabla f(y_k)\|< \frac{1}{2C(M,\nu)}$, we have $\|\nabla f(z_1)\|\leq C(M,\nu)\|\nabla f(y)\|^2\leq \frac{1}{2}\|\nabla f(y)\|$, inductively, we have
-    \begin{equation*}
-        \|\nabla f(z_i)\| \leq 2^{-2^i+1}\|\nabla f(y)\|,
-    \end{equation*}
-    as a result, local diving of \Cref{alg.local detection} takes
-    \begin{equation*}
-        \log\log\frac{2\|\nabla f(y)\|}{\epsilon}\leq \left \lceil \log\frac{\|\nabla f(y)\|}{\epsilon}\right \rceil
-    \end{equation*}
-    iterations to find $\epsilon$-approximate solutions. Overall, the number of iterations of local diving is enough for Newton's method to converge to the $\epsilon$-approximate solution.
+    Next, we consider the case \Cref{alg.local detection} enters local diving. We know from \eqref{eq.psd xk} that when $y_k\in\mathcal{LQ}_g$, $\|\nabla f(y_k)\|\leq \frac{1}{C(M,\nu)}$, then from Lemma~\ref{lem.loglog vs log}~(see Appendix~\ref{sec.proof variant 1}) we know that local diving will find $\epsilon$-approximate solutions within the iteration number defined in \eqref{eq.number of iterations newton}, which is strictly less than the maximal number of iteration we defined at line~\ref{line.track 1 number of iter}, i.e., $\left \lceil\log\frac{\|\nabla f(y)\|}{\epsilon} \right\rceil$.
 \end{proof}
-
-
 \section{Variant~II: Pushing Global Efficiency to the Limit}\label{sec.second variant}
 We now turn to another accelerated TR method that incorporates the acceleration framework of \citet{monteiro2013accelerated}. This method achieves a near-optimal global oracle complexity of $\tilde{O}(\epsilon^{-2/7})$ for finding $\epsilon$-approximate solutions. However, this global efficiency comes at the cost of losing local quadratic convergence. We refer to this approach as the Accelerated Trust-Region Extragradient Method (\Cref{alg.ms accelerated utr}).
 \subsection{Algorithm design}
@@ -1114,6 +1113,9 @@ We implement two different accelerated TR methods (\atr{} and \atrms{}) and comp
         \resizebox{0.47\columnwidth}{!}{\input{../figs/e-logistic-w8a-k}}
     }
 
+    % \subcaptionbox{Runtime (seconds)}{
+    %     \includegraphics[width=0.47\columnwidth]{icml2025/figs/fx-softmax-t.pdf}
+    % }
     \caption{Logistic regression using the LIBSVM datasets}\label{fig.logistic regression}
     \normalsize
 \end{figure}
@@ -1133,7 +1135,7 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
 \addcontentsline{toc}{section}{References}
 
 \bibliographystyle{plainnat}
-\bibliography{ref}
+\bibliography{arxiv_version/ref_arxiv}
 \newpage
 \appendix
 \section{Technical proofs in~\Cref{sec.priliminary}}\label{sec.proof pre}
@@ -1354,6 +1356,56 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
     \end{equation*}
     we have $y_k\in\mathcal{LQ}_g$.
 \end{proof}
+\subsection*{Lemma~\ref{lem.loglog vs log} and its proof}
+\begin{lemma}\label{lem.loglog vs log}
+Let $\{a_i\}$ satisfy $a_i \le C\,a_{i-1}^2$ with $C>0$ and $0<Ca_0<1$. Define
+\[
+i_{\min} \;=\; \min\Big\{i\in\mathbb{N}:\ a_i\le \epsilon\Big\}.
+\]
+Then there exists $\epsilon^*>0$ such that for all $\epsilon\leq \{\epsilon^*,\frac{1}{C}\}$,
+\[
+i_{\min}\;\le\;\Big\lceil \log\!\frac{a_0}{\epsilon}\Big\rceil.
+\]
+\end{lemma}
+
+\begin{proof}
+From the quadratic recurrence we have the standard bound
+\[
+a_i \;\le\; C^{2^{i}-1} a_0^{2^{i}}
+\;=\; \frac{(C a_0)^{2^{i}}}{C}
+\;=\; \frac{\eta_0^{2^{i}}}{C}\,.
+\]
+Thus $a_i\le\epsilon$ is guaranteed once $\eta_0^{2^{i}}\le C\epsilon$, i.e.,
+\[
+2^{i} \;\ge\; \frac{\ln(1/(C\epsilon))}{\ln(1/\eta_0)}.
+\]
+Hence
+\[
+i_{\min}\;\le\;\Big\lceil \log\!\Big(\frac{\ln(1/(C\epsilon))}{\ln(1/\eta_0)}\Big)\Big\rceil
+\;\le\;\Big\lceil \log\!\frac{a_0}{\epsilon}\Big\rceil
+\]
+is ensured provided
+\begin{equation}\label{eq.equiv star}
+\frac{\ln(1/(C\epsilon))}{\ln(1/\eta_0)}
+\;\le\; \frac{a_0}{\epsilon}
+\quad\Longleftrightarrow\quad
+w\ln\!\frac{1}{w}\;\le\;\eta_0\ln\!\frac{1}{\eta_0},
+\qquad w:=C\epsilon\in(0,1).
+\end{equation}
+We now give a simple \emph{sufficient} bound that implies \eqref{eq.equiv star} without special functions.
+If we choose $w\le \tfrac{1}{2}\,\eta_0\ln(1/\eta_0)$ and also $w\le w^{-2}$, then
+$\ln(1/w)\ge 2$ and therefore
+\[
+w\ln\!\frac{1}{w} \;\le\; \Big(\tfrac{1}{2}\,\eta_0\ln\!\tfrac{1}{\eta_0}\Big)\cdot 2
+\;=\; \eta_0\ln\!\tfrac{1}{\eta_0},
+\]
+which is exactly \eqref{eq.equiv star}. Taking
+\[
+\epsilon^\ast \;=\; \frac{1}{C}\,\min\!\Big\{\,\tfrac{1}{2}\,\eta_0\ln\!\tfrac{1}{\eta_0}\,,\ w^{-2}\Big\}
+\]
+yields $w=C\epsilon\le \min\{\tfrac{1}{2}\eta_0\ln(1/\eta_0),\,w^{-2}\}$ whenever $\epsilon\le\epsilon^\ast$,
+so \eqref{eq.equiv star} holds and the desired inequality follows.
+\end{proof}
 \section{Technical proofs in~\Cref{sec.second variant}}\label{sec.appendix 2}
 \subsection*{Proof to \Cref{lem.growth of Ak}}
 \begin{proof}
@@ -1535,7 +1587,24 @@ Now we introduce some basic properties of $\psi(\sigma,y)$:
     \end{equation*}
     which means $\psi \left(\sigma,y(\sigma)\right)>\frac{1}{M}$.
 \end{proof}
-\subsection*{Proof to \Cref{lem.curve condition}}
+
+
+\subsection*{Proof to \Cref{lem.complexity bisection}}
+In fact, we prove a more detailed version of \Cref{lem.complexity bisection} here, which is \cref{coro.bisection bound} here. First, we need the following auxiliary lemmas below.
+
+First, we introduce the following property of $y(\cdot)$, since it is an auxiliary lemma, and the proof is almost the same as in \citet{monteiro2013accelerated}.
+\begin{lemma}[Lemma 7.13, \citet{monteiro2013accelerated}]
+    \label{lem.curve condition}
+    Suppose Assumption~\ref{assm.solvable} holds, and there exists $M_0>0$ such that
+    \begin{equation}\label{eq.bounded assm point}
+        \|x-x^*\|\leq M_0, \ \|v-x^*\|\leq M_0,
+    \end{equation}
+    then the curve $y(\cdot)$ satisfies
+    \begin{equation}
+        \label{eq.curve condition}
+        \|y(s)-y(t)\| \leq \frac{M_0}{t}(s-t), \ \forall s\geq t >0.
+    \end{equation}
+\end{lemma}
 \begin{proof}
     We have
     \begin{equation*}
@@ -1582,23 +1651,6 @@ Now we introduce some basic properties of $\psi(\sigma,y)$:
         \end{aligned}
     \end{equation*}
 \end{proof}
-
-\subsection*{Proof to \Cref{lem.complexity bisection}}
-In fact, we prove a more detailed version of \Cref{lem.complexity bisection} here, which is \cref{coro.bisection bound} here. First, we need the following auxiliary lemmas below.
-
-First, we introduce the following property of $y(\cdot)$, since it is an auxiliary lemma, and the proof is almost the same as in \citet{monteiro2013accelerated}.
-\begin{lemma}[Lemma 7.13, \citet{monteiro2013accelerated}]
-    \label{lem.curve condition}
-    Suppose Assumption~\ref{assm.solvable} holds, and there exists $M_0>0$ such that
-    \begin{equation}\label{eq.bounded assm point}
-        \|x-x^*\|\leq M_0, \ \|v-x^*\|\leq M_0,
-    \end{equation}
-    then the curve $y(\cdot)$ satisfies
-    \begin{equation}
-        \label{eq.curve condition}
-        \|y(s)-y(t)\| \leq \frac{M_0}{t}(s-t), \ \forall s\geq t >0.
-    \end{equation}
-\end{lemma}
 Next, we proceed to introduce the lemma with analyzes the difference between $\psi_-$ and $\psi_+$:
 \begin{lemma}
     \label{lem.bound gap bisection}
@@ -1761,53 +1813,21 @@ Now we can proceed with the main proof.
 % \bibliographystyle{amsplain}
 %    Insert the bibliography data here.
 
+\clearpage
+
+\tableofcontents
+
+\clearpage
+
+
+
+
+
+
+
+
+
+
+
+
 \end{document}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%    Templates for common elements of a journal article; for additional
-%    information, see the AMS-LaTeX instructions manual, instr-l.pdf,
-%    included in the MCOM author package, and the amsthm user's guide,
-%    linked from http://www.ams.org/tex/amslatex.html .
-
-%    Section headings
-\section{}
-\subsection{}
-
-%    Ordinary theorem and proof
-\begin{theorem}[Optional addition to theorem head]
-    % text of theorem
-\end{theorem}
-
-\begin{proof}[Optional replacement proof heading]
-    % text of proof
-\end{proof}
-
-%    Figure insertion; default placement is top; if the figure occupies
-%    more than 75% of a page, the [p] option should be specified.
-\begin{figure}
-    \includegraphics{filename}
-    \caption{text of caption}
-    \label{}
-\end{figure}
-
-%    Mathematical displays; for additional information, see the amsmath
-%    user's guide, linked from http://www.ams.org/tex/amslatex.html .
-
-% Numbered equation
-\begin{equation}
-\end{equation}
-
-% Unnumbered equation
-\begin{equation*}
-\end{equation*}
-
-% Aligned equations
-\begin{align}
-     & \\
-     &
-\end{align}
-
-%-----------------------------------------------------------------------
-% End of mcom-l-template.tex
-%-----------------------------------------------------------------------

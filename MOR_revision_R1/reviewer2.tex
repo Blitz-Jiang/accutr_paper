@@ -1,0 +1,77 @@
+\section{Reviewer 2}
+
+\subsection{Main concerns}
+
+\begin{itemize}
+    \item \comm{Definition 2.1 combines function value residuals and gradient norms under a single tolerance $\epsilon$. Since these two measures usually operate on different scales and orders of magnitude, a unified $\epsilon$ may not be well-defined for all problems. The authors should justify the use of this combined stopping criterion or discuss the implications of the scale mismatch between $f(x)-f^*$ and $\|\nabla f(x)\|$.}
+
+    \item \comm{In the pseudocode for both Algorithm 1 and Algorithm 2, the main iteration loop is defined as ``for $k=0,1,\ldots,K_\epsilon$.'' However, as the complexity analysis demonstrates, $K_\epsilon$ depends on unknown constants such as the initial distance to the optimum, $D_0=\|x_0-x^*\|$. Since $D_0$ is unknown a priori, $K_\epsilon$ cannot be used as a practical limit for the total number of iterations. For the sake of clarity, the authors should explicitly define the verifiable stopping criteria, e.g., $\|\nabla f(x_k)\|\le \epsilon$, that would be used in a numerical implementation to trigger the termination of the loop.}
+
+    \resp{Thank you for the valuable insight. We assume that these two questions are closely related thus we answer them together. We have now revised the Definition 2.1. The two tolerances $\epsilon_f$ and $\epsilon_g$ are kept separate because
+    the function-value residual $f(x)-f^*$ and the gradient norm
+    $\|\nabla f(x)\|$ generally have different scales as you said. Under the bounded hessian assumption and convexity, the two
+    measures are related by
+    \[
+        \frac{1}{2\kappa_H}\|\nabla f(x)\|^2
+        \leq f(x)-f^*.
+    \]
+    Hence an $\epsilon_f$-function-value solution is also a
+    $\sqrt{2\kappa_H\epsilon_f}$-first-order stationary solution. Conversely,
+    under local strong convexity, a sufficiently small gradient norm also
+    controls the local function-value residual.\\
+    In particular, the
+    algorithms below use only the verifiable first-order condition
+    $\|\nabla f(x)\|\leq \epsilon_g$ as a stopping criterion. The tolerance $\epsilon_f$ is introduced only for complexity analysis and is reported as an anytime guarantee. It is not used as an input or stopping rule in the algorithm.
+    }
+\end{itemize}
+
+\subsection{Discussion points}
+
+\begin{itemize}
+    \item \comm{Given that trust-region methods naturally handle negative curvature, it would be interesting to hear the authors' views on whether the $\trp$ oracle and estimating sequence techniques could be extended to non-convex settings to find second-order stationary points. Specifically, could such an extension potentially improve upon the complexity bounds of existing unaccelerated non-convex trust-region methods?}
+
+    \resp{We thank the reviewer for this insightful question. Trust-region methods are indeed naturally suited to nonconvex problems because the trust-region subproblem can exploit negative curvature. $\trp$ oracle framework can be used to find second-order stationary points in nonconvex optimization, see~\citet{jiang2024nonconvexityuniversaltrustregionmethod}. That said, combining it with estimating sequence is not immediate. In the convex setting, the estimating-sequence argument relies crucially on global convexity, since affine lower models of $f$ are used to maintain the estimate-sequence inequalities. This mechanism breaks down in general nonconvex problems. We expect it to be useful only under additional structural assumptions, such as higher-order smoothness, controlled nonconvexity, or other conditions that allow suitable surrogate lower models to be constructed~(like the paper~\citet{carmon2017convex} did under second-order smoothness).\\
+    Regarding complexity, \citet{carmon_lower_2020} established a lower bound of order
+    \[
+        \Omega\!\left(\sqrt{M}\,(f(x_0)-f^*)\,\epsilon^{-3/2}\right)
+    \]
+    for finding first-order stationary points using second-order information under Hessian Lipschitz continuity. To the best of our knowledge, among trust-region-type methods, \citet{hamad2022consistently} matches this bound up to absolute constants. However, their guarantee is for first-order stationarity and does not directly provide an approximate second-order stationary point. Other trust-region-type methods can find approximate second-order stationary points, such as those in
+    \citet{jiang2024nonconvexityuniversaltrustregionmethod,curtis2017trust,curtis2021trust}, but their complexity guarantees typically involve additional dependencies or less streamlined bounds.\\
+    Our view is that it may be possible to design a trust-region-type method that both matches the optimal first-order complexity order and returns an approximate second-order stationary point, but doing so would be highly nontrivial. Moreover, the estimating-sequence technique by itself is unlikely to yield an acceleration benefit in fully general nonconvex problems, because the extra dependency in complexity results is more likely a trust-region-method-related problem.}
+
+    \item \comm{The theoretical guarantees for the $\trp$ oracle rely on exact primal-dual solutions. In large-scale settings, these are typically solved inexactly via iterative methods, e.g., Krylov methods or truncated conjugate gradient methods. Could the authors clarify whether the estimating sequence in Algorithm 1 and the $\lambda=0$ local detection trigger remain robust under relative inexactness? It would be useful to know if the $\widetilde{O}(\epsilon^{-1/3})$ complexity bound is preserved under these conditions.}
+
+    \resp{}
+
+    \item \comm{The current ratio conditions and numerical experiments rely on a conservative global estimate of the Lipschitz constant $M$. While theoretically sufficient, this limits practical efficiency. The authors should discuss whether an adaptive backtracking strategy for $M_k$ could be integrated into the $\trp$ framework without degrading the $\widetilde{O}(\epsilon^{-1/3})$ complexity.}
+
+    \resp{Thanks for the question. We believe we can design adaptive/backtracking strategy with similar technique used in \citet{jiang2020unified}. The key is to get rid of the dependence of $M$ in Lemma 2.3.}
+\end{itemize}
+
+\subsection{Typos}
+
+\begin{itemize}
+    \item \comm{Page 4, line 43: There is an extra space before the period in ``can be designed .''.}
+
+    \resp{Thank you. We have removed the extra space.}
+
+    \item \comm{Page 4, line 50: The phrase ``hold, holds'' appears to be a typo. Moreover, the expression ``for some $\mu \ge M\|d\|$'' seems to modify both Assumption 2.1 and (2.5), while Assumption 2.1 is independent of $\mu$. It may be clearer to write: ``Suppose that Assumption 2.1 holds and that (2.5) holds for some $\mu \ge M\|d\|$.''}
+
+    \resp{Thank you. We have revised the sentence as suggested.}
+
+    \item \comm{Page 8, line 29: $\sqrt{\frac{1}{2M}}\|\nabla f(y_k)\|$ should be $\sqrt{\frac{1}{2M}}\|\nabla f(y_k)\|^{1/2}$.}
+
+    \resp{Thank you. We have corrected this expression.}
+
+    \item \comm{Page 8, line 31: $\sqrt{2M\|\nabla f(y_k)\|}$ should be $\sqrt{2M}\|\nabla f(y_k)\|^{1/2}$.}
+
+    \resp{Thank you. We have corrected this expression.}
+
+    \item \comm{Page 12, lines 19--21: $\nabla f$ should be $\nabla^2 f$. There is also a missing period in equation (3.22).}
+
+    \resp{Thank you. We have corrected the notation and added the missing period.}
+
+    \item \comm{Page 20, line 22: $-\frac{M}{4}\|d\|^4$ should be $-\frac{M^2}{4}\|d\|^4$.}
+
+    \resp{Thank you. We have corrected this typo.}
+\end{itemize}
