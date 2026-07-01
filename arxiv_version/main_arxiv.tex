@@ -1,0 +1,1833 @@
+\documentclass{article}
+
+\input{arxiv_version/header_arxiv}
+
+\author[1]{\small Yuntian Jiang}
+\author[2]{\small Chuwen Zhang}
+\author[1]{\small Bo Jiang\thanks{Corresponding author: isyebojiang@gmail.com}}
+\author[3]{\small Yinyu Ye}
+
+
+\affil[1]{\footnotesize School of Information Management and Engineering\\ Shanghai University of Finance and Economics}
+\affil[2]{\footnotesize Booth School of Business\\ University of Chicago}
+\affil[3]{\footnotesize Antai College of Economics and Management\\ Shanghai Jiao Tong University}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \title{Homogeneous Second-Order Descent Method: Generalization and Application}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Accelerating Trust-Region Methods: An Attempt to Balance Global and Local Efficiency}
+
+\begin{document}
+
+\maketitle
+\begin{abstract}
+    Historically speaking, it is hard to balance the global and local efficiency of second-order optimization algorithms. For instance,
+    {the classical Newton's method possesses excellent local convergence but lacks global guarantees, often exhibiting divergence when the starting point is far from the optimal solution~\cite{more1982newton,dennis1996numerical}. In contrast, accelerated second-order methods offer strong global convergence guarantees, yet they tend to converge with slower local rate~\cite{carmon2022optimal,chen2022accelerating,jiang2020unified}. Existing second-order methods struggle to balance global and local performance, leaving open the question of how much we can
+    globally accelerate the second-order methods while maintaining excellent local convergence guarantee. In this paper, we tackle this challenge by proposing for the first time the accelerated trust-region-type methods, and leveraging their unique primal-dual information.} Our primary technical contribution is \emph{Accelerating with Local Detection}, which utilizes the Lagrange multiplier to detect local regions and achieves a global complexity of $\tilde{O}(\epsilon^{-1/3})$, while maintaining quadratic local convergence. We further explore the trade-off when pushing the global convergence to the limit. In particular, we propose the \emph{Accelerated Trust-Region Extragradient Method} that has a global near-optimal rate of $\tilde{O}(\epsilon^{-2/7})$ but loses the quadratic local convergence.
+    This reveals a phase transition in accelerated trust-region type methods: the excellent local convergence can be maintained when achieving a moderate global acceleration but becomes invalid when pursuing the extreme global efficiency.  
+    Numerical experiments further confirm the results indicated by our convergence analysis.
+\end{abstract}
+
+\section{Introduction}\label{Intro}
+In this paper, we consider the unconstrained convex optimization problem
+\begin{equation} \label{eq.main problem}
+    f^* = \min_{x\in \mathbb{R}^n} f(x),
+\end{equation}
+where $f:\mathbb{R}^n \to \mathbb{R}$ is a convex function.
+When the Hessian of the objective is available, second-order methods (SOMs) are particularly effective for solving~\eqref{eq.main problem}, especially when high-accuracy solutions are desired. Their power stems from a central property: Newton’s method achieves quadratic convergence in a neighborhood of any non-degenerate local minimum~\cite{polyak2007newton,more1982newton,nocedal1999numerical}. Many SOMs are thus designed to approximate the Newton direction, allowing them to inherit its excellent local convergence behavior.
+
+In addition to local convergence, another important criterion for evaluating the effectiveness of optimization methods is their non-asymptotic global oracle complexity, which refers to the number of second-order subproblems (the oracle calls) needed to find an $\epsilon$-approximate solution~\cite{cartis2022evaluation}. Over the past decades, a few SOMs have been developed with such emphases ~\cite{nesterov2006cubic,mishchenko_regularized_2023,jiang2024nonconvexityuniversaltrustregionmethod,heHomogeneousSecondorderDescent2025}.  In convex optimization, these methods can be further improved through acceleration techniques.
+
+In this context, two major approaches have emerged. The first approach, accelerated cubic regularized Newton (CRN) method~\cite{nesterov2008accelerating}, achieves a global oracle complexity of $O(\epsilon^{-1/3})$ based on the cubic regularization oracle \cite{nesterov2006cubic}. A different strategy is adopted in the accelerated Newton proximal extragradient (A-NPE) method~\cite{monteiro2013accelerated}, which improves the oracle complexity to $\tilde{O}(\epsilon^{-2/7})$ and is compatible with second-order oracles that satisfy certain error bound conditions~\cite{carmon2022optimal}.
+These developments, largely based on the estimating sequence technique~\cite{nesterovMethodSolvingConvex1983a,baesEstimateSequenceMethods2009a}, have inspired a wide range of enhancements~\cite{jiang2021optimal,chen2022accelerating,lin2022explicit,agafonov2023inexact,agafonov2024advancing,jiang2024accelerated,huang2024inexact,doikov2020contracting}.
+Recently, the oracle complexity of the A-NPE method was improved to be an optimal rate in $O(\epsilon^{-2/7})$~\cite{carmon2022optimal,NEURIPS2022_e56f394b}. These acceleration techniques are broadly applicable and are by no means limited to the domain of SOMs~\cite{xu2017accelerated,xu2018accelerated,lan2012optimal,ghadimi2016accelerated}.
+
+
+However,  it is hard to balance the global and local efficiency of second-order optimization algorithms. For instance,
+    the classical Newton's method possesses excellent local convergence but lacks global guarantees, often exhibiting divergence when the starting point is far from the optimal solution~\cite{more1982newton,dennis1996numerical}. In contrast, stronger worst-case complexity results of accelerated SOMs often come at the cost of local efficiency.  
+% While classical SOMs achieve local quadratic convergence, no existing accelerated SOM successfully retains this property. 
+Empirical evidence shows that in many tasks like logistic regression, accelerated SOMs are often outperformed by unaccelerated ones~\cite{jiang2020unified,huang2024inexact,chen2022accelerating,carmon2022optimal}, and manually switching to Newton’s method is often necessary to obtain highly accurate solutions~\cite{jiang2020unified,huang2024inexact,chen2022accelerating}. The above phenomenon underscores a fundamental dilemma in accelerated SOMs, and raises the following question:
+\begin{center}
+    \emph{How much can we accelerate SOMs globally while maintaining their excellent local convergence?}
+\end{center}
+
+\subsection{Motivation and our approach}\label{sec.motivation}
+It is folklore that the strong local performance of SOMs ultimately stems from the Newton step. Thus, to design an accelerated method with excellent local performance, the second-order oracle should have the ability to detect the local geometry near the optimal solution, providing a signal indicating that the iterates may have
+entered the quadratic convergence region, allowing a Newton step to be active.
+For that sake, one particular choice could be the trust-region (TR) oracle~\cite{More1983,conn2000trust}. At a given point \( x \in \mathbb{R}^n \), the classic TR oracle solves the following subproblem:
+\begin{equation}
+    \label{eq.classic tr subproblem}
+    \begin{aligned}
+        \underset{d \in \mathbb{R}^n}{\min}~ & \nabla f(x)^T d + \tfrac{1}{2} d^T \nabla^2 f(x)  d \\
+        \text{s.t.}                          & \quad  \|d\| \le r,
+    \end{aligned}
+\end{equation}
+where \( r \) denotes the trust-region radius. We denote $(d,\lambda) = \tr(x, r)$ as the primal-dual solution to this problem. For an overview of TR methods, we refer readers to two excellent monographs \cite{yuan2000review,yuan2015recent}.
+
+Two features make \eqref{eq.classic tr subproblem} particularly appealing. Near a non-degenerate minimizer, the step reduces to the pure Newton direction once the ball constraint becomes inactive, preserving quadratic convergence, which is the capability absent from other second-order oracles. 
+Moreover, \tr{} oracles can be solved in $O(n^3 + n^2\log\log(\epsilon^{-1}))$ arithmetic operations \cite{vavasisProvingPolynomialtimeSphereconstrained1990,yenewcomplexityresult1991}, incurring no significant overhead compared to solving a Newton equation.
+% \footnote{In comparison, the cubic Newton oracle requires an $O\left(\log\left(1/\epsilon\right)\right)$-time 1-dimensional search procedure \cite{nesterov2006cubic,cartisChapter8Subproblem2022}.}
+On the practical side, the TR oracle has been thoroughly analyzed \cite{jiangHolderianErrorBounds2022,rojasNewMatrixfreeAlgorithm2001,ho2017second,wang2022generalized}, so that highly competitive solvers have been developed \cite{rojasNewMatrixfreeAlgorithm2001, adachiSolvingTrustregionSubproblem2017, adachiEigenvaluebasedAlgorithmAnalysis2019} for it and its extensions.
+To this end, TR oracles have formed the algorithmic core of general-purpose nonlinear programming solvers such as Knitro~\cite{byrd2006k}, COPT~\cite{geCardinalOptimizerCOPT2022}, and PDFO~\cite{ragonneau2024pdfo}. Similar success can be found in other cross-cutting applications ranging from adversarial training~\cite{yao2019trust} to reinforcement learning~\cite{schulman2015trust}. These advantages serve as the motivation to use \tr{} to address the global-local balance in accelerated SOMs.
+
+
+However, to our best knowledge,  TR methods have not been accelerated yet as
+using TR oracles introduces technical challenges. Classical TR methods cannot match the global oracle complexity of other unaccelerated SOMs~\cite{cartisComplexitySteepestDescent2010,curtis2017trust} because the dual variable $\lambda$ associated with the ball constraint in \eqref{eq.classic tr subproblem} is determined a posteriori and requires careful monitoring~\cite{curtis2018concise}. Achieving global acceleration demands relative stability between this multiplier and the step size, which roughly means that $\lambda$ should not vary too fast relative to the step size, but enforcing such stability can interfere with transitions to Newton steps near the optimum.
+
+To address this challenge, we design, for the first time, the accelerated trust-region methods that leverage a modified TR oracle, which we call the trust-region oracle for acceleration denoted as \ref{eq.newTR}. In particular, at a point $x \in \mathbb{R}^n$, the \ref{eq.newTR} oracle solves
+\begin{equation*}
+\begin{aligned}
+\min_{d \in \mathbb{R}^n}~ & \nabla f(x)^\top d 
+    + \tfrac{1}{2} d^\top (\nabla^2 f(x) + \sigma I) d, \\
+\text{s.t.} &~ \|d\| \le r.
+\end{aligned}
+\tag*{(TR$_+$)}
+\end{equation*}
+The dual variable associated with the ball constraint is denoted by $\lambda$, which can detect local geometric information of the optimal solution. 
+The primal regularization $\sigma$ in \ref{eq.newTR} is used to effectively modulate $\lambda$, and maintains the stability required for global acceleration, enabling our accelerated trust-region method to systematically balance fast local convergence with provable global guarantee.
+\subsection{Contribution}
+This work provides an answer to the question posed earlier: we demonstrate that the compatibility between the global and local efficiency of the SOMs depends on the degree of global acceleration.
+Specifically, based on the \ref{eq.newTR} oracles \cite{jiang2024nonconvexityuniversaltrustregionmethod}, we develop two accelerated TR-type methods for problem~\eqref{eq.main problem}. One can simultaneously achieve both global acceleration and quadratic local convergence, and the other has a faster global convergence rate but loses local efficiency.
+
+The first method, \emph{Accelerated Trust-Region Method with Local Detection} (\Cref{alg.accelerated utr}), implements a local detection mechanism (\Cref{alg.local detection}) that automatically identifies and ``dives into'' the quadratic convergence regions. This design yields an improved global worst-case oracle complexity of $\tilde{O}(\epsilon^{-1/3})$, while achieving a local quadratic rate of convergence. To our best knowledge, this is the first accelerated SOM that provably achieves both $\tilde{O}(\epsilon^{-1/3})$ global oracle complexity and local quadratic convergence. 
+
+The second method, \emph{Accelerated Trust-Region Extragradient Method} (\Cref{alg.ms accelerated utr}), is designed to persuit the limits of global performance, reaching the near-optimal global oracle complexity of $\tilde{O}(\epsilon^{-2/7})$, but loses the excellent local convergence. Thus, our analysis and experiments reveal a phase transition in accelerated trust-region type methods: pushing global efficiency to its limits naturally entails a trade-off with local performance. 
+Such a phase transition occurs due to the loss of local detection in \Cref{alg.ms accelerated utr} when pursuing the near-optimal global convergence rate,
+where the primal regularizer $\sigma$ is set prior to determining the extrapolation point that is used in the \ref{eq.newTR} oracle~(as in \Cref{alg.accelerated utr}).
+
+Our theoretical findings are corroborated by numerical experiments. On a global scale, all accelerated SOMs, including ours and \cite{nesterov2008accelerating,monteiro2013accelerated}, consistently outperform the non-accelerated trust-region method~\cite{jiang2024nonconvexityuniversaltrustregionmethod} and cubic Newton method~\cite{nesterov2006cubic}. Locally, \Cref{alg.accelerated utr} exhibits quadratic convergence, and \atrms{} cannot retain superlinear convergence near the solution, similar to the empirical conclusions in \cite{carmon2022optimal,jiang2024accelerated,huang2024inexact}. These findings again confirm the necessity of local detection.
+
+\subsection{Related works}
+We review related works along two main lines: TR-type methods and accelerated SOMs that aim to achieve faster-than-sublinear efficiency. Despite the strong empirical success of TR-type methods, its theoretical analysis mainly focuses on nonconvex problems~\cite{yeSecondOrderOptimization2005,curtis2017trust,curtis2021trust,zhangHomogeneousSecondorderDescent2025,hamad2022consistently,grapiglia2015convergence,hamad2024simplepracticaladaptivetrustregion}, while  
+its global complexity analysis for convex problems remains incomplete.
+In fact, in convex optimization, the classical TR has worse convergence rates than other unaccelerated mainstream SOMs. This gap was recently closed in~\cite{jiang2024nonconvexityuniversaltrustregionmethod}. However, whether TR oracles can further benefit from acceleration, as achieved for other SOMs, remains an open question.
+
+As discussed earlier, unaccelerated SOMs often exhibit superior local performance near the optimal solution compared with their accelerated counterparts. A common remedy for this issue is to employ restart strategies in accelerated frameworks~\cite{nesterov_lectures_2018}. However, this introduces a new challenge of deciding when to restart since the optimal restart frequency depends on unknown, problem-specific parameters. In contrast, when stronger global regularity conditions (akin to strong convexity) are imposed on the objective function, the restart schedule can be determined in a more structured form~\cite{ostroukhov2020tensor, lin2025perseus, huang2025approximation} or even becomes unnecessary~\cite{jiang2022generalized, marques2022variants}. Under such assumptions, these methods can accommodate global performance, and thus the intrinsic trade-off between global convergence and local efficiency becomes a secondary concern.
+
+\paragraph{Organization of the paper}
+The remaining part of this paper is organized as follows. Section~\ref{sec.priliminary} reviews the background on TR-type oracles and the use of estimate sequence techniques in accelerated second-order optimization. In Section~\ref{sec.first variant}, we present the \Cref{alg.accelerated utr}, which achieves an oracle complexity of $\tilde O(\epsilon^{-1/3})$ and exhibits quadratic convergence in high-accuracy regimes. Section~\ref{sec.second variant} introduces the \Cref{alg.ms accelerated utr}, which explores the phase transition of acceleration and attains a near-optimal oracle complexity of $\tilde O(\epsilon^{-2/7})$. Section~\ref{sec.experiments} reports numerical results on practical tasks, confirming the theoretical advantages of our proposed methods.
+
+
+\section{Preliminaries}
+\label{sec.priliminary}
+Let $\|\cdot\|$ denote the standard Euclidean norm in $\mathbb{R}^n$, and let $x^T y$ and $\langle x,y\rangle$ represent the inner product between $x, y \in \mathbb{R}^n$. For a matrix $X \in \mathbb{R}^{n \times n}$, $\|X\|$ denotes the induced $\ell_2$ norm.
+% We use the standard notations $O(\cdot), \Omega(\cdot), \Theta(\cdot)$ in their conventional sense, where $\tilde{O}(\cdot)$ hides logarithmic terms within $O(\cdot)$. Specifically, for two numerical quantities $A$ and $B$, we say that $A = O(B)$ if there exists an absolute constant $c > 0$ such that $A \leq c \cdot B$, and $A = \Omega(B)$ if there exists an absolute constant $c > 0$ such that $A \geq c \cdot B$. We write $A = \Theta(B)$ if both $A = O(B)$ and $A = \Omega(B)$ hold.
+Unless otherwise stated, all logarithmic functions $\log(x)$ in this paper refer to the base-2 logarithm.
+
+We are interested in finding $\epsilon$-approximate solutions of \eqref{eq.main problem} defined as below.
+\begin{definition}
+    \label{def.approximate solution}
+    Given $0<\epsilon <1$, a point $x \in \mathbb{R}^n$ is an $\epsilon$-approximate solution to problem~\eqref{eq.main problem} if
+    \begin{equation}
+        \label{eq.approximate solution}
+        f(x) - f^* \leq \epsilon \quad \text{or} \quad \|\nabla f(x)\| \leq \epsilon.
+    \end{equation}
+\end{definition}
+The following assumptions are used throughout the paper. Some of them are invoked only when necessary and will be stated explicitly.
+\begin{assumption}
+    \label{assm.lipschitz}
+    The objective function $f: \mathbb{R}^n \to \mathbb{R}$ is twice continuously differentiable, and its Hessian is Lipschitz continuous. That is, there exists a constant $M > 0$ such that for all $x, y \in \mathbb{R}^n$,
+    \begin{equation}
+        \label{eq.main assm}
+        \|\nabla^2 f(x) - \nabla^2 f(y)\| \leq M \|x - y\|. \end{equation}
+\end{assumption}
+\begin{assumption}
+    \label{assm.solvable}
+    The problem \eqref{eq.main problem} is solvable; that is, there exists $x^* \in \mathbb{R}^n$ such that
+    \begin{equation*}
+        f(x^*) = f^*:= \min_{x \in \mathbb{R}^n} f(x).
+    \end{equation*}
+\end{assumption}
+\begin{assumption}
+    \label{assm.bounded hessian}
+    The Hessian of the objective function is bounded. That is, there exists a constant $\kappa_H > 0$ such that for all $x \in \mathbb{R}^n$, \begin{equation}
+        \label{eq.bounded hessian}
+        \|\nabla^2 f(x)\| \leq \kappa_H.
+    \end{equation}
+\end{assumption}
+As a direct consequence of Assumption~\ref{assm.lipschitz}, we have
+\begin{lemma}[Lemma 4.1.1, \citet{nesterov_lectures_2018}]\label{lem.lipschitz}
+    If \(f:\mathbb{R}^n \mapsto \mathbb{R}\) satisfies Assumption~\ref{assm.lipschitz}, then for all \(x,y\in \mathbb{R}^n\), we have
+    \begin{subequations}
+        \begin{align}
+            \label{eq.first-order exp}
+             & \left\|\nabla f(y)-\nabla f(x)-\nabla^{2} f(x)(y-x)\right\|                       \leq \frac{M}{2}\|y-x\|^{2} \\
+            \label{eq.second-order exp}
+             & \left|f(y)-f(x)-\nabla f(x)^T(y-x)-\frac{1}{2}(y-x)^T\nabla^{2} f(x)(y-x)\right|  \leq \frac{M}{6}\|y-x\|^{3}.
+        \end{align}
+    \end{subequations}
+\end{lemma}
+
+To proceed, let us introduce a unified view of the updates of SOMs. In fact, almost all of the SOMs choose the step $d$ at a given point $x$ as
+\begin{equation}
+    \label{eq.second-order update}
+    \left (\nabla^2 f(x) + \mu I \right )d = -\nabla f(x).
+\end{equation}
+The regularization parameter $\mu$ plays a critical role in the convergence analysis and varies among different SOMs. For example, in the classical TR method using the standard oracle~\eqref{eq.classic tr subproblem}, $\mu$ is fully determined as a posteriori, and is exactly the Lagrangian multiplier associated with the ball constraint in \eqref{eq.classic tr subproblem}. In the regularized Newton methods~\cite{mishchenko_regularized_2023}, $\mu$ can be explicitly selected as $\Theta(\sqrt{\|\nabla f(x)\|})$ such that a $O(\epsilon^{-1/2})$ method can be designed . In the CRN method~\cite{nesterov2006cubic}, it requires some search procedures on $\mu$. 
+
+The following lemmas clarify $\mu$ plays an important role in the convergence analysis of SOMs, the proofs of which can be found in \Cref{sec.proof pre}.
+\begin{lemma}
+    \label{lem.bound next gradient}
+    Suppose Assumption~\ref{assm.lipschitz} and \eqref{eq.second-order update} hold, then we have
+    \begin{equation}
+        \label{eq.bound next gradient}
+        \|\nabla f(x+d)\| \leq \frac{M}{2}\|d\|^2+\mu\|d\|.
+    \end{equation}
+\end{lemma}
+
+\begin{lemma}
+    \label{lem.inner product g and d}
+    Suppose Assumption~\ref{assm.lipschitz} and \eqref{eq.second-order update} hold,
+    holds for some $\mu$ with $\mu\geq M \|d\|$, then we have
+    \begin{equation}
+        \label{eq.inner product g d}
+        \langle \nabla f(x+d),-d \rangle \geq \frac{\|\nabla f(x+d)\|^2}{2\mu}+\frac{3}{8}\mu \|d\|^2.
+    \end{equation}
+    Further, if $\mu \leq 2M\|d\|$, we have
+    \begin{equation}
+        \label{eq.inner product g d advanced}
+        \langle \nabla f(x+d),-d \rangle \geq \frac{\sqrt{6}}{6} \frac{\|\nabla f(x+d)\|^{3/2}}{\sqrt{M}}.
+    \end{equation}
+\end{lemma}
+
+Generally speaking, \Cref{lem.bound next gradient} shows that we can bound the next-iterate gradient norm by controlling $\mu$.
+{\Cref{lem.inner product g and d} serves as a key bridge to establish the global efficiency~(in fact, it is a modified version of~\cite[Lemma 4.2.5]{nesterov_lectures_2018} and~\cite[Corollary 1]{nesterovImplementableTensorMethods2021} for TR-type oracle)}, which suggests that $\mu$ should be selected roughly as $\Theta(\|d\|)$. This condition generally fails for the classical TR oracle, as explained in~\Cref{sec.motivation} and also discussed in~\cite{curtis2018concise,curtis2017trust}. For this reason, we adopt the \ref{eq.newTR} oracle:
+% However, achieving this global-local balance is far from straightforward. On one hand, the multiplier in standard TR oracles is not stable and is determined a posteriori, making it difficult to consistently satisfy $\mu = \Theta(\|d\|)$ required by persueing better global complexity. On the other hand, existing accelerated SOMs often lack local detection mechanisms and therefore tend to adopt globally conservative strategies by default. As a result, their local steps remain overly cautious even when faster convergence is possible.
+\begin{equation}\label{eq.newTR}
+\begin{aligned}
+    \min_{d \in \mathbb{R}^n}~ & \nabla f(x)^T d 
+    + \tfrac{1}{2} d^T (\nabla^2 f(x) + \sigma I) d, \\
+    \text{s.t.} &~ \|d\| \le r,
+\end{aligned}
+\tag*{(TR$_+$)}
+\end{equation}
+We denote $(d, \lambda) = \trp(x, \sigma, r)$ as the primal-dual solution of the \ref{eq.newTR} subproblem, and in the following, all references to solution pairs $(d,\lambda)$ will refer to this \ref{eq.newTR} solution unless otherwise stated.
+The global optimality conditions are as follows.
+\begin{lemma}[Section 3,~\citet{conn2000trust}]\label{lem.optimal condition}
+    The direction $d$ is the solution to \ref{eq.newTR} if and only if there exists a dual multiplier $\lambda \geq 0$ such that: \begin{subequations}\label{eq.sa}
+        \begin{align}
+            \label{eq.optcond primal}
+             & \| d\| \leq r                                                       \\
+            \label{eq.optcond coml slack}
+             & \lambda \left(\|d\|-r \right)=0                                     \\ \label{eq.optcond firstorder}
+             & \left(\nabla^2 f(x) + \sigma I + \lambda I \right) d = -\nabla f(x) \\
+            \label{eq.optcond secondorder}
+             & \nabla^2 f(x) + \sigma I + \lambda I \succeq 0.
+        \end{align}
+    \end{subequations}
+\end{lemma}
+In the \ref{eq.newTR} oracle, the regularization parameter decomposes as $\mu=\sigma+\lambda$, aggregating \emph{a prior} regularizer from the primal problem and \emph{a posterior} dual variable. As we will show in the following, this primal-dual combo of information has the potential to balance global and local behavior.
+\section{Variant~I: Balancing the Global-Local Trade-off}\label{sec.first variant}
+In this section, we propose the first accelerated TR method, which applies the primal-dual structure of \ref{eq.newTR} into the estimating sequence \cite{nesterov2008accelerating}. The global oracle complexity is improved to $\tilde O(\epsilon^{-1/3})$ as opposed to the recent $O(\epsilon^{-1/2})$ in convex optimization \cite{jiang2024nonconvexityuniversaltrustregionmethod}, while the local rate of convergence to the non-degenerate solution remains quadratic.
+\subsection{Algorithm design}
+\Cref{alg.accelerated utr} and its local detection mechanism (\Cref{alg.local detection}) are presented below.
+\begin{algorithm}[ht]
+    \caption{Accelerated Trust-Region Method with Local Detection (\atr{})}\label{alg.accelerated utr}
+    \begin{algorithmic}[1]
+        \STATE \textbf{input:} initial point $x_0=v_0\in \mathbb{R}^n$, $s_0=0$, tolerance $\epsilon>0$
+        \FOR{$k=0, 1, \ldots, K_\epsilon$}
+        \STATE $y_k = \frac{k}{k+3}x_k+\frac{3}{k+3}v_k$
+        \STATE $(\sigma_k,r_k) = (\tfrac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2},\tfrac{1}{\sqrt{2M}}\|\nabla f(y_k)\|^{1/2})$
+        \STATE $(d_k,\lambda_k) = \trp(y_k,\sigma_k,r_k)$ 
+        % \noindent\rule{8cm}{0.4pt} 
+        \IF{$\lambda_k=0$} \label{line.if}
+        % \STATE $x_{k+1}=y_k+d_k$ \label{line.nonzero multiplier}
+        \STATE \texttt{\# Enter Local Detection (\Cref{alg.local detection})}
+        % \STATE $z_i,\text{ET}=\operatorname{Newton}(y_k,\left \lceil\frac{\log \|\nabla f(y_k)\|}{\epsilon} \right\rceil)$ 
+        % \STATE $(z_i,d_k,\mu_k,\text{ET}) = \operatorname{LD}(y_k,\tfrac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2},d_k,\epsilon)$
+        \STATE $(x_{k+1},\text{ET}) = \operatorname{LD}(y_k,\tfrac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2},d_k,\epsilon)$
+        \label{line.early terminate main}
+        \IF{$\text{ET}$}
+        \STATE \textbf{terminate and output $x_{k+1}$}
+        \ENDIF
+        % \IF{$\textrm{ET}$} \STATE\textbf{terminate} \ENDIF
+        \ENDIF
+        % \STATE $x_{k+1}=y_k+d_k$
+        \STATE $s_{k+1} = s_{k}+\tfrac{(k+1)(k+2)}{2}\nabla f(x_{k+1})$
+        \STATE $v_{k+1} = v_0-\sqrt{\tfrac{8}{3M\|s_{k+1}\|}}s_{k+1}$
+        \ENDFOR
+    \end{algorithmic}
+\end{algorithm}
+\begin{subroutine}[!ht]
+    \caption{Local Detection (LD) }\label{alg.local detection}
+    \begin{algorithmic}[1]
+        \STATE{\textbf{input:} $z_0=y\in \mathbb{R}^n$, $\mu_+$, $d_+$, $\epsilon$;
+            \label{line.right bracket point}
+        }
+        \IF{$\|d_+\| \leq \min\{\frac{\epsilon}{2\kappa_H}, \sqrt{\frac{\epsilon}{M}}\}$}\label{line.if coro 3.1}
+        \STATE{\textbf{output} $y+d_+$, ET =True
+            \label{line.et 2}
+        }
+        \ENDIF
+        \STATE{\texttt{\# Track 1: Local Diving}}
+        \FOR{$i=1,\ldots,\left \lceil\log\frac{\|\nabla f(y)\|}{\epsilon} \right\rceil$}\label{line.track 1 number of iter}
+        \STATE{$z_i = z_{i-1}-\nabla^2f(z_{i-1})^{-1}\nabla f(z_{i-1})$}
+        \IF{$\|\nabla f(z_i)\|\leq \epsilon$}
+        \STATE{\textbf{output} $z_i$, ET=True
+            \label{line.et 1}
+        }
+        \ENDIF
+        \ENDFOR
+        \STATE{\texttt{\# Track 2: Ratio Bracketing and Bisection~(R\&B)}}
+        \IF{$\frac{\mu_+}{\|d_+\|}\leq 2M$
+            \label{line.check right bracket point}}
+        \STATE{\textbf{output} $y+d_+$, ET =False
+            \hfill\texttt{\# Check if the bisection is needed}
+        }
+        \ELSE
+        \STATE{$r_- = \|d_+\|$, $r_+ = \left \|\left(\nabla^2f(y)+M\|d_+\| I\right)^{-1}\nabla f(y)\right\|$
+            \label{line.left bracketing point}
+        }
+        \ENDIF
+        \WHILE{True}
+        \STATE{$r = \tfrac{r_-+r_+}{2}$
+        \hfill\texttt{\# Perform bisection over $r \in [r_-, r_+]$}
+        }
+        \STATE{$(d,\mu) = \trp(y,0,r)$
+        \label{line.linear system oracle}
+        }
+        \IF{$\frac{\mu}{\|d\|}<M$}
+        \STATE{$r_+=r$}
+        \ELSIF{$\tfrac{\mu}{\|d\|}>2M$}
+        \STATE{$r_- = r$}
+        \ELSE
+        \STATE{\textbf{output} $y + d$, ET= False}
+        \ENDIF
+        \ENDWHILE
+        % \WHILE{$\frac{\mu}{\|d\|} \not\in [M, 2M]$}
+        % \STATE{Perform bisection over $r \in [r_-, r_+]$}
+        % \hfill\texttt{\# Bisection starts}
+
+        % \STATE{$(d,\mu) = \trp(y,0,r)$
+        %     \label{line.linear system oracle}
+        % }
+        % % \IF{$\frac{\mu}{\|d\|}<M$}
+        % % \STATE{$r_+=r$}
+        % % \ELSIF{$\tfrac{\mu}{\|d\|}>2M$}
+        % % \STATE{$r_- = r$}
+        % % \ELSE
+        % % \STATE{\textbf{output} None, $d$, $\mu$, ET= False}
+        % % \ENDIF
+        % \ENDWHILE
+        % \STATE{\textbf{output} None, $d$, $\mu$, ET= False}
+        % \STATE{\textbf{output} $y + d$, ET= False}
+
+    \end{algorithmic}
+\end{subroutine}
+The overall regularization in \ref{eq.newTR} is a combination of primal and dual information: $\mu_k = \sigma_k + \lambda_k$. The primal part $\sigma_k$ is chosen carefully to make the dual part more stable and still carry local information, while the dual part $\lambda_k$ is used as an indicator to check whether the current iterate is close to the local optimum according to the value of $\lambda_k$.
+
+% The algorithm proceeds by checking whether the dual multiplier $\lambda_k$ is zero.
+
+The case $\lambda_k > 0$ typically indicates that the current iterate is still far from a local optimum. In that regime, as shown later in \Cref{lem.ratio pass nonzero}, the overall regularization parameter $\mu_k$ becomes automatically proportional to the step size, which justifies the updates of the estimating sequence in the acceleration framework.
+
+The case $\lambda_k = 0$ is a signal that the current extrapolation point $y_k$ may have entered the local quadratic convergence region of Newton's method (see \Cref{lem.detection of local quadratic}). This triggers the Local Detection procedure (LD, \Cref{alg.local detection}), which consists of two separate tracks named local diving and R\&B respectively probing the local geometry around $y_k$. 
+
+In local diving (\texttt{Track 1}), we run Newton's method starting from $y_k$, the resulting sequence is indexed by $i$ and denoted by $\{z_i\}$. As discussed in Section~\ref{sec.local}, if $y_k$ indeed lies within the quadratic convergence region, the resulting sequence $\{z_i\}$ will exhibit quadratic convergence, which justifies early termination of \Cref{alg.accelerated utr}.~(In practice, we could stop diving if the $\|\nabla f(z_i)\|$ is not decreasing, or a degenerate Hessian is detected.)
+
+In R\&B (\texttt{track 2}), we attempt to find a step $d_k$ whose size is proportional to the regularization parameter $\mu_k$. This step certifies the updates of the estimate sequence and thus preserves global acceleration. 
+
+In summary, \Cref{alg.accelerated utr} admits two possible termination routes: when $y_k$ enters the region of local quadratic convergence, the algorithm detects this and terminates early with ET$=$True~(see lines~\ref{line.et 2} and \ref{line.et 1} in \Cref{alg.local detection}). Otherwise, it continues to follow a path of globally accelerated sequences with $\mathrm{ET} = \mathrm{False}$.
+
+\subsection{Global complexity analysis}
+Now we analyze the worst-case global oracle complexity of \Cref{alg.accelerated utr} for computing an approximate solution as defined in \Cref{def.approximate solution}. Since our goal here is to analyze the worst-case global complexity, we assume the iterates do not step into local diving of \Cref{alg.local detection}, which is more relevant to local convergence analysis (cf. \Cref{sec.local}). Our analysis follows a standard procedure: we first establish the \textit{iteration complexity} of the accelerated sequence in~\Cref{alg.accelerated utr}, and subsequently determine the number of oracle calls required per iteration in~\Cref{alg.local detection}, thereby obtaining the final \textit{oracle complexity} bound.
+\subsubsection{Iterations complexity of \Cref{alg.accelerated utr}}
+Denote $K_\epsilon$ as the iteration number \Cref{alg.accelerated utr} takes to find an approximate solution satisfying \eqref{eq.approximate solution}. We show $K_\epsilon = O(\epsilon^{-1/3})$.
+
+When using the estimating sequence technique in~\cite{nesterov2008accelerating}, the globally accelerated convergence is guaranteed by maintaining the following two relations across iterations
+\begin{subequations}\label{eq.es relation}
+    \begin{align}
+        \label{eq.es relation 1}
+         & \phi_k^*  \geq A_k f(x_k), \  \phi_k^*= \phi_k(v_k) =\min_{x\in\mathbb{R}^n}\phi_k(x) \\
+        \label{eq.es relation 2}
+         & \phi_k(x)\leq A_kf(x)+\phi_0(x), \ \forall x\in\mathbb{R}^n.
+    \end{align}
+\end{subequations}
+Here $\{\phi_k(x)\}_{k\geq 0}$ is a sequence of functions that approximate $f(x)$ from both above and below with $\{v_k\}_{k\geq0}$ being the optimum, $\{A_k\}_{k\geq 0}$ is a sequence that measures the convergence rate of the sequence $\{x_k\}_{k\geq 0}$. As a result of \eqref{eq.es relation}, we have
+\begin{equation*}
+    f(x_k)-f(x)\leq \frac{1}{A_k}\phi_0(x), \ \forall x\in \mathbb{R}^n.
+\end{equation*}
+Therefore, the global complexity directly follows from the choice of $A_k$ and $\phi_0(x)$.
+
+For the upcoming analysis, we first complete the definition of $A_k,\phi_k(x)$ in the estimating sequence framework that was not explicitly presented in the algorithm:
+\begin{equation}
+    \label{eq.update a and A}
+    a_k = \frac{(k+1)(k+2)}{2}, \ A_k=\frac{k(k+1)(k+2)}{6},
+\end{equation}
+\begin{align}\label{eq.update phi}
+    \phi_0(x) = \frac{M}{8}\|x-x_0\|^3, \ \phi_{k+1}(x) =\phi_k(x)+a_k\left (f(x_{k+1})+\langle \nabla f(x_{k+1}),x-x_{k+1}\rangle \right ).
+\end{align}
+Here are some basic properties of the estimating sequence, which are from \citet{nesterov_lectures_2018}.
+\begin{lemma}
+    \label{lem.magnitude a and A}
+    For $k\geq 0$, we have
+    \begin{equation}
+        \label{eq.magnitude a and A}
+        \frac{A_{k+1}}{a_k^{3/2}} \geq \frac{\sqrt{2}}{3}.
+    \end{equation}
+\end{lemma}
+\begin{proof}The conclusion follows from that
+    $$\frac{A_{k+1}}{a_k^{3/2}}= \frac{(k+1)(k+2)(k+3)}{6}\cdot \frac{2^{3/2}}{(k+1)^{3/2}(k+2)^{3/2}} = \frac{\sqrt{2}(k+3)}{3(k+1)^{1/2}(k+2)^{1/2}} \geq \frac{\sqrt{2}}{3}.$$
+\end{proof}
+We call a differentiable function $d(x)$ on $\mathbb{R}^n$ uniformly convex \cite[Section 4.2.2]{nesterov_lectures_2018} of degree $p\geq 2$ with constant $q>0$ if
+\begin{equation}
+    \label{eq.uniformly convex of p}
+    d(y)\geq d(x)+\langle \nabla d(x),y-x\rangle +\frac{q}{p}\|y-x\|^p, \ \forall x,y\in\mathbb{R}^n.
+\end{equation}
+\begin{lemma}
+    \label{lem.property of phi}
+    For the function sequence $\phi_k(x)$, they have the following properties
+    \begin{enumerate}
+        \item $\phi_k(x)$ is uniformly convex of degree $3$ with constant $\frac{3M}{16}$.
+        \item $v_k$ is the unique minimizer of $\phi_k(x)$, and
+              \begin{equation}
+                  \label{eq.phi_k phi_low}
+                  \phi_k(x)\geq \phi_k^* + \frac{M}{16}\|x-v_k\|^3.,
+              \end{equation}
+              where $\phi_k^* =\min \phi_k(x).$
+    \end{enumerate}
+\end{lemma}
+\begin{proof}
+    The first claim is from the definition of $\phi_0$ in \eqref{eq.update phi}, for analysis of uniform convex functions, please refer to \cite[Section 4.2.2]{nesterov_lectures_2018}. For the second claim, we have
+    \begin{equation}
+        \label{eq.phi recursive}
+        \phi_k(x) = \phi_0(x)+\sum_{i=0}^{k-1}a_i\left (f(x_{i+1})+\langle \nabla f(x_{i+1}),x-x_{i+1}\rangle \right).
+    \end{equation}
+    From the optimality condition, we have that
+    \begin{equation*}
+        \begin{aligned}
+            \nabla \phi_k(x) & = \nabla \phi_0(x)+ \sum_{i=0}^{k-1} a_i\nabla f(x_{i+1})                \\
+                             & = \frac{3M}{8}\|x-x_0\|(x-x_0)+\sum_{i=0}^{k-1} a_i\nabla f(x_{i+1}) =0.
+        \end{aligned}
+    \end{equation*}
+    Solving the optimality condition and noticing the way we update $s_k$ gives
+    \begin{equation*}
+        x = v_0 - \sqrt{\frac{8}{3M\|s_{k}\|}}s_{k},
+    \end{equation*}
+    which is $v_k$. Then \eqref{eq.phi_k phi_low} holds from the fact that $\phi_k(x)$ is uniformly convex of degree 3.
+\end{proof}
+To proceed, we categorize the iterates generated by \Cref{alg.accelerated utr} into two disjoint sets based on the value of the multiplier, according to whether the iterations invoke local detection:
+\begin{equation}
+    \label{eq.outer index catagory}
+    \begin{aligned}
+         & \mathcal{Z} = \left \{k |k\leq K_\epsilon,\ \lambda_k=0\right\},   \\
+         & \mathcal{N} = \left \{ k | k\leq K_\epsilon,\ \lambda_k>0\right\}.
+    \end{aligned}
+\end{equation}
+We first demonstrate that the ratio between the regularizer and the step size remains stable for $k\in\mathcal{N}$ as shown in \eqref{eq.output of alg2} which exhibits the power of \ref{eq.newTR}. 
+\begin{lemma}
+    \label{lem.ratio pass nonzero}
+    In the $k$-th iteration of \Cref{alg.accelerated utr}, if $k\in\mathcal{N}$, then
+    \begin{subequations}
+        \label{eq.output of alg2}
+        \begin{gather}
+            d_k = -\left(\nabla^2 f(y_k)+\mu_k I \right)^{-1}\nabla f(y_k)\\
+            M\|d_k\|\leq \mu_k \leq 2M\|d_k\|.
+        \end{gather}
+    \end{subequations}
+\end{lemma}
+\begin{proof}
+    On the one hand, by our choice of $(\sigma_k,r_k)$, we have $$\mu_k=\sigma_k+r_k\geq\sigma_k= Mr_k= M\|d_k\|.$$
+    On the other hand, since $\nabla^2 f(y_k)\succeq 0$, we have
+    \begin{equation*}
+        \mu_k\|d_k\|=\|\mu_kd_k\|\leq \left\|\left(\nabla^2 f(y_k)+\mu_k I\right)d_k\right\|=\|\nabla f(y_k)\|.
+    \end{equation*}
+    Note that $\lambda_k>0$ implies $\|d_k\|=r_k=\frac{1}{\sqrt{2M}}\|\nabla f(y_k)\|$. As a result, we have
+    \begin{equation*}
+        \mu_k\leq \frac{\|\nabla f(y_k)\|}{\|d_k\|}=\sqrt{2M}\|\nabla f(y_k)\|=2M\|d_k\|.
+    \end{equation*}
+    Therefore, \eqref{eq.output of alg2} holds.
+\end{proof}
+To maintain the flow of the complexity analysis, we temporarily assume the output of R\&B of \Cref{alg.local detection} satisfies~\eqref{eq.output of alg2} as well, i.e., \eqref{eq.output of alg2} holds for $k\in\mathcal{Z}$~(we will rigorously verify this later). Now we are able to show that, during the update of \Cref{alg.accelerated utr}, the relation \eqref{eq.es relation} holds.
+\begin{lemma}\label{lem.estimate sequence}
+    Suppose Assumption~\ref{assm.lipschitz} holds, and \eqref{eq.output of alg2} holds for the output of \Cref{alg.local detection}. Then we can guarantee the following for all $k\geq 0$:
+    \begin{equation}
+        \label{eq.estimating sequence relation}
+        A_k f(x_k)\leq \phi_k^*  \leq \phi_k(x)\leq A_k f(x)+\phi_0(x), \ \forall x\in \mathbb{R}^n.
+    \end{equation}
+\end{lemma}
+\begin{proof}
+    We conduct the proof by induction. Note that $A_0 = 0$, so \eqref{eq.estimating sequence relation} holds for $i=0$. Suppose it also holds for $i=k$.
+    We first check \eqref{eq.es relation 2} for $i=k+1$:
+    \begin{align*}
+        \phi_{k+1}(x) & =\phi_k(x)+a_k\left(f(x_{k+1})+\langle \nabla f(x_{k+1}),x-x_{k+1}\rangle \right)               \\
+                      & \leq A_k f(x)+\phi_0(x) +a_k\left(f(x_{k+1})+\langle \nabla f(x_{k+1}),x-x_{k+1}\rangle \right) \\
+                      & \leq A_k f(x)+\phi_0(x) +a_k f(x)                                                               \\
+                      & =A_{k+1} f(x)+\phi_0(x),
+    \end{align*}
+    where the first inequality is from the induction hypothesis.
+    We now check \eqref{eq.es relation 1} for $i=k+1$,
+    \begin{align*}
+        \phi_{k+1}^*
+         & = \min_{x\in\mathbb{R}^n} \left\{ \phi_k(x) + a_k \left(f(x_{k+1}) + \langle \nabla f(x_{k+1}), x - x_{k+1} \rangle \right) \right\} \\
+         & \geq \min_{x\in\mathbb{R}^n} \Bigl\{ \phi_k^* + \frac{M}{16} \|x - v_k\|^3
+        + a_k \left(f(x_{k+1}) + \langle \nabla f(x_{k+1}), x - x_{k+1} \rangle \right) \Bigr\}                                                 \\
+         & \geq \min_{x\in\mathbb{R}^n} \Bigl\{ A_k f(x_k) + \frac{M}{16} \|x - v_k\|^3
+        + a_k \left(f(x_{k+1}) + \langle \nabla f(x_{k+1}), x - x_{k+1} \rangle \right) \Bigr\}                                                 \\
+         & \geq \min_{x\in\mathbb{R}^n} \Bigl\{ A_k f(x_{k+1}) + A_k \langle \nabla f(x_{k+1}), x_k - x_{k+1} \rangle                           \\
+         & \qquad + \frac{M}{16} \|x - v_k\|^3 + a_k \left(f(x_{k+1}) + \langle \nabla f(x_{k+1}), x - x_{k+1} \rangle \right) \Bigr\}          \\
+         & =  A_{k+1} f(x_{k+1})
+        + A_{k+1} \left\langle \nabla f(x_{k+1}),
+        \frac{A_k}{A_{k+1}} x_k + \frac{a_k}{A_{k+1}} v_k - x_{k+1} \right\rangle                                                               \\
+         & \qquad + \min_{x\in\mathbb{R}^n} \Bigl\{\frac{M}{16} \|x - v_k\|^3
+        + a_k \langle \nabla f(x_{k+1}), x - v_k \rangle \Bigr\}                                                                                \\
+         & = A_{k+1} f(x_{k+1})
+        + A_{k+1} \left\langle \nabla f(x_{k+1}),
+        \frac{A_k}{A_{k+1}} x_k + \frac{a_k}{A_{k+1}} v_k - x_{k+1} \right\rangle                                                               \\
+         & \qquad - \frac{a_k^{3/2}}{3\sqrt{3} \cdot \sqrt{M}} \|\nabla f(x_{k+1})\|^{3/2}                                                      \\
+         & = A_{k+1} f(x_{k+1}) + A_{k+1} \langle \nabla f(x_{k+1}), y_k - x_{k+1} \rangle
+        - \frac{a_k^{3/2}}{3\sqrt{3} \cdot \sqrt{M}} \|\nabla f(x_{k+1})\|^{3/2}                                                                \\
+         & = A_{k+1} f(x_{k+1}) + A_{k+1} \left(
+        \langle \nabla f(x_{k+1}), y_k - x_{k+1} \rangle
+        - A_{k+1}^{-1} \cdot \frac{a_k^{3/2}}{3\sqrt{3} \cdot \sqrt{M}}
+        \|\nabla f(x_{k+1})\|^{3/2} \right)                                                                                                     \\
+         & \geq A_{k+1} f(x_{k+1}) + A_{k+1} \left(
+        \langle \nabla f(x_{k+1}), y_k - x_{k+1} \rangle
+        - \frac{\sqrt{6}}{6\sqrt{M}} \|\nabla f(x_{k+1})\|^{3/2} \right).
+    \end{align*}
+    In the above analysis, the first inequality is because of the uniform convexity of $\phi_k$, the second inequality is from the induction hypothesis, the third inequality is from the convexity of $f$, and the last inequality is from \eqref{eq.magnitude a and A}. Now it reduces to proving
+    \begin{equation*}
+        \langle f(x_{k+1}),y_k-x_{k+1} \rangle -\frac{\sqrt{6}}{6\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2} \geq 0.
+    \end{equation*}
+    Note that we have
+    \begin{equation*}
+        M\|d_k\| \leq \mu_k \leq 2M\|d_k\|.
+    \end{equation*}
+    As a result of \eqref{eq.inner product g d advanced}, it holds that
+    \begin{equation*}
+        \langle f(x_{k+1}),y_k-x_{k+1} \rangle -\frac{\sqrt{6}}{6\sqrt{M}}\|\nabla f(x_{k+1})\|^{3/2} \geq 0.
+    \end{equation*}
+    Thus the proof is complete.
+\end{proof}
+As a direct consequence of \eqref{eq.update a and A} and \Cref{lem.estimate sequence}, we have the following global iteration complexity result of \Cref{alg.accelerated utr}.
+\begin{theorem}
+    \label{thm.convergence outer loop}
+    Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.solvable} hold, and \eqref{eq.output of alg2} holds for the output of \Cref{alg.local detection}, then \Cref{alg.accelerated utr} finds a point $x\in\mathbb{R}^n$ that satisfies \eqref{eq.approximate solution} in $K_\epsilon=O(\epsilon^{-1/3})$ iterations.
+\end{theorem}
+
+\subsubsection{Oracle complexity of \Cref{alg.local detection}}
+It remains to analyze how many oracles are needed in R\&B to find a direction that satisfies \eqref{eq.output of alg2}. We will show that the number of \ref{eq.newTR} oracles needed is bounded above by $O(\log\tfrac1\epsilon)$. As the argument is quite technical, some of the proofs are postponed to \Cref{sec.proof variant 1}.
+
+We begin with the following property of the iterates $y_k$ with $k\in\mathcal{Z}$.
+\begin{lemma}
+    \label{lem.upper bound for zero lambda}
+    Suppose Assumption~\ref{assm.bounded hessian} hold, for $k\in \mathcal{Z}$, we have
+    \begin{equation}
+        \label{eq.upper bound for zero lambda}
+        \|\nabla f(y_k)\|\leq \frac{2\kappa_H^2}{M}.
+    \end{equation}
+\end{lemma}
+\begin{proof}
+    Note that when $k\in \mathcal{Z}$, we have $\lambda_k =0$, hence the following hold
+    \begin{equation*}
+        \left (\nabla^2 f(y_k)+\frac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2} I\right )d_+ = -\nabla f(y_k), \ \|d_+\| \leq \frac{1}{\sqrt{2M}}\|\nabla f(y_k)\|^{1/2}.
+    \end{equation*}
+    Therefore, by the triangle inequality, it holds that
+    \begin{equation*}
+        \|\nabla f(y_k)\| \leq \|\nabla^2 f(y_k) d_+\| +\frac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2}\|d_+\| \leq \|\nabla^2 f(y_k) d_+\|+\frac{1}{2}\|\nabla f(y_k)\|.
+    \end{equation*}
+    By Assumption~\ref{assm.bounded hessian}, we have
+    \begin{equation*}
+        \begin{aligned}
+            \kappa_H \cdot \frac{1}{\sqrt{2M}}\|\nabla f(y_k)\|^{1/2}  \geq \kappa_H \|d_+\|  & \geq \|\nabla^2 f(y_k) d_+\|       \geq \frac{1}{2}\|\nabla f(y_k)\|.
+        \end{aligned}
+    \end{equation*}
+    By rearranging terms, we obtain \eqref{eq.upper bound for zero lambda}.
+\end{proof}
+\begin{corollary}
+    \label{coro.second et}
+    Suppose Assumption~\ref{assm.lipschitz}, Assumption~\ref{assm.bounded hessian}, and the "if" condition $\|d_+\|\leq \min\{\frac{\epsilon}{2\kappa_H},\sqrt{\frac{\epsilon}{M}}\}$ at line~\ref{line.if coro 3.1} of \Cref{alg.local detection} hold, then we have
+    \begin{equation*}
+        \|\nabla f(y+d_+)\|\leq \epsilon.
+    \end{equation*}
+\end{corollary}
+\begin{proof}
+    From \Cref{lem.bound next gradient}, we have
+    \begin{equation*}
+        \begin{aligned}
+            \|\nabla f(y+d_+)\| & \leq \frac{M}{2}\|d_+\|^2 + \frac{\sqrt{2M}}{2}\|\nabla f(y)\|^{1/2}\|d_+\|                                                          \\
+                                & \leq \frac{M}{2}\times \frac{\epsilon}{M}+\frac{\sqrt{2M}}{2}\times\frac{\sqrt{2}\kappa_H}{\sqrt{M}}\times\frac{\epsilon}{2\kappa_H} \\
+                                & \leq \epsilon.
+        \end{aligned}
+    \end{equation*}
+\end{proof}
+This implies that, in the subsequent analysis, we may assume that $\|d_+\| > \min\{\frac{\epsilon}{2\kappa_H},\sqrt{\frac{\epsilon}{M}}\}$. Otherwise, an approximate solution has already been found.
+
+Now we focus on the oracle complexity of R\&B, i.e., the complexity of bisection over radius $r$ on the interval $[r_-,r_+]$ to make \eqref{eq.output of alg2} hold. For simplicity, we omit the subscript $k$ in the analysis of the bisection procedure. In each step of the bisection, the update $(d,\mu)=\trp(y,0,r)$ with $r\in[r_-,r_+]$ defines the correspondence between $r$ and $\mu$ over the interval $[r_-,r_+]$ and $[\mu_-,\mu_+]$, where $\mu_-$ and $\mu_+$ have the following value due to the mechanism of \Cref{alg.accelerated utr} and \Cref{alg.local detection}
+\begin{equation}\label{eq.value mu}
+    \mu_- = M\|d_+\|, \ \mu_+=\frac{\sqrt{2M}}{2}\|\nabla f(y)\|^{1/2}.
+\end{equation}
+We show that this correspondence is one-to-one.
+
+% In each step of the bisection, one oracle $(d,\mu)=\trp(y,0,r)$ with $r\in[r_-,r_+]$ is called at the extrapolation point $y$, which gives a corresponding $\mu$. We show that the correspondence between $r$ and $\mu$ over the interval $[r_-,r_+]$ and $[\mu_-,\mu_+]$ is one-to-one, where
+
+\begin{lemma}
+    \label{lem.one-to-one correspondence}
+    For any $r \in [r_-, r_+]$, there exists a unique $\mu \in [\mu_-, \mu_+]$ such that
+    \[
+        r = \bigl\|(\nabla^2 f(y) + \mu I)^{-1} \nabla f(y)\bigr\| := r_y(\mu),
+    \]
+    establishing a one-to-one correspondence between $r$ and $\mu$. 
+    In particular, we may write $\mu = r_y^{-1}(r)$,
+    and the correspondence of endpoints satisfies
+    \[
+        r_- = r_y(\mu_+),
+        \quad
+        r_+ = r_y(\mu_-).
+    \]
+\end{lemma}
+\begin{proof}
+The endpoints correspondence between $r_- \to \mu_+$ and $r_+ \to \mu_-$ follows from line~\ref{line.left bracketing point} of \Cref{alg.local detection} and \eqref{eq.value mu}. 
+
+For any $r$, the existence of such $\mu$ follows from $(d,\mu)=\trp(y,0,r)$ and $\eqref{eq.optcond firstorder}$. For uniqueness, noting $\nabla^2 f(y) + \mu I \succ 0$ for any $\mu \in [\mu_-, \mu_+]$, 
+we can apply the eigenvalue decomposition 
+$\nabla^2 f(y) = V \Lambda V^\top$ with $\Lambda = \mathrm{diag}(\lambda_1,\dots,\lambda_n)$ and $V$ orthogonal. 
+Then
+\[
+    r = \bigl\|(\nabla^2 f(y) + \mu I)^{-1}\nabla f(y)\bigr\|
+      = \sqrt{\sum_{i=1}^n \frac{\beta_i^2}{(\lambda_i + \mu)^2}},
+\]
+where $\beta_i = \nabla f(y)^\top v_i$. Since $\lambda_i \ge 0$ and $\mu > 0$, every term in the summation is continuous and strictly decreasing in $\mu$, and thus $r_y(\mu)$ is continuous and strictly decreasing on $[\mu_-, \mu_+]$.  
+Consequently, for any $r \in [r_-, r_+]$, there exists a unique $\mu \in [\mu_-, \mu_+]$ such that 
+\[
+    r = r_y(\mu) = \bigl\|(\nabla^2 f(y) + \mu I)^{-1}\nabla f(y)\bigr\|.
+\]
+Hence, the correspondence between $r$ and $\mu$ is one-to-one, establishing the desired relation $\mu = r_y^{-1}(r)$.
+\end{proof}
+Using this one-to-one correspondence, when we perform bisection on $r$ over the interval $[r_-,r_+]$, we also implicitly perform bisection on $\mu$ over $[\mu_-,\mu_+]$. The logic of our analyses is to first identify the target interval of $\mu$ and then use the one-to-one correspondence again to transfer it to the target interval of $r$. This observation motivates us to introduce the following auxiliary functions of $\mu$.
+% gives
+% \begin{equation}
+%     \label{eq.correspondence}
+%     \|d\|=r=\left\|\left(\nabla^2 f(y)+\mu I\right)^{-1}\nabla f(y)\right\|.
+% \end{equation}
+% \cz{
+%     a bit messy. do you need $r(\mu), \mu(r), g(\mu)$ altogether?
+% }
+% Obviously, such correspondence between $r$ and $\mu$ is one-to-one for $r\in[r_-,r_+]$ and $\mu\in[\mu_-,\mu_+]$, where $\mu_-,\mu_+$ is defined by
+% \begin{equation}
+%     \label{eq.endpoint correspondence}
+%     r_- = \left\|\left(\nabla^2 f(y)+\mu_+ I\right)^{-1}\nabla f(y)\right\|, \ r_+=\left\|\left(\nabla^2 f(y)+\mu_- I\right)^{-1}\nabla f(y)\right\|.
+% \end{equation}
+\begin{equation}
+    \label{eq.auxiliary function for bisection}
+    g_y(\mu) =\frac{\mu}{r_y(\mu)}=\frac{\mu}{\|\left (\nabla^2 f(y)+\mu I\right)^{-1}\nabla f(y)\|}.
+\end{equation}
+% Or equivalently, \cz{not needed?}
+% \begin{equation}
+%     \label{eq.auxiliary function for bisection 2}
+%     \mu_y(r) = r_y^{-1}(r), r\in[r_-,r_+].
+% \end{equation}
+The goal of bisection is to locate the radius $r$ such that the corresponding $\mu$ as defined in \Cref{lem.one-to-one correspondence} satisfies
+\begin{equation*}
+    M \leq g_y(\mu) \leq 2M.
+\end{equation*}
+The following lemma validates the choices of the bracketing points at line~\ref{line.left bracketing point}.
+\begin{lemma}
+    \label{lem.valid bracketing}
+    In \textnormal{R\&B} of \Cref{alg.local detection}, when the bisection begins, we have
+    \begin{equation*}
+        g_y(\mu_-) < M, \ g_y(\mu_+) >2M.
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    From line~\ref{line.check right bracket point} in \Cref{alg.local detection}, we have $g_y(\mu_+)=\frac{\mu_+}{\|d_+\|} >2M$ whenever \Cref{alg.local detection} enters bisection procedure .
+
+    Denote $d_- = -\left(\nabla^2 f(y)+\mu_-I\right)^{-1}\nabla f(y)$. Since $\mu_- <\mu_+$, then
+    \begin{equation*}
+        \|d_-\|=\| \left (\nabla ^2 f(y)+\mu_- I\right )^{-1} \nabla f(y)\|>\| \left (\nabla ^2 f(y)+\mu_+ I\right )^{-1} \nabla f(y)\| = \|d_+\|,
+    \end{equation*}
+    therefore $g_y(\mu_-) = \frac{\mu_-}{\|d_-\|}=\frac{M\|d_+\|}{\|d_-\|}< M$.
+\end{proof}
+Next, we identify the length of the target interval for $\mu$.
+\begin{lemma}
+    \label{lem.bound target interval}
+    There exist $\mu_l,\mu_u$ with $\mu_-<\mu_l<\mu_u<\mu_+$ such that
+    \begin{equation}\label{eq.target interval bracketing points}
+        g_{y}(\mu_l)=M, \ g_{y}(\mu_u)=2M,
+    \end{equation}
+    and for all $\mu\in[\mu_l,\mu_u]$, we have
+    \begin{equation*}
+        M\leq g_y(\mu) \leq2M.
+    \end{equation*}
+    The length of the target interval $[\mu_l,\mu_u]$ satisfies
+    \begin{equation}
+        \label{eq.bound target interval}
+        \mu_u-\mu_l \geq \frac{M\|\left (\nabla ^2 f(y)+\mu_u I \right )^{-1}\nabla f(y)\|}{2}.
+    \end{equation}
+\end{lemma}
+After using the one-to-one correspondence to transfer the target interval to the one concerning $r$, the complexity of R\&B is bounded as follows. The details can be found in the Appendix~\ref{sec.proof variant 1}.
+\begin{lemma}
+    \label{lem.bound initial interval}
+    Suppose \Cref{assm.lipschitz} and \Cref{assm.bounded hessian} hold. At the $k$-th iteration of \Cref{alg.accelerated utr}, the oracle complexity of the bisection search procedure is
+    \begin{equation}
+        \label{eq.complexity bisection}
+        O\left(\log\frac{\kappa_H+\mu_+}{\epsilon}\right).
+    \end{equation}
+\end{lemma}
+
+
+Till now, we have established that the oracle complexity of \Cref{alg.local detection} reduces to $$\max\{O\left(\log\frac{\kappa_H+\mu_+}{\epsilon}\right),O\left(\log \frac{\|\nabla f(y)\|}{\epsilon}\right)\}.$$
+Since $\mu_+ = \frac{\sqrt{2M}}{2}\|\nabla f(y)\|^{1/2}$ and we already established the boundedness for the gradient norm in \Cref{lem.upper bound for zero lambda}, we can derive the total complexity of \Cref{alg.accelerated utr},
+\begin{theorem}
+    \label{thm.total complexity newton}
+    Suppose Assumption~\ref{assm.lipschitz}, \Cref{assm.solvable} and Assumption~\ref{assm.bounded hessian} hold, it takes at most
+    \begin{equation}\label{eq.total complexity newton}
+        O\left (\epsilon^{-1/3}\log \left(1/\epsilon\right)\right)
+    \end{equation}
+    \ref{eq.newTR} oracles for \Cref{alg.accelerated utr} to find a solution that satisfies \eqref{eq.approximate solution}.
+\end{theorem}
+\begin{proof}
+    This result is a direct combination of Theorem~\ref{thm.convergence outer loop} with \Cref{lem.bound initial interval} and \Cref{lem.upper bound for zero lambda}.
+\end{proof}
+\subsection{Local Convergence Rate of \Cref{alg.accelerated utr}}
+\label{sec.local}
+In this section, we analyze the local convergence rate of \Cref{alg.accelerated utr}. Compared to other accelerated SOMs, \Cref{alg.accelerated utr} shows a quadratic local convergence in favor of the local detection mechanism. The quadratic local convergence is essential to find approximate solutions with high accuracy. First, we make the following standard assumption for local convergence analysis.
+\begin{assumption}
+    \label{assm.local strongly convex}
+    Suppose problem \eqref{eq.main problem} has a unique solution $x^*$, which satisfies the second-order sufficient optimality condition
+    \begin{equation}
+        \label{eq.second-order suff cond}
+        \nabla f(x^*)=0, \ \nabla^2 f(x^*)\succeq \nu I
+    \end{equation}
+    for some $\nu >0$.
+\end{assumption}
+If the above assumption holds, it is a well-known result that Newton's method converges quadratically if initialized in a small region that contains the optimum.
+\begin{lemma}[Theorem 1.2.5,~\cite{nesterov_lectures_2018}]
+    \label{lem.quadratic point}
+    Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.local strongly convex} hold and $\{z_i\}$ is the sequence generated by Newton's method. Denoting $R_i = \|z_i-x^*\|$, when the initial point $z_0$ is in the region:
+    \begin{equation}
+        \label{eq.local quadratic region}
+        \mathcal{LQ}_p = \{x\in\mathbb{R}^n| \ \|x-x^*\| < \frac{2\nu}{3M}\},
+    \end{equation}
+    then $z_i \in \mathcal{LQ}_p$ for all $i$ and it converges quadratically to $x^*$:
+    \begin{equation}
+        \label{eq.quadratic convergence}
+        R_{i+1} < \frac{3M}{2\nu}R_i^2<R_i.
+    \end{equation}
+\end{lemma}
+Similar to the standard quadratic convergence region discussed above, the gradient norm also exhibits quadratic convergence when the initial point is sufficiently close to $x^*$. To establish this result, we first present the following technical lemma, which will be central to the subsequent analysis.
+\begin{lemma}[Corollary 1.2.2,~\cite{nesterov_lectures_2018}]
+    Suppose~\Cref{assm.lipschitz} and \Cref{assm.local strongly convex} hold, for any $x$ with $\|x-x^*\| \leq r$, we have
+    \begin{equation}
+        \label{eq.psd region}
+        \nabla^2 f(x^*)-MrI\preceq \nabla f(x) \preceq \nabla^2 f(x^*)+MrI.
+    \end{equation}
+    Therefore, when $x\in \mathcal{LQ}_p$, we have
+    \begin{equation}
+        \label{eq.psd xk}
+        \nabla^2 f(x) \succ \frac{\nu}{3}I
+    \end{equation}
+\end{lemma}
+Now we introduce the region of quadratic convergence for the norm of the gradient.
+\begin{lemma}
+    \label{lem.quadratic gradient}
+    Suppose \Cref{assm.lipschitz} and \Cref{assm.local strongly convex} hold and $\{z_i\}$ is the sequence generated by Newton's method. When the initial point $z_0$ is in the region:
+    \begin{equation}
+        \label{eq.local quadratic region gradient}
+        \mathcal{LQ}_g = \{x\in\mathbb{R}^n| \ \|x-x^*\| < \frac{2\nu}{3M}, \ \|\nabla f(x)\|< \frac{2\nu^2}{9M}\},
+    \end{equation}
+    then $z_i \in \mathcal{LQ}_g$ for all $i$ and the norm of the gradient $\|\nabla f(z_i)\|$ converges quadratically to $0$:
+    \begin{equation}
+        \label{eq.quadratic convergence gradient}
+        \|\nabla f(z_{i+1})\| < \frac{9M}{2\nu^2}\|\nabla f(z_i)\|^2<\|\nabla f(z_i)\|.
+    \end{equation}
+\end{lemma}
+\begin{proof}
+    We prove by induction. Suppose $z_i\in \mathcal{LQ}_g$. From \eqref{eq.first-order exp}, we have
+    \begin{equation*}
+        \|\nabla f(z_{i+1}) -\nabla f(z_i)-\nabla^2 f(z_i)(z_{i+1}-z_i)\| \leq \frac{M}{2}\|z_{i+1}-z_i\|^2.
+    \end{equation*}
+    Noting that $z_{i+1} = z_i-\nabla^2 f(z_i)^{-1}\nabla f(z_i)$, we have
+    \begin{equation*}
+    \begin{aligned}
+            \|\nabla f(z_{i+1})\| &\leq \frac{M}{2}\|\nabla^2 f(z_i)^{-1} \nabla f(z_i)\|^2  \leq \frac{M}{2}\|\nabla^2 f(z_i)^{-1}\|^2\| \nabla f(z_i)\|^2\\
+            &< \frac{9M}{2\nu^2}\|\nabla f(z_i)\|^2 < \|\nabla f(z_i)\|.
+    \end{aligned}
+    \end{equation*}
+    The third inequality is from $R_i< \frac{2\nu}{3M}$ and \eqref{eq.psd xk}. The last inequality is from the fact $z_i\in \mathcal{LQ}_g$. $R_{i+1} \leq \frac{2\nu}{3M}$ follows from \Cref{lem.quadratic point}. Therefore, $z_{i+1}\in \mathcal{LQ}_g$.
+\end{proof}
+As a result, we know how many iterations are needed to find a point with $\|\nabla f(z_i)\|\leq \epsilon$ if $z_0 \in \mathcal{LQ}_g$ and $\{z_i\}$ is generated by Newton's method initialized at $z_0$.
+\begin{corollary}
+    \label{lem.number of iterations newton}
+    Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.local strongly convex} hold. Let $0<\epsilon< \frac{1}{C(M,\nu)}$, $z_0\in\mathcal{LQ}_g$ and $\{z_i\}$ generated by Newton's method. Then when
+    \begin{equation}
+        \label{eq.number of iterations newton}
+        i\geq \left\lceil \log\!\left( \frac{\ln\!\left(\tfrac{1}{C(M,\nu)\epsilon}\right)}{\ln\!\left(\tfrac{1}{\eta_0}\right)} \right) \right\rceil \;\, \mbox{with}\;\, C(M,\nu) = \frac{9M}{2\nu^2}, \  \eta_0 = \|\nabla f(z_0)\| C(M,\nu)<1,
+    \end{equation}
+    we have $\|\nabla f(z_i)\|\leq \epsilon$.
+\end{corollary}
+\begin{proof}
+    From \eqref{eq.quadratic convergence gradient} we have
+    \begin{equation*}
+            \|\nabla f(z_i)\| \leq C(M,\nu)\|\nabla f(z_{i-1})\|^2 \leq C(M,\nu)^{2^{i-1}} \|\nabla f(z_0)\|^{2^i} \leq \frac{(C(M,\nu)\|\nabla f(z_0)\|)^{2^i}}{C(M,\nu)}.
+    \end{equation*}
+    Therefore, when $i$ hits the threshold defined in \eqref{eq.number of iterations newton}, we have $\|\nabla f(z_i)\|\leq \epsilon$.
+\end{proof}
+After all these preparations, we show that \Cref{alg.local detection} can guarantee that we can find an $\epsilon$-approximate solution with a local quadratic rate. The proof consists of the following three steps:
+\begin{enumerate}
+    \item After constant number of iterations of \Cref{alg.accelerated utr}, $y_k\in\mathcal{LQ}_g$;
+    \item Whenever $y_k\in\mathcal{LQ}_g$, $\lambda_k=0$ in \Cref{alg.accelerated utr};
+    \item Once $y_k\in \mathcal{LQ}_g$, the Local Diving procedure in \Cref{alg.local detection} converges quadratically with ET=True.
+\end{enumerate}
+First, we show the first step, i.e., $y_k$ will finally enter the region $\mathcal{LQ}_g$. 
+\begin{lemma}\label{lem.enter region}
+    Suppose Assumption~\ref{assm.lipschitz}, Assumption~\ref{assm.bounded hessian} and Assumption~\ref{assm.local strongly convex} hold. Then, in \Cref{alg.accelerated utr}, when
+    \begin{equation*}
+        k\geq \max\{\frac{3^{4/3}M\|x_0-x^*\|}{2\nu},\frac{16\cdot6^5 M^3\kappa_H\|x_0-x^*\|^3}{\nu^4},\frac{6\cdot9^4 M^3\kappa_H^5\|x_0-x^*\|^3}{\nu^8}\},
+    \end{equation*}
+    we have $y_k\in \mathcal{LQ}_g$.
+\end{lemma}
+The proof of the above lemma can be found in \Cref{sec.proof variant 1}.
+Next, we prove the second step: in \Cref{alg.accelerated utr}, when $y_k\in\mathcal{LQ}_g$, we must have $\lambda_k=0$.
+\begin{lemma}
+    \label{lem.detection of local quadratic}
+    Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.local strongly convex} holds. In the $k$-th iteration of \Cref{alg.accelerated utr}, if $y_k\in\mathcal{LQ}_g$, then $\lambda_k=0$.
+\end{lemma}
+\begin{proof}
+    From \eqref{eq.optcond coml slack}, to prove $\lambda_k=0$, it suffices to prove that the step $d_k$ lies in the trust region.
+    \begin{equation*}
+        \begin{aligned}
+            \|(\nabla^2 f(y_k)+\sigma_k I)^{-1}\nabla f(y_k)\| & = \left\|\left (\nabla^2 f(y_k)+\frac{\sqrt{2M}}{2} \|\nabla f(y_k)\|^{1/2} I\right)^{-1}\nabla f(y_k)\right\|         \\
+                                                               & \leq \left\|\left (\nabla^2 f(y_k)+\frac{\sqrt{2M}}{2} \|\nabla f(y_k)\|^{1/2} I\right)^{-1}\right\| \|\nabla f(y_k)\|
+        \end{aligned}
+    \end{equation*}
+    Note $\nabla^2 f(y_k)\succ \frac{\nu}{3}$ as analyzed in \eqref{eq.psd xk}.
+    \begin{equation*}
+    \begin{aligned}
+        \|(\nabla^2 f(y_k)+\sigma_k I)^{-1}\nabla f(y_k)\|  &\leq \frac{\|\nabla f(y_k)\|}{\frac{\nu}{3}+\frac{\sqrt{2M}}{2} \|\nabla f(y_k)\|^{1/2}} \\&<\frac{\|\nabla f(y_k)\|}{\frac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2}+\frac{\sqrt{2M}}{2} \|\nabla f(y_k)\|^{1/2}}\\
+        &=\frac{\|\nabla f(y_k)\|^{1/2}}{\sqrt{2M}} =r_k.
+    \end{aligned}
+    \end{equation*}
+    The second line is because of the definition of $\mathcal{LQ}_g$ in \eqref{eq.local quadratic region gradient}. Therefore, we conclude that the TR constraint is inactive and $\lambda_k=0$.
+\end{proof}
+Last, we show the third step: when the tolerance $\epsilon$ is small enough, \Cref{alg.accelerated utr} will be early terminated, i.e., we have ET$=$True when $y_k$ enters $\mathcal{LQ}_g$. Though the constant in the following theorem may look a bit unwieldy, the high-level idea is that quadratic convergence is faster than linear convergence in the region we defined.
+\begin{theorem}
+    \label{thm.local quadratic convergence}
+    Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.local strongly convex} hold, then there exists $\epsilon^* >0$ such that when
+    \begin{equation}
+        \label{eq.regularity epsilon}
+        0<\epsilon< \min\{\epsilon^*, \frac{1}{C(M,\nu)}\}
+    \end{equation}
+    then the $\epsilon$-approximate solutions will be found in $O\left(\log\log\left(1/\epsilon\right)\right)$ iterations when $y_k$ enters $\mathcal{LQ}_g$, and ET$=$True in \Cref{alg.accelerated utr}.
+\end{theorem}
+\begin{proof}
+    We first consider the case that the approximate solution is found at line~\ref{line.et 2} of \Cref{alg.local detection}, then $y_k+d_k$ is already an $\epsilon$-approximate solution and there is nothing to prove.
+
+    Next, we consider the case \Cref{alg.local detection} enters local diving. We know from \eqref{eq.psd xk} that when $y_k\in\mathcal{LQ}_g$, $\|\nabla f(y_k)\|\leq \frac{1}{C(M,\nu)}$, then from Lemma~\ref{lem.loglog vs log}~(see Appendix~\ref{sec.proof variant 1}) we know that local diving will find $\epsilon$-approximate solutions within the iteration number defined in \eqref{eq.number of iterations newton}, which is strictly less than the maximal number of iteration we defined at line~\ref{line.track 1 number of iter}, i.e., $\left \lceil\log\frac{\|\nabla f(y)\|}{\epsilon} \right\rceil$.
+\end{proof}
+\section{Variant~II: Pushing Global Efficiency to the Limit}\label{sec.second variant}
+We now turn to another accelerated TR method that incorporates the acceleration framework of \citet{monteiro2013accelerated}. This method achieves a near-optimal global oracle complexity of $\tilde{O}(\epsilon^{-2/7})$ for finding $\epsilon$-approximate solutions. However, this global efficiency comes at the cost of losing local quadratic convergence. We refer to this approach as the Accelerated Trust-Region Extragradient Method (\Cref{alg.ms accelerated utr}).
+\subsection{Algorithm design}
+We begin by outlining the acceleration framework in \Cref{alg.ms accelerated utr}. The main technical ingredient is to integrate the \ref{eq.newTR} oracle into a modified version of the framework from \citet{monteiro2013accelerated}, which provides another eligible oracle choice besides the cubic regularization oracle in the previous literature \cite{carmon2022optimal}.
+
+At the core of \Cref{alg.ms accelerated utr} lies an implicit search procedure (\Cref{alg.bisection ms}, we still call it R\&B for short) along the curve:
+\begin{gather} \label{eq.update yk} y_k(\sigma) = \frac{A_k}{A_k+a_k(\sigma)}x_k+\frac{a_k(\sigma)}{A_k+a_k(\sigma)}v_k\\ \label{eq.update ak} a_k(\sigma) =\frac{1+\sqrt{1+4A_k\sigma}}{2\sigma}. 
+\end{gather}
+In the whole process, R\&B~(\Cref{alg.bisection ms}) determines the primal regularization $\sigma_k$, and thus $a_k$ and the extrapolation point $y_k$, at which \ref{eq.newTR} is called.
+\begin{algorithm}[ht]
+    \caption{Accelerated Trust-Region Extragradient Method~(\atrms{})}\label{alg.ms accelerated utr}
+    \begin{algorithmic}[1]
+        \STATE{\textbf{input:} $x_0=v_0\in \mathbb{R}^n$, \ $A_0 =0$, \ search threshold $\theta>1$, \ $0<\eta<1$, damping parameter $\gamma \leq \frac{1}{\theta}$,  tolerance $\epsilon>0$}
+        \FOR{$k=0, 1, \ldots, K_\epsilon$}
+        % \STATE{$(x_{k+1},a_k,\lambda_k,\sigma_k,\text{ET}) = \operatorname{BISECTION}(x_k,v_k,A_k,\eta,\theta,\epsilon)$}
+        \STATE{$(x_{k+1},\sigma_k,\text{ET}) = \operatorname{R\&B}(x_k,v_k,A_k,\eta,\theta,\epsilon)$}
+        \IF{$\text{ET}$}
+        \STATE \textbf{terminate and output $x_{k+1}$
+            \label{line.early terminate ms}
+        }
+        \ENDIF
+        \STATE{$a_k = a_k(\sigma_k)$}
+        \STATE{
+            $v_{k+1} = v_k-\gamma a_k \nabla f(x_{k+1})$}
+        \STATE{
+            $A_{k+1} = A_k+a_k$
+        }
+        \ENDFOR
+    \end{algorithmic}
+\end{algorithm}
+\begin{subroutine}[!ht]
+    \caption{Ratio Bracketing and Bisection~(R\&B) for \Cref{alg.ms accelerated utr}}\label{alg.bisection ms}
+    \begin{algorithmic}[1]
+        \STATE{\textbf{input:} $x,v\in \mathbb{R}^n$, $A,\eta,\theta \in \mathbb{R}$, $\epsilon$;}
+        \STATE{\texttt{\# Bracket points}}
+        \STATE{Set $\sigma_- = \sqrt{\frac{2M\epsilon}{1+2\theta}}, \ \sigma_+=\sqrt{\frac{MG_0}{\eta}}$, $(\lambda_-,d_-) = \trp(y(\sigma_-),\sigma_-,\frac{1}{M}\sigma_-)$
+            \label{line.def G0}
+        }
+        \IF{$\lambda_- \leq (\theta-1)\sigma_-$}\label{line.early termination criterion}
+        % \STATE{\textbf{Output} $y+d,\text{None},\text{None},\text{None},\text{ET=True}$}
+        \STATE{\textbf{Output} $y+d,\sigma_-,\text{ET=True}$}
+        \label{line.early termination ms}
+        \ELSE
+        \STATE{\texttt{\# Perform bisection over $\sigma\in [\sigma_-,\sigma_+]$}}
+        \WHILE{i) $\lambda = 0$ and $\|d\| < \frac{\eta}{M}\sigma$, or ii) $\lambda > (\theta-1)\sigma$}\label{line.goal of bisection ms}
+        \STATE{$\sigma = \frac{\sigma_-+\sigma_+}{2}$}
+            % \label{eq.ms utr oracle}
+        \STATE{$(\lambda,d) = \trp(y(\sigma),\sigma,\frac{1}{M}\sigma)$}
+        \IF{i) holds}
+        \STATE{$\sigma_+ =\sigma$}
+        \ELSIF{ii) holds}
+        \STATE{$\sigma_- =\sigma$}
+        \ELSE
+        \STATE{\textbf{output} $y(\sigma)+d,\sigma,\text{ET=False}$}
+        \ENDIF
+        \ENDWHILE
+        % \STATE{\textbf{output} $y(\sigma)+d,a(\sigma),\lambda,\sigma,\text{ET=False}$}
+        % \STATE{\textbf{output} $y(\sigma)+d,\sigma,\text{ET=False}$}
+        \ENDIF
+    \end{algorithmic}
+\end{subroutine}
+In R\&B~(\Cref{alg.bisection ms}), the search task initializes the bracketing points at line~\ref{line.def G0}, where
+$$G_0 = \max\left\{\|\nabla f(x)\| \mid \|x-x^*\|\leq \left(\frac{4}{\sqrt{3\gamma}}+1\right)D_0\right\}, D_0 = \|x_0-x^*\|.$$
+At line~\ref{line.goal of bisection ms}, we proceed bisection until $\sigma_k$ has been located such that
+\begin{equation}
+    \label{eq.relation lambda sigma}
+    0 \leq \lambda_k \leq (\theta - 1)\sigma_k, \quad \|d_k\| \geq \frac{\eta}{M} \sigma_k,
+\end{equation}
+where $\theta$ and $\eta$ are prescribed thresholds for the regularization term and the step size, respectively. They will work together with the damping parameter $\gamma$ in \Cref{alg.ms accelerated utr} to guarantee convergence. This pair of inequalities \eqref{eq.relation lambda sigma} serves a similar purpose as \eqref{lem.ratio pass nonzero} to \Cref{alg.accelerated utr}, which we will further clarify in \Cref{lem.reduce line search}.
+
+Similar to \Cref{alg.accelerated utr}, there are two paths to terminate \Cref{alg.ms accelerated utr}. The first path occurs when the flag $\textrm{ET} = \text{True}$, indicating early termination (see line~\ref{line.early termination ms}). This happens when a solution with a small gradient norm is found in R\&B~(\Cref{alg.bisection ms}).
+The second path arises if \Cref{alg.ms accelerated utr} is not early terminated. In this case, the step $d_k$ satisfies \eqref{eq.relation lambda sigma} for each $k$, and consequently, the estimating sequence guarantees that \Cref{alg.ms accelerated utr} outputs an approximate solution with a small deviation from the optimal value.
+\subsection{Global complexity analysis}
+The proof sketch is similar to the one in the previous section: we first establish \textit{iteration complexity} then move on to \textit{oracle complexity}.
+\subsubsection{Iteration complexity of \Cref{alg.ms accelerated utr}}
+We first show that \Cref{alg.ms accelerated utr} can terminate early from R\&B~(\Cref{alg.bisection ms}) at an approximate stationary point.
+\begin{lemma}
+    \label{lem.early termination ms}
+    Suppose \Cref{assm.lipschitz} holds and \Cref{alg.bisection ms} outputs ET$=$True at line~\ref{line.early terminate ms}, we have
+    \begin{equation*}
+        \|\nabla f(y(\sigma_-)+d_-) \|\leq \epsilon.
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    From \Cref{assm.lipschitz}, we have
+    \begin{equation*}
+        \|\nabla f(y(\sigma_-)+d_-)-\nabla f(y(\sigma_-))-\nabla^2 f(y(\sigma_-))d_-\|\leq \frac{M}{2}\|d_-\|^2.
+    \end{equation*}
+    By triangle inequality and \eqref{eq.optcond firstorder}, we have
+    \begin{equation*}
+        \begin{aligned}
+            \|\nabla f(y(\sigma_-)+d_-)\| & \leq \frac{M}{2}\|d_-\|^2+\| \nabla f(y(\sigma_-))+\nabla^2 f(y(\sigma_-))d_-\| \\
+                                          & = \frac{M}{2}\|d_-\|^2+(\sigma_-+\lambda_-) \|d_-\|  \\
+                                          &\leq \frac{1+2\theta}{2M}\sigma_-^2  \leq \epsilon.
+        \end{aligned}
+    \end{equation*}
+\end{proof}
+Since we focus on the worst-case global oracle complexity, we assume that early termination does not occur; that is, the ``If'' loop at line~\ref{line.early termination criterion} of R\&B~(\Cref{alg.bisection ms}) is never triggered. Similar to previous analyses, let $K_\epsilon$ denote the iteration number it takes to find an $\epsilon$-approximate solution satisfying \Cref{def.approximate solution}. We will show that $K_\epsilon = O(\epsilon^{-2/7})$. 
+
+First, we assume the bisection procedure is valid in the sense that \eqref{eq.relation lambda sigma} holds for each $k$~(which will be verified in~\Cref{sec.validty of bisection}).
+As a result, the following recursive relation holds.
+\begin{lemma}\label{lem.ms estimate}
+    Suppose Assumption~\ref{assm.lipschitz}, Assumption~\ref{assm.solvable} hold, and the output of \textnormal{R\&B}~(\Cref{alg.bisection ms}) satisfies \eqref{eq.relation lambda sigma}, i.e.,
+    \begin{equation*}
+        0\leq\lambda_k\leq (\theta-1)\sigma_k, \ \|d_k\|\geq \frac{\eta}{M}\sigma_k,
+    \end{equation*}
+    then in the $k$-th iteration of \Cref{alg.ms accelerated utr}, the following holds:
+    \begin{equation}
+        \label{eq.helper bounded x}
+        \frac{1}{2}\|v_{k+1}-x^* \|^2 +\gamma A_{k+1}\left (f(x_{k+1}-f^*)\right)+ \frac{3\gamma A_{k+1}\sigma_k}{8}\|d_k\|^2 \leq \frac{1}{2}\|v_k-x^*\|^2 +\gamma A_k \left (f(x_k)-f^*\right).
+    \end{equation}
+    Further, if the output of \textnormal{R\&B}~(\Cref{alg.bisection ms}) satisfies \eqref{eq.relation lambda sigma} for all iteration $i$ with $0\leq i\leq k$, then
+    \begin{equation}
+        \label{eq.ms estimate advanced}
+        \gamma A_{k+1}\left (f(x_{k+1})-f^* \right) + \frac{1}{2}\|v_{k+1}-x^*\|^2 +B_{k+1} \leq \frac{1}{2}\|v_0-x^*\|^2,
+    \end{equation}
+    where $B_{k+1} = \frac{3\gamma M}{8}\sum_{i=0}^{k}A_{i+1}\|d_i\|^3.$
+\end{lemma}
+\begin{proof}
+    Note the way we update $v_{k+1}$ in \Cref{alg.ms accelerated utr}.
+    \begin{align*}
+        \|v_{k+1} - x^*\|^2
+         & = \|v_k - x^* - \gamma a_k \nabla f(x_{k+1})\|^2                                       \\
+         & = \|v_k - x^*\|^2 + \gamma^2 a_k^2 \|\nabla f(x_{k+1})\|^2
+        - 2\gamma a_k \langle \nabla f(x_{k+1}), v_k - x^* \rangle                                \\
+         & = \|v_k - x^*\|^2 + \gamma^2 a_k^2 \|\nabla f(x_{k+1})\|^2                             \\
+         & \quad - 2\gamma \langle \nabla f(x_{k+1}), (A_k + a_k) y_k - A_k x_k - a_k x^* \rangle \\
+         & = \|v_k - x^*\|^2 + \gamma^2 a_k^2 \|\nabla f(x_{k+1})\|^2                             \\
+         & \quad - 2\gamma \langle \nabla f(x_{k+1}),
+        (A_k + a_k)(y_k - x_{k+1}) + A_k(x_{k+1} - x_k)
+        + a_k(x_{k+1} - x^*) \rangle                                                              \\
+         & \leq \|v_k - x^*\|^2 + \gamma^2 a_k^2 \|\nabla f(x_{k+1})\|^2                          \\
+         & \quad - 2\gamma (A_k + a_k) \langle \nabla f(x_{k+1}), y_k - x_{k+1} \rangle           \\
+         & \quad - 2\gamma A_k \left(f(x_{k+1}) - f(x_k)\right)
+        - 2\gamma a_k \left(f(x_{k+1}) - f^*\right).
+    \end{align*}
+
+    The third line comes from \eqref{eq.update yk}. The last line is from the convexity of $f$. Rearranging terms gives
+    \begin{align*}
+             & \|v_{k+1}-x^*\|^2 +2\gamma A_{k+1} \left (f(x_{k+1})-f^*\right)                                                                                \\
+        \leq & \|v_k-x^*\|^2+2\gamma A_k \left (f(x_k)-f^*\right )+\gamma^2 a_k^2 \|\nabla f(x_{k+1})\|^2                                                     \\
+             & -2\gamma \left (A_k+a_k\right)\langle \nabla f(x_{k+1}), y_k-x_{k+1} \rangle                                                                   \\
+        \leq & \|v_k-x^*\|^2+2\gamma A_k \left (f(x_k)-f^*\right )+\gamma^2 a_k^2 \|\nabla f(x_{k+1})\|^2                                                     \\
+             & -\gamma \left (A_k+a_k\right)\left (\frac{\|\nabla f(x_{k+1})\|^2}{\sigma_k+\lambda_k}+\frac{3(\sigma_k+\lambda_k)}{4}\|d_k\|^2\right)         \\
+        \leq & \|v_k-x^*\|^2+2\gamma A_k \left (f(x_k)-f^*\right )+\left(\gamma^2 a_k^2-\frac{\gamma(A_k+a_k)}{\theta \sigma_k}\right)\|\nabla f(x_{k+1})\|^2 \\
+             & -\frac{3\gamma(A_k+a_k)(\sigma_k+\lambda_k)}{4}\|d_k\|^2.
+    \end{align*}
+    The second inequality is from \eqref{eq.inner product g d}. The third inequality is from \eqref{eq.relation lambda sigma}. Note that $\gamma \leq \frac{1}{\theta}$ and the way we update $a_k$ in \eqref{eq.update ak}. Rearranging items gives \eqref{eq.helper bounded x}.
+    Because $\sigma_k \geq M\|d_k\|$,
+    \begin{equation*}
+        \frac{1}{2}\|v_{k+1}-x^* \|^2 +\gamma A_{k+1}\left (f(x_{k+1}-f^*)\right)+ \frac{3\gamma M A_{k+1}}{8}\|d_k\|^3 \leq \frac{1}{2}\|v_k-x^*\|^2 +\gamma A_k \left (f(x_k)-f^*\right).
+    \end{equation*}
+    Iterating the above inequality gives \eqref{eq.ms estimate advanced}.
+\end{proof}
+From \eqref{eq.ms estimate advanced}, it is clear that the oracle complexity of \Cref{alg.ms accelerated utr} reduces to analyzing the growth rate of $A_k$, which is addressed in \citet[Lemma 4.2]{monteiro2013accelerated} and \citet[Lemma 4.3.5]{nesterov_lectures_2018}. We provide the lower bound of $A_k$ in the following lemma, whose proof is deferred to the \Cref{sec.appendix 2}.
+\begin{lemma}
+    \label{lem.growth of Ak}
+    For and $k\geq 1$, we have
+    \begin{equation}
+        \label{eq.growth of Ak}
+        A_k \geq \left(\frac{\eta}{4}\left (\frac{3\gamma}{4M^2D_0^2}\right)^{1/3}\right)^{3 / 2}\left(\frac{2 k+1}{3}\right)^{7/2} = \Omega(k^{7/2}).
+    \end{equation}
+\end{lemma}
+Hence, as a direct consequence of \eqref{eq.ms estimate advanced} and \eqref{eq.growth of Ak}, an estimate of $K_\epsilon$ can be summarized as follows.
+\begin{theorem}\label{thm.outer loop complexity}
+    Suppose Assumption~\ref{assm.lipschitz},  Assumption~\ref{assm.solvable} hold, and the output of \Cref{alg.bisection ms} satisfies \eqref{eq.relation lambda sigma} for all the iterations. Then for any $0<\epsilon<1$, \Cref{alg.ms accelerated utr} finds an $\epsilon$-approximate solution as in \eqref{eq.approximate solution} in $K_\epsilon= O(\epsilon^{-2/7})$ iterations.
+\end{theorem}
+\subsubsection{Oracle complexity of \Cref{alg.ms accelerated utr}}\label{sec.validty of bisection}
+Next, we elaborate on how R\&B~(\Cref{alg.bisection ms}) safeguards \eqref{eq.relation lambda sigma}, and then provide the estimate of the number of \ref{eq.newTR} oracles needed during this procedure. We omit the subscripts in the analysis for the bisection for simplicity. We now define the auxiliary function in the analysis, which is bivariate in $y$ and $\sigma$. 
+\begin{equation}
+    \label{eq.linesearch quantity}
+    \psi(\sigma,y) := \frac{1}{\sigma}\left \| \left(\nabla^2 f(y)+\sigma I \right)^{-1}\nabla f(y)\right \|, \ \sigma>0, \ y\in\mathbb{R}^n.
+\end{equation}
+Some basic analyses on local perturbation in $\sigma$ and $y$ are deferred to \Cref{sec.appendix 2}~(see \Cref{lem.psi property wrt sigma} and \Cref{lem.psi property wrt y}).
+
+The below \Cref{lem.reduce line search} means the analysis of auxiliary function $\psi(\sigma,y(\sigma))$ can be simplified by focusing solely on $\sigma$, reducing the search procedure into a one-dimensional problem.
+\begin{lemma}
+    \label{lem.reduce line search}
+    At line \ref{line.goal of bisection ms} of \textnormal{R\&B}~(\Cref{alg.bisection ms}), if case i) occurs, i.e.,
+    \begin{equation}
+        \label{eq.bracket small lambda}
+        \lambda = 0, \ \|d\|<\frac{\eta}{M}\sigma,
+    \end{equation}
+    then $\psi(\sigma,y(\sigma))<\frac{\eta}{M}$.  Otherwise, if case ii) occurs, i.e.,
+    \begin{equation}
+        \label{eq.bracket big lambda}
+        \lambda > (\theta-1)\sigma,
+    \end{equation}
+    then $\psi(\sigma,y(\sigma))>\frac{1}{M}$. As a result, if $\sigma$ satisfies
+    \begin{equation}
+        \label{eq.reduce line search interval}
+        \frac{\eta}{M}\leq \psi(\sigma,y(\sigma)) \leq \frac{1}{M},
+    \end{equation}
+    then \eqref{eq.relation lambda sigma} holds.
+\end{lemma}
+
+Now we can validate the choice of $\sigma_-,\sigma_+$ as qualified bracketing points.
+\begin{lemma}
+    \label{lem.bracketing points}
+    Suppose
+    \begin{equation}\label{eq.bounded gradient y}
+        \|\nabla f(y(\sigma))\|\leq G_0, \ \forall \sigma>0,
+    \end{equation}
+    and we let
+    \begin{equation}
+        \label{eq.bracket points}
+        \sigma_- = \sqrt{\frac{2M\epsilon}{1+2\theta}}, \ \sigma_+ = \sqrt{\frac{MG_0}{\eta}}.
+    \end{equation}
+    If \textnormal{R\&B}~(\Cref{alg.bisection ms}) outputs ET$=$False, we have
+    \begin{equation*}
+        \psi\left (\sigma_-,y(\sigma_-)\right) >\frac{1}{M}, \ \psi\left (\sigma_+,y(\sigma_+)\right) <\frac{\eta}{M}.
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    First, we show that $\psi(\sigma_+,y(\sigma_+))<\frac{\eta}{M}$,
+    \begin{equation*}
+        \begin{aligned}
+            \psi(\sigma_+,y(\sigma_+)) & = \frac{1}{\sigma_+}\left \|\left(\nabla^2 f(y(\sigma_+))+\sigma_+ I\right)^{-1}\nabla f(y(\sigma_+))\right\| \\
+                                       & \leq \frac{1}{\sigma_+^2}\|\nabla f(y(\sigma_+))\| \leq \frac{1}{\sigma_+^2} G_0 = \frac{\eta}{M}.
+        \end{aligned}
+    \end{equation*}
+    The second line is from $\nabla^2 f(y(\sigma_+))\succeq 0$, \eqref{eq.bounded gradient y} and \eqref{eq.bracket points}. For the other statement, from \Cref{lem.early termination ms}, we can conclude that if ET$=$False, we have $\lambda_- > (\theta-1)\sigma_-$, and from \Cref{lem.reduce line search} $\psi(\sigma_-,y(\sigma_-))>\frac{1}{M}.$
+\end{proof}
+Under the bounded gradient assumption \eqref{eq.bounded gradient y}, during the bisection, we have
+\begin{gather} 
+\label{eq.bisection condition}
+\psi_+:=\psi(\sigma_+,y(\sigma_+))<\frac{\eta}{M}, \ \psi_-:=\psi(\sigma_-,y(\sigma_-))>\frac{1}{M},\\ 
+\label{eq.bracket points condition} \sigma_- \geq \sqrt{\frac{2M\epsilon}{1+2\theta}}, \ \sigma_+ \leq \sqrt{\frac{MG_0}{\eta}}. 
+\end{gather}
+These relations ensure that valid bracketing points are maintained throughout the search. Leveraging the property of the curve $\psi(\sigma,y(\sigma))$, we can then derive the complexity of R\&B~(\Cref{alg.bisection ms}) as in \Cref{lem.complexity bisection}. A formal statement and proof of this result are provided in \Cref{sec.appendix 2} (\Cref{coro.bisection bound}).
+\begin{lemma}
+    \label{lem.complexity bisection}
+    Assume that Assumptions~\ref{assm.lipschitz} and \ref{assm.solvable} hold, and that conditions \eqref{eq.bounded gradient y} and \begin{equation}\label{eq.bounded assm point main text}
+        \|x-x^*\|\leq M_0, \ \|v-x^*\|\leq M_0,
+    \end{equation}
+    hold for some $M_0>0$, then the number of \ref{eq.newTR} oracle calls during the bisection is $O\left(\log \left(1/\epsilon\right)\right)$.
+\end{lemma}
+To derive the final oracle complexity result of \Cref{alg.ms accelerated utr}, one final step remains: we must get rid of the boundedness assumption used in \eqref{eq.bounded gradient y} and \eqref{eq.bounded assm point main text}.
+\begin{lemma}
+    \label{lem.bounded iterate}
+    Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.solvable} hold. For every $k\geq 0$,
+    \begin{equation}
+        \label{eq.bounded iterate}
+        \|x_k- x^*\| \leq \left(\frac{4}{\sqrt{3\gamma}}+1\right)D_0, \ \|v_k-x^*\|\leq D_0.
+    \end{equation}
+    As a consequence,
+    \begin{gather}
+        \label{eq.bounded iterate y}
+        \|y_k(\sigma)-x^*\| \leq \left(\frac{4}{\sqrt{3\gamma}}+1\right)D_0, \ \forall \sigma>0,\\
+        \label{eq.ub yk sigma}
+        \|\nabla f(y_k(\sigma))\| \leq G_0:= \left(\frac{4}{\sqrt{3\gamma}}+1\right)\|\nabla ^2 f^*\|D_0+\frac{M}{2}\left(\frac{4}{\sqrt{3\gamma}}+1\right)^2 D_0^2.
+    \end{gather}
+\end{lemma}
+By this lemma, we know \eqref{eq.bounded gradient y} holds, and \eqref{eq.bounded assm point main text} holds uniformly for all $k\geq0$ with $M_0 =\left(\frac{4}{\sqrt{3\gamma}}+1\right)D_0 $. Now we finally arrive at the final theorem of \Cref{alg.ms accelerated utr}, as a consequence of \Cref{thm.outer loop complexity}, \Cref{lem.complexity bisection}, and \Cref{lem.bounded iterate}.
+\begin{theorem}
+    \label{thm.final complexity of msatr}
+    Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.solvable} hold, it takes at most
+    \begin{equation}
+        \label{eq.final complexity of msatr}
+        O\left(\epsilon^{-2/7}\log\left(1/\epsilon\right)\right)
+    \end{equation}
+    \ref{eq.newTR} oracles for \Cref{alg.ms accelerated utr} to find a solution $x$ that satisfies \eqref{eq.approximate solution}.
+\end{theorem}
+While the proposed algorithm attains a near-optimal global complexity rate, it fails to balance the global guarantees and the local efficiency. This is because, in the extragradient framework, the primal regularizer $\sigma$ must be fixed before the extrapolation point is determined, which prevents effective exploitation of local geometric structures and limits faster local convergence. 
+\section{Numerical Experiments}\label{sec.experiments}
+In this section, we present the numerical experiments to validate the global and local behavior of the proposed methods. All experiments are conducted on a single machine with a 14-core Apple M4 Pro CPU and 48GB LPDDR5 RAM.
+We conduct experiments on the regularized logistic regression problem, which is defined as follows:
+\begin{equation}
+    \label{eq.logistic regression}
+    f(x) = \frac{1}{N} \sum_{i=1}^N \log \left(1 + \exp \left(-b_i a_i^T x\right)\right) + \frac{\gamma}{2}\|x\|^2,
+\end{equation}
+where $a_i \in \mathbb{R}^n$ and $b_i \in \{-1, 1\}$, $\gamma = 10^{-4}$ is the regularization parameter.
+As mentioned, this problem is a notorious example where many accelerated SOMs are not as competitive as the classical Newton-type methods \cite{carmon2022optimal,chen2022accelerating} numerically.
+Besides, a well-known estimate for the Lipschitz constant $\widehat M$ of $\nabla^2 f$ can be specified as follows:
+$$\widehat M = \left\|\frac{1}{N} \sum_{i=1}^N a_i a_i^{\top}\right\| \max _{i \in[N]}\left\|a_i\right\|.$$
+Although the estimate is conservative~\cite{songUnifiedAccelerationHighorder2021}, we adopt it to isolate the basic algorithm frameworks from other practical enhancements, such as the adaptive adjustment of Lipschitz constants, see \cite{mishchenko_regularized_2023,cartis2011adaptive1}.
+
+We implement two different accelerated TR methods (\atr{} and \atrms{}) and compare them to some state-of-the-art SOMs, including
+\begin{itemize}[leftmargin=*]
+    \item The cubic regularized Newton method (\arc{}, \citet{nesterov2006cubic}) and its accelerated version (\arca{}, \citet{nesterov2008accelerating}).
+    \item A non-accelerated TR method using the \ref{eq.newTR} oracle, by setting both $(\sigma_k, r_k)$ proportionally to $\|\nabla f(x_k)\|^{1/2}$ similar to \cite{jiang2024nonconvexityuniversaltrustregionmethod}.
+          We test two non-accelerated TR methods $\utr{}~\texttt{(1)}, \utr{}~\texttt{(2)}$, using different Lipschitz estimates $\tfrac{\widehat M}{2}, \widehat M$, respectively. The purpose is to present the sensitivity of Lipschitz constants and set a fair comparison to \arc{}.
+\end{itemize}
+\begin{figure}[!t]
+    \small
+    \centering
+    \subcaptionbox{\texttt{a4a}}[0.47\columnwidth]{
+        \resizebox{0.47\columnwidth}{!}{\input{../figs/e-logistic-a4a-k}}
+    }
+    \subcaptionbox{\texttt{a9a}}[0.47\columnwidth]{
+        \resizebox{0.47\columnwidth}{!}{\input{../figs/e-logistic-a9a-k}}
+    }
+    \subcaptionbox{\texttt{w4a}}[0.47\columnwidth]{
+        \resizebox{0.47\columnwidth}{!}{\input{../figs/e-logistic-w4a-k}}
+    }
+    \subcaptionbox{\texttt{w8a}}[0.47\columnwidth]{
+        \resizebox{0.47\columnwidth}{!}{\input{../figs/e-logistic-w8a-k}}
+    }
+
+    % \subcaptionbox{Runtime (seconds)}{
+    %     \includegraphics[width=0.47\columnwidth]{icml2025/figs/fx-softmax-t.pdf}
+    % }
+    \caption{Logistic regression using the LIBSVM datasets}\label{fig.logistic regression}
+    \normalsize
+\end{figure}
+
+The subproblems arising in \arc{} and \arca{} are solved by a 1-D line-search strategy according to \cite{nesterov_lectures_2018}. Similarly, \ref{eq.newTR} (in \utr{}, \atr{} and \atrms{}) is solved by searching the dual variable. All methods use exact Hessian evaluation and Cholesky factorization to solve the linear systems.
+Since these SOMs use different subproblems, and theoretically, the complexity rates to solve them vary from $O\left(\log\left(1/\epsilon\right)\right)$ (for subproblems in a cubic regularized method \cite{nesterov2006cubic}) to $O\left(\log\log\left(1/\epsilon\right)\right)$ (for \ref{eq.newTR} \cite{yenewcomplexityresult1991,vavasisProvingPolynomialtimeSphereconstrained1990}),
+we report the number of Hessian evaluations needed in the method. In \Cref{fig.logistic regression}, the performance of the SOMs on some LIBSVM datasets\footnote{For details, see \url{https://www.csie.ntu.edu.tw/cjlin/libsvmtools/datasets/}} is reported.
+
+We could have several observations. Firstly, for non-accelerated methods, a trend of local superlinear convergence can be observed in \utr{}~\texttt{(1)}, \utr{}~\texttt{(2)} and \arc{}. We could conclude that these three methods are comparable.
+Secondly, in the beginning of the iterations, all accelerated methods, including \atr{}, \atrms{}, and \arca{}, converge faster than the non-accelerated methods (e.g., \utr{}~\texttt{(1)}, \utr{}~\texttt{(2)}, \arc{}). This confirms the effectiveness of the global acceleration. 
+
+Secondly, the global convergence does come at the expense of local superlinear convergence.
+Notably, \atr{} is the only accelerated method that has the local rate of superlinear convergence because of the diving track.
+Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \atrms{} is slightly better because of its superior $\tilde O(\epsilon^{-2/7})$ non-asymptotic performance. These results are in accordance with what is predicted in the convergence analysis.
+
+\newpage
+\addcontentsline{toc}{section}{References}
+
+\bibliographystyle{plainnat}
+\bibliography{arxiv_version/ref_arxiv}
+\newpage
+\appendix
+\section{Technical proofs in~\Cref{sec.priliminary}}\label{sec.proof pre}
+\subsection*{Proof to~\Cref{lem.bound next gradient}}
+\begin{proof}
+    From \eqref{eq.second-order exp}, we have
+    \begin{equation*}
+        \|\nabla f(x+d)- \nabla f(x) -\nabla ^2 f(x) d\| \leq \frac{M}{2}\|d\|^2.
+    \end{equation*}
+    By \eqref{eq.second-order update} and the above, we have
+    \begin{equation}\label{eq.bounded by squared step}
+        \|\nabla f(x+d)+\mu d\| \leq \frac{M}{2}\|d\|^2.
+    \end{equation}
+    Applying the triangle inequality and rearranging items, we can derive \eqref{eq.bound next gradient}.
+\end{proof}
+\subsection*{Proof to~\Cref{lem.inner product g and d}}
+\begin{proof}
+    Squaring both sides of \eqref{eq.bounded by squared step} and rearranging items, we have
+    \begin{equation*}
+        \begin{aligned}
+            2\mu \langle \nabla f(x+d),-d \rangle & \geq \|\nabla f(x+d)\|^2 +\mu^2 \|d\|^2 -\frac{M}{4}\|d\|^4 \\
+                                                  & \geq \|\nabla f(x+d)\|^2 +\frac{3}{4}\mu^2 \|d\|^2.
+        \end{aligned}
+    \end{equation*}
+    The second line is due to $\mu\geq M\|d\|$, dividing both sides by $2\mu$ gives \eqref{eq.inner product g d}. Further, when $\mu \leq 2M\|d\|$, the above gives
+    \begin{equation*}
+        4M\|d\| \langle \nabla f(x+d),-d \rangle \geq \|f(x+d)\|^2 +\frac{3}{4} M^2 \|d\|^4,
+    \end{equation*}
+    which yields
+    \begin{equation*}
+        \langle \nabla f(x+d),-d \rangle \geq \frac{\|f(x+d)\|^2}{4M\|d\|}+\frac{3}{16}M\|d\|^3.
+    \end{equation*}
+    Consider an auxiliary function $h(t) = \frac{\|f(x+d)\|^2}{4Mt}+\frac{3}{16}Mt^3$ where $t\geq 0$, taking derivatives gives $h(t)$ achieves its minimum at $t^*= \frac{\sqrt{2}\|\nabla f(x+d)\|^{1/2}}{\sqrt{3M}}$, plugging $t^*$ back gives \eqref{eq.inner product g d advanced}.
+\end{proof}
+\section{Technical proofs in~\Cref{sec.first variant}}\label{sec.proof variant 1}
+\subsection*{Proof to \Cref{lem.bound target interval}}
+To prove \Cref{lem.bound target interval}, we first introduce the following lemma, which discusses the property of the auxiliary function $g_y(\mu)$.
+\begin{lemma}
+    \label{lem.property g}
+    For any $y\in \mathbb{R}^n$, $g_y(\mu)$ is continuously differentiable and monotonically increasing for $\mu \in \left (0,+\infty\right ]$ and
+    \begin{equation}
+        \label{eq.derivative}
+        g_y'(\mu) = \frac{1}{\|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|}+\frac{\mu}{\|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\left (\lambda_i+\mu\right )^3},
+    \end{equation}
+    and it is bounded both below and above
+    \begin{equation}
+        \label{eq.derivative bound}
+        0< g_y'(\mu) \leq \frac{2}{\|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|}.
+    \end{equation}
+    Where $\lambda_i$ is the $i$-th eigenvalue of $\nabla ^2 f(y)$, $\beta_i = \nabla f(y)^T v_i$, $v_i$ denotes the eigenvector corresponding to $\lambda_i$.
+\end{lemma}
+\begin{proof}
+    Since $\nabla^2 f(y)+\mu I \succ 0$ for $\mu>0$, we can apply eigen decomposition to it, then
+    \begin{equation*}
+        \|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|=\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}}, \ g_y(\mu) = \frac{\mu}{\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}}}.
+    \end{equation*}
+    Obviously $g_y(\mu)$ is increasing in $\mu \in \left (0,+\infty\right ]$. Also, through some basic calculations, we have
+    \begin{equation*}
+        \begin{aligned}
+            g_y'(\mu) & = \frac{1}{\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}}}+\mu \frac{1}{\left ( \sum_{i=1}^n \frac{\beta_i^2}{\left (\lambda_i+\mu\right )^2}\right )^{3/2}}\sum_{i=1}^n\frac{\beta_i^2}{\left (\lambda_i+\mu\right )^3} \\
+                      & = \frac{1}{\|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|}+\frac{\mu}{\|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\left (\lambda_i+\mu\right )^3}                                          \\
+                      & \leq \frac{1}{\|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|}+\frac{\mu}{\|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\mu\left (\lambda_i+\mu\right )^2}                                    \\
+                      & =  \frac{2}{\|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|}.
+        \end{aligned}
+    \end{equation*}
+    The inequality is because of $\lambda_i \geq 0$ for $i=1,\ldots,n$.
+\end{proof}
+
+Now we are ready to formally prove \Cref{lem.bound target interval}.
+\begin{proof}
+    From the continuity and monotonicity of $g_y(\mu)$, we know there exists interval $[\mu_l,\mu_u]$ with \eqref{eq.target interval bracketing points} and
+    \begin{equation*}
+        M\leq g_y(\mu)\leq 2M
+    \end{equation*}
+    for all $\mu$ in this interval~(intermediate value theorem).
+
+    Now we show that the length of the target interval for $\mu$ is bounded below; By the mean value theorem, there exists $\xi\in \left [\mu_l,\mu_u\right]$, such that
+    \begin{equation*}
+        M=g_y(\mu_u)-g_y(\mu_l) = g_y'(\xi)(\mu_u-\mu_l),
+    \end{equation*}
+    combine the above with \eqref{eq.derivative bound} and \eqref{eq.target interval bracketing points} we have
+    \begin{equation*}
+        \begin{aligned}
+            \mu_u-\mu_l & =  \frac{1}{g_y'(\xi)}\left(g_y(\mu_u)-g_y(\mu_l)\right)                    \\
+                        & \geq \frac{M\|\left (\nabla ^2 f(y)+\xi I \right )^{-1}\nabla f(y)\|}{2}    \\
+                        & \geq \frac{M\|\left (\nabla ^2 f(y)+\mu_u I \right )^{-1}\nabla f(y)\|}{2}.
+        \end{aligned}
+    \end{equation*}
+    The third line is because of $\mu_+ >\xi$.
+\end{proof}
+\subsection*{Proof to \Cref{lem.bound initial interval}}
+\begin{proof}
+    Denote the target interval for $r$ as $[r_l,r_u]$ and
+    \begin{equation*}
+        r_y(\mu)=\|\left (\nabla^2 f(y)+\mu I\right)^{-1}\nabla f(y)\|,
+    \end{equation*}
+    we have
+    \begin{equation*}
+        r_l = r_y(\mu_u), \ r_u=r_y(\mu_l).
+    \end{equation*}
+    The bisection terminates whenever $r\in[r_l,r_u]$. Note that by the mechanism of bisection, the oracle complexity is bounded by
+    \begin{equation*}
+        O\left(\log\frac{r_+-r_-}{r_u-r_l}\right)\leq O\left(\log\frac{r_+}{r_u-r_l}\right) \leq O\left(\log\frac{r_+}{r_y(\mu_l)-r_y(\mu_u)}\right).
+    \end{equation*}
+    For $r_y(\mu_l)-r_y(\mu_u)$, we have
+    \begin{equation*}
+        \begin{aligned}
+            r_y(\mu_l)-r_y(\mu_u) & =r_y'(\xi)(\mu_l-\mu_u), \ \xi\in[\mu_l,\mu_u]                                                                                         \\
+                                  & =\frac{\sum_{i=1}^n \frac{\beta_i^2}{(\lambda_i+\xi)^3}}{\left\|\left(\nabla^2 f(y)+\xi I\right)^{-1}\nabla f(y)\right\|}(\mu_u-\mu_l) \\
+                                  & \geq \frac{1}{\kappa_H+\mu_u} \left\|\left(\nabla^2 f(y)+\xi I\right)^{-1}\nabla f(y)\right\|(\mu_u-\mu_l)                             \\
+                                  & \geq \frac{1}{\kappa_H+\mu_u} \left\|\left(\nabla^2 f(y)+\mu_u I\right)^{-1}\nabla f(y)\right\|^2                                      \\
+                                  & \geq \frac{\|\nabla f(y)\|^2}{(\kappa_H+\mu_u)^3}.
+        \end{aligned}
+    \end{equation*}
+    In the above equations, the second line is derived by taking derivative of $r_y(\mu)$, which is similar to the analysis in \Cref{lem.property g}. The third line is from Assumption~\ref{assm.bounded hessian}. The fourth line is from \eqref{eq.bound target interval}. Therefore, we have
+    \begin{equation*}
+        \begin{aligned}
+            O\left(\log\frac{r_+}{r_y(\mu_l)-r_y(\mu_u)}\right) & \leq O\left(\log\frac{r_+(\kappa_H+\mu_u)^3}{\|\nabla f(y)\|^2}\right)                                                                                \\
+                                                                & \leq O\left(\log\frac{\|\nabla f(y)\|(\kappa_H+\mu_u)^3}{M\|d_+\|\|\nabla f(y)\|^2}\right)                                                            \\
+                                                                & = O\left(\log\frac{(\kappa_H+\mu_u)^3}{M\|d_+\|\|\nabla f(y)\|}\right)                                                                                \\
+                                                                & \leq O\left(\log\frac{(\kappa_H+\mu_+)^3}{8M\|d_+\|^2}\right)                                                                                         \\
+                                                                & \leq  \max \left\{O\left(\log\frac{(\kappa_H+\mu_+)^3}{8\epsilon}\right),O\left(\log\frac{4\kappa_H^2(\kappa_H+\mu_+)^3}{8M\epsilon^2}\right)\right\} \\
+                                                                & = O\left(\log\frac{\kappa_H+\mu_+}{\epsilon}\right).
+        \end{aligned}
+    \end{equation*}
+    In the above, the second line is from
+    $$r_+ = \left\|\left(\nabla^2 f(y)+M\|d_+\|I\right)^{-1} \nabla f(y)\right\| \leq \frac{\|\nabla f(y)\|}{M\|d_+\|}.$$
+    The fourth line is from $\mu_u \leq \mu_+$ and
+    $$
+        \frac{\sqrt{2M}}{2}\|\nabla f(y)\| =\mu_+ \geq 2M\|d_+\|.
+    $$
+    The last line is from the proposition of the logarithmic function.
+\end{proof}
+\subsection*{Proof to \Cref{lem.enter region}}
+\begin{proof}
+    We first examine the distance between $y_k$ and $x^*$:
+    \begin{equation*}
+        \begin{aligned}
+            \|y_k-x^*\| & \leq \|x_k-x^*\|+\|x_k-y_k\|                                                \\
+                        & =\|x_k-x^*\|+\frac{a_k}{A_k+a_k}\|x_k-v_k\|                                 \\
+                        & = \|x_k-x^*\|+\frac{3}{k+3}\|x_k-v_k\|                                      \\
+                        & =\|x_k-x^*\|+\frac{3}{k+3}\|x_k-x^*+x^*-v_k\|                               \\
+                        & \leq (1+\frac{3}{k+3})\|x_k-x^*\|+\frac{3}{k+3}\|x^*\|+\frac{3}{k+3}\|v_k\|
+        \end{aligned}
+    \end{equation*}
+    In the above, the first line is from the triangle inequality. The second line is from the definition of $y_k$. The last line is from the triangle inequality.
+
+    For the first term $\|x_k-x^*\|$, we first show that when $k\geq \frac{3^{4/3}M\|x_0-x^*\|}{2\nu}$, we have $x_k\in \mathcal{LQ}_p$~(see~\eqref{eq.local quadratic region}): for any $x\in\mathbb{R}^n$ with $\|x-x^*\| = \frac{2\nu}{3M}$, which means $x$ lies on the boundary of $\mathcal{LQ}_p$,
+    we have
+    \begin{equation*}
+        \begin{aligned}
+            f(x) & \geq f^* + \langle\nabla f(x^*),x-x^*\rangle +\frac{1}{2}(x-x^*)^T \nabla ^2 f(\chi x+(1-\chi)x^*)(x-x^*) \\
+                 & \geq f^*+\frac{\nu}{6}\|x-x^*\|^2                                                                         \\
+                 & =f^*+\frac{2\nu^3}{27M^2},
+        \end{aligned}
+    \end{equation*}
+    where $\chi\in [0,1]$, and the second line is from \eqref{eq.psd region}. Therefore, for any $x\in\mathbb{R}^n$ with $\|x-x^*\| >\frac{2\nu}{3M}$, we also have
+    \begin{equation*}
+        f(x)\geq f^*+\frac{2\nu^3}{27M^2}
+    \end{equation*}
+    due to the convexity of $f$. When $k\geq \frac{3^{4/3}M\|x_0-x^*\|}{2\nu}$, we have
+    \begin{equation*}
+        f(x_k)-f^*< \frac{2\nu^3}{27M^2}.
+    \end{equation*}
+    Therefore, $x_k\in\mathcal{LQ}_p$.
+
+    Moreover, we have $\nabla^2 f(x) >\frac{\nu}{3}I$ for all $x$ between $x_k$ and $x^*$, which further implies:
+    \begin{equation*}
+        \frac{\nu}{6}\|x_k-x^*\|^2 \leq f(x_k)-f^* \leq \frac{\phi_0(x^*)}{A_k}=\frac{3M\|x_0-x^*\|^3}{4 k(k+1)(k+2)}.
+    \end{equation*}
+    For the term $\|v_k\|$, we have
+    \begin{equation*}
+        \begin{aligned}
+            \|v_k\| & =\|v_0-\sqrt{\frac{8}{3M\|s_{k}\|}}s_k\|       \\
+                    & \leq \|v_0\|+\sqrt{\frac{8}{3M}}\|s_k\|^{1/2}.
+        \end{aligned}
+    \end{equation*}
+    Since $\frac{1}{2\kappa_H}\|\nabla f(x_k)\|^2 \leq f(x_k)-f^* \leq \frac{3M\|x_0-x^*\|^3}{4 k(k+1)(k+2)}$, we have
+    \begin{equation*}
+        \|\nabla f(x_k)\|\leq \sqrt{\frac{3\kappa_H M\|x_0-x^*\|^3}{2 k(k+1)(k+2)}}.
+    \end{equation*}
+    Note
+    \begin{equation*}
+        \begin{aligned}
+            \|s_k\| & =\|\sum_{i=1}^k\frac{i(i+1)}{2}\nabla f(x_i)\|                                         \\
+                    & \leq \sum_{i=1}^k \frac{i(i+1)}{2}\|\nabla f(x_i)\|                                    \\
+                    & \leq \sum_{i=1}^k\frac{i(i+1)}{2}\sqrt{\frac{3\kappa_H M\|x_0-x^*\|^3}{2 i(i+1)(i+2)}} \\
+                    & \leq \sqrt{\frac{3\kappa_H M\|x_0-x^*\|^3}{2}}\sum_{i=1}^k\frac{\sqrt{i}}{2}           \\
+                    & \leq \sqrt{\frac{3\kappa_H M\|x_0-x^*\|^3}{2}}\int_0^k \frac{\sqrt{t}}{2}dt            \\
+                    & =\sqrt{\frac{\kappa_H M\|x_0-x^*\|^3}{6}}k^{3/2}.
+        \end{aligned}
+    \end{equation*}
+    Therefore, $\|v_k\|\leq \|v_0\|+\frac{4\kappa_H^{1/4}\|x_0-x^*\|^{3/4}}{6^{3/4}M^{1/4}}k^{3/4}$. As a result,
+    \begin{equation}
+        \label{eq.bound yk}
+        \begin{aligned}
+            \|y_k-x^*\|\leq & (1+\frac{3}{k+3})\|x_k-x^*\|+\frac{3}{k+3}\|x^*\|                                      \\
+                            & +\frac{3}{k+3}\|v_0\|+\frac{12\kappa_H^{1/4}\|x_0-x^*\|^{3/4}}{6^{3/4}M^{1/4}}k^{-1/4} \\
+            \leq            & (1+\frac{3}{k+3})\sqrt{\frac{9M\|x_0-x^*\|^3}{2\nu k(k+1)(k+2)}}+\frac{3}{k+3}\|x^*\|  \\&
+            +\frac{3}{k+3}\|v_0\|+\frac{12\kappa_H^{1/4}\|x_0-x^*\|^{3/4}}{6^{3/4}M^{1/4}}k^{-1/4}.
+        \end{aligned}
+    \end{equation}
+    For the gradient norm, we have
+    \begin{equation*}
+        \|\nabla f(y_k)\| = \|\nabla f(y_k)-\nabla f(x^*)\|\leq \kappa_H\|y_k-x^*\|.
+    \end{equation*}
+    Therefore, when
+    \begin{equation}\label{eq.quadratic region guarantee}
+        \|y_k-x^*\|\leq \min\{\frac{2\nu}{3M},\frac{2\nu}{9\kappa_HM}\},
+    \end{equation}
+    we have $y_k\in\mathcal{LQ}_g$. Without loss of generality, we can assume the dominating term on the RHS of \eqref{eq.bound yk} is the last term
+    \begin{equation*}
+        \frac{12\kappa_H^{1/4}\|x_0-x^*\|^{3/4}}{6^{3/4}M^{1/4}}k^{-1/4},
+    \end{equation*}
+    therefore, when
+    \begin{equation*}
+        k\geq \max\{\frac{3^{4/3}M\|x_0-x^*\|}{2\nu}, \frac{16\cdot6^5 M^3\kappa_H\|x_0-x^*\|^3}{\nu^4},\frac{6\cdot9^4 M^3\kappa_H^5\|x_0-x^*\|^3}{\nu^8}\},
+    \end{equation*}
+    we have $y_k\in\mathcal{LQ}_g$.
+\end{proof}
+\subsection*{Lemma~\ref{lem.loglog vs log} and its proof}
+\begin{lemma}\label{lem.loglog vs log}
+Let $\{a_i\}$ satisfy $a_i \le C\,a_{i-1}^2$ with $C>0$ and $0<Ca_0<1$. Define
+\[
+i_{\min} \;=\; \min\Big\{i\in\mathbb{N}:\ a_i\le \epsilon\Big\}.
+\]
+Then there exists $\epsilon^*>0$ such that for all $\epsilon\leq \{\epsilon^*,\frac{1}{C}\}$,
+\[
+i_{\min}\;\le\;\Big\lceil \log\!\frac{a_0}{\epsilon}\Big\rceil.
+\]
+\end{lemma}
+
+\begin{proof}
+From the quadratic recurrence we have the standard bound
+\[
+a_i \;\le\; C^{2^{i}-1} a_0^{2^{i}}
+\;=\; \frac{(C a_0)^{2^{i}}}{C}
+\;=\; \frac{\eta_0^{2^{i}}}{C}\,.
+\]
+Thus $a_i\le\epsilon$ is guaranteed once $\eta_0^{2^{i}}\le C\epsilon$, i.e.,
+\[
+2^{i} \;\ge\; \frac{\ln(1/(C\epsilon))}{\ln(1/\eta_0)}.
+\]
+Hence
+\[
+i_{\min}\;\le\;\Big\lceil \log\!\Big(\frac{\ln(1/(C\epsilon))}{\ln(1/\eta_0)}\Big)\Big\rceil
+\;\le\;\Big\lceil \log\!\frac{a_0}{\epsilon}\Big\rceil
+\]
+is ensured provided
+\begin{equation}\label{eq.equiv star}
+\frac{\ln(1/(C\epsilon))}{\ln(1/\eta_0)}
+\;\le\; \frac{a_0}{\epsilon}
+\quad\Longleftrightarrow\quad
+w\ln\!\frac{1}{w}\;\le\;\eta_0\ln\!\frac{1}{\eta_0},
+\qquad w:=C\epsilon\in(0,1).
+\end{equation}
+We now give a simple \emph{sufficient} bound that implies \eqref{eq.equiv star} without special functions.
+If we choose $w\le \tfrac{1}{2}\,\eta_0\ln(1/\eta_0)$ and also $w\le w^{-2}$, then
+$\ln(1/w)\ge 2$ and therefore
+\[
+w\ln\!\frac{1}{w} \;\le\; \Big(\tfrac{1}{2}\,\eta_0\ln\!\tfrac{1}{\eta_0}\Big)\cdot 2
+\;=\; \eta_0\ln\!\tfrac{1}{\eta_0},
+\]
+which is exactly \eqref{eq.equiv star}. Taking
+\[
+\epsilon^\ast \;=\; \frac{1}{C}\,\min\!\Big\{\,\tfrac{1}{2}\,\eta_0\ln\!\tfrac{1}{\eta_0}\,,\ w^{-2}\Big\}
+\]
+yields $w=C\epsilon\le \min\{\tfrac{1}{2}\eta_0\ln(1/\eta_0),\,w^{-2}\}$ whenever $\epsilon\le\epsilon^\ast$,
+so \eqref{eq.equiv star} holds and the desired inequality follows.
+\end{proof}
+\section{Technical proofs in~\Cref{sec.second variant}}\label{sec.appendix 2}
+\subsection*{Proof to \Cref{lem.growth of Ak}}
+\begin{proof}
+    First note that for $i\geq 0$
+    \begin{equation*}
+        A_{i+1}^{1/2}-A_i^{1/2} = \frac{a_i}{A_{i+1}^{1/2}+A_i^{1/2}}=\frac{1}{A_{i+1}^{1/2}+A_i^{1/2}}\sqrt{\frac{A_{i+1}}{\sigma_i}}\geq \frac{1}{2\sqrt{\sigma_i}}.
+    \end{equation*}
+    The second equality comes from $\sigma_ia_i^2=A_i+a_i=A_{i+1}$. Summing up the above from $i=0$ to $k-1$ gives
+    \begin{equation*}
+        A_k \geq \frac{1}{4} \left (\sum_{i=0}^{k-1}\frac{1}{\sigma_i^{1/2}}\right)^2,
+    \end{equation*}
+    from \eqref{eq.relation lambda sigma}, the above gives
+    \begin{equation}\label{eq.Ak helper 1}
+        A_k \geq \frac{\eta}{4M} \left (\sum_{i=0}^{k-1} \frac{1}{\|d_i\|^{1/2}}\right)^2,
+    \end{equation}
+    on the other hand, from \eqref{eq.ms estimate advanced} we have
+    \begin{equation*}
+        B_k = \frac{3\gamma M}{8}\sum_{i=0}^{k-1} A_{i+1}\|d_i\|^3 \leq \frac{1}{2}\|v_0-x^*\|^2.
+    \end{equation*}
+    To estimate $A_k$ from below, define $\zeta_i = \|d_i\|^{1/2}$, $D = \frac{4}{3\gamma M}\|v_0-x^*\|^2$, we use the following auxiliary optimization problem
+    \begin{equation*}
+        \zeta^*=\min _{\zeta \in \mathbb{R}^k}\left\{\sum_{i=0}^{k-1} \frac{1}{\zeta_i}: \quad \sum_{i=0}^{k-1} A_{i+1} \zeta_i^6 \leq D\right\}.
+    \end{equation*}
+    Introducing the Lagrangian multiplier $w$, the optimality condition gives
+    \begin{equation*}
+        \frac{1}{\zeta_i^2}=w A_{i+1} \zeta_i^5, \quad i=0, \ldots, k-1
+    \end{equation*}
+    thus $\zeta_i = \left( \frac{1}{w A_{i+1}}\right)^{1/7}$, we have $w>0$ and the constraint is active,
+    \begin{equation*}
+        D=\sum_{i=0}^{k-1} A_{i+1}\left(\frac{1}{w A_{i+1}}\right)^{6 / 7}=\frac{1}{w^{6 / 7}} \sum_{i=0}^{k-1} A_{i+1}^{1 / 7},
+    \end{equation*}
+    therefore $\zeta^*=\sum_{i=0}^{k-1}\left(w A_{i+1}\right)^{1 / 7}=\frac{1}{D^{1 / 6}}\left(\sum_{i=0}^{k-1} A_{i+1}^{1 / 7}\right)^{7 / 6}$, plugging back $\|d_i\| $ and $ \|v_0-x^*\|^2$, we have
+    \begin{equation*}
+        A_k\geq\sum_{i=0}^{k-1}\frac{1}{\|d_i\|^{1/2}} \geq \left (\frac{3\gamma M}{4\|v_0-x^*\|^2}\right)^{1/6} \left(\sum_{i=0}^{k-1} A_{i+1}^{1 / 7}\right)^{7 / 6},
+    \end{equation*}
+    from \eqref{eq.Ak helper 1} we have
+    \begin{equation}
+        \label{eq.Ak helper 2}
+        A_k \geq \frac{\eta}{4M}\left (\frac{3\gamma M}{4\|v_0-x^*\|^2}\right)^{1/3} \left(\sum_{i=1}^{k} A_{i}^{1 / 7}\right)^{7 / 3}, \ k\geq 1.
+    \end{equation}
+    Denote $\omega = \frac{\eta}{4M}\left (\frac{3\gamma M}{4\|v_0-x^*\|^2}\right)^{1/3}$, $C_k =\left(\sum_{i=1}^k A_i^{1 / 7}\right)^{2 / 3}$, plugging them into \eqref{eq.Ak helper 2} we have
+    \begin{equation*}
+        C_1\geq\omega^{1/7},\ C_{k+1}^{3 / 2}-C_k^{3 / 2} \geq \omega^{1 / 7} C_{k+1}^{1 / 2},
+    \end{equation*}
+    which gives
+    \begin{equation*}
+        \begin{aligned}
+            \omega^{1 / 7} C_{k+1}^{1 / 2} & \leq\left(C_{k+1}^{1 / 2}-C_k^{1 / 2}\right)\left(C_{k+1}^{1 / 2}\left(C_{k+1}^{1 / 2}+C_k^{1 / 2}\right)+C_k\right)                                                                 \\
+                                           & \leq\left(C_{k+1}^{1 / 2}-C_k^{1 / 2}\right)\left(C_{k+1}^{1 / 2}\left(C_{k+1}^{1 / 2}+C_k^{1 / 2}\right)+\frac{1}{2} C_{k+1}^{1 / 2}\left(C_{k+1}^{1 / 2}+C_k^{1 / 2}\right)\right) \\
+                                           & =\frac{3}{2} C_{k+1}^{1 / 2}\left(C_{k+1}-C_k\right).
+        \end{aligned}
+    \end{equation*}
+    Thus $C_k \geq \omega^{1 / 7}\left(1+\frac{2}{3}(k-1)\right), k \geq 1$. For $A_k$, by \eqref{eq.Ak helper 2} we have
+    \begin{equation*}
+        \begin{aligned}
+            A_k & \geq \omega\left(C_k^{3 / 2}\right)^{7 / 3} \geq \omega\left(\omega^{1 / 7} \cdot \frac{2 k+1}{3}\right)^{7 / 2}=\omega^{3 / 2}\left(\frac{2 k+1}{3}\right)^{7 / 2} \\
+                & =\left(\frac{\eta}{4}\left (\frac{3\gamma}{4M^2\|v_0-x^*\|^2}\right)^{1/3}\right)^{3 / 2}\left(\frac{2 k+1}{3}\right)^{3.5}
+        \end{aligned}
+    \end{equation*}
+\end{proof}
+\subsection*{Properties of $\psi(\sigma,y)$}
+Now we introduce some basic properties of $\psi(\sigma,y)$:
+\begin{lemma}
+    \label{lem.psi property wrt sigma}
+    For any $y\in\mathbb{R}^n$, suppose $0<\sigma\leq \Bar{\sigma}$, then we have
+    \begin{equation}
+        \label{eq.psi property wrt sigma}
+        \left(\frac{\sigma}{\Bar{\sigma}}\right)^2 \psi(\sigma,y)\leq \psi(\Bar{\sigma},y) \leq \frac{\sigma}{\Bar{\sigma}}\psi(\sigma,y).
+    \end{equation}
+\end{lemma}
+\begin{proof}
+    Note that
+    \begin{equation*}
+        \sigma \psi(\sigma,y) = \left \| \left(\nabla^2 f(y)+\sigma I \right)^{-1}\nabla f(y)\right \|.
+    \end{equation*}
+    Since $\nabla^2 f(y)+\Bar{\sigma} I\succeq \nabla^2 f(y)+\sigma I \succ 0$, we have
+    \begin{equation*}
+        \sigma \psi(\sigma,y) \geq \Bar{\sigma} \psi(\Bar{\sigma},y),
+    \end{equation*}
+    which is the second argument. Similarly,
+    \begin{equation*}
+        \sigma^2 \psi(\sigma,y) = \left \| \left(\frac{\nabla^2 f(y)}{\sigma}+ I \right)^{-1}\nabla f(y)\right \|,
+    \end{equation*}
+    since $\frac{1}{\sigma}\nabla^2 f(y)+I\succeq \frac{1}{\Bar{\sigma}}\nabla^2 f(y)+I\succ I$, we have $\sigma^2 \psi(\sigma,y)\leq \Bar{\sigma}^2 \psi(\Bar{\sigma},y)$, which finished the proof.
+\end{proof}
+\begin{lemma}
+    \label{lem.psi property wrt y}
+    Suppose Assumption~\ref{assm.lipschitz} holds, for any $y,\Bar{y} \in \mathbb{R}^n$ and $\sigma>0$, then
+    \begin{equation}
+        \label{eq.psi property wrt y}
+        \left \vert \psi(\sigma,y)-\psi(\sigma,\Bar{y}) \right\vert \leq \frac{1}{\sigma}\|y-\Bar{y}\| +\frac{M}{\sigma^2}\|y-\Bar{y}\|^2 +\frac{2M}{\sigma}\|y-\Bar{y}\|r,
+    \end{equation}
+    where $\delta:=\min\{\psi(\sigma,\Bar{y}),\psi(\sigma,y)\}$. Further, we have
+    \begin{equation}
+        \label{eq.psi property wrt y advanced}
+        \psi(\sigma,y) \leq \frac{1}{\sigma}\|y-\Bar{y}\| +\frac{M}{\sigma^2}\|y-\Bar{y}\|^2 +\left(\frac{2M}{\sigma}\|y-\Bar{y}\|+1\right)\psi(\sigma,\Bar{y}).
+    \end{equation}
+\end{lemma}
+\begin{proof}
+    We denote
+    \begin{gather*}
+        x = \arg\min_{x\in \mathbb{R}^n} \ \nabla f(y)^T(x-y) +\frac{1}{2}(x-y)\nabla ^2 f(y)(x-y) +\frac{\sigma}{2}\|x-y\|^2,\\
+        \Bar{x} = \arg\min_{x\in \mathbb{R}^n} \ \nabla f(\Bar{y})^T(x-\Bar{y}) +\frac{1}{2}(x-\Bar{y})\nabla ^2 f(\Bar{y})(x-\Bar{y}) +\frac{\sigma}{2}\|x-\Bar{y}\|^2,
+    \end{gather*}
+    the optimality conditions of the above are
+    \begin{gather*}
+        \nabla f(y) + \nabla ^2 f(y)(x-y) +\sigma(x-y)=0,\\
+        \nabla f(\Bar{y})+\nabla ^2 f(\Bar{y})(\Bar{x}-\Bar{y})+\sigma(\Bar{x}-\Bar{y})=0.
+    \end{gather*}
+    Denote
+    \begin{gather*}
+        v = \nabla f(y) + \nabla ^2 f(y)(x-y),\\
+        \Bar{v} =  \nabla f(\Bar{y})+\nabla ^2 f(\Bar{y})(\Bar{x}-\Bar{y}),\\
+        u = \nabla f(\Bar{y})+\nabla ^2 f(\Bar{y})(x-\Bar{y}).
+    \end{gather*}
+    Plugging them into the optimality conditions gives
+    \begin{gather}
+        \label{eq.def v}
+        v+\sigma(x-y)=0,\\
+        \label{eq.def bar v}
+        \Bar{v}+\sigma(\Bar{x}-\Bar{y})=0,\\
+        \label{eq.target distance initial}
+        \left \vert \psi(\sigma,y)-\psi(\sigma,\Bar{y}) \right\vert= \left \vert\frac{1}{\sigma^2}\|v\| -\frac{1}{\sigma^2}\|\Bar{v}\|\right\vert\leq \frac{1}{\sigma^2}\|v-\Bar{v}\|.
+    \end{gather}
+    Subtracting \eqref{eq.def bar v} from \eqref{eq.def v}, we have
+    \begin{equation*}
+        \sigma(x-\Bar{x})+v -\Bar{v} = \sigma(y-\Bar{y}).
+    \end{equation*}
+    Plus both sides by $u$, we have
+    \begin{equation*}
+        \sigma(x-\Bar{x})+u-\Bar{v} = \sigma(y-\Bar{y})+u-v.
+    \end{equation*}
+    It is easy to show that
+    \begin{equation*}
+        \langle x-\Bar{x},u-\Bar{v}\rangle = \langle x-\Bar{x},\nabla ^2 f(\Bar{y})(x-\Bar{x})\rangle\geq 0,
+    \end{equation*}
+    thus from triangle inequality, we have
+    \begin{equation*}
+        \|u-\Bar{v}\| \leq \|\sigma(x-\Bar{x})+u-\Bar{v}\| \leq \sigma \|y-\Bar{y}\|+\|u-v\|,
+    \end{equation*}
+    hence
+    \begin{equation}\label{eq.bound psi 1}
+        \|v-\Bar{v}\| \leq \sigma\|y-\Bar{y}\| +2\|u-v\|.
+    \end{equation}
+    Now we bound $\|u-v\|$,
+    \begin{equation}\label{eq.bound psi 2}
+        \begin{aligned}
+            \|u-v\| & = \left\|\nabla f(\Bar{y})+\nabla ^2 f(\Bar{y})(x-\Bar{y})-\left(\nabla f(y) + \nabla ^2 f(y)(x-y)\right)\right\|                                                              \\
+                    & = \left\|\left(\nabla f(\Bar{y})+\nabla^2 f(\Bar{y})(y-\Bar{y})-\nabla f(y)\right)+\left(\nabla^2 f(\Bar{y})(x-y)-\nabla^2 f(y)(x-y)\right)\right\|                            \\
+                    & \leq \left\|\left(\nabla f(\Bar{y})+\nabla^2 f(\Bar{y})(y-\Bar{y})-\nabla f(y)\right)\right \| +\left \|\left(\nabla^2 f(\Bar{y})-\nabla^2 f(y)\right)\left(x-y\right)\right\| \\
+                    & \leq \frac{M}{2}\|y-\Bar{y}\|^2+M\|y-\Bar{y}\|\|x-y\|                                                                                                                          \\
+                    & =\frac{M}{2}\|y-\Bar{y}\|^2+\sigma M \|y-\Bar{y}\|\psi(\sigma,y).
+        \end{aligned}
+    \end{equation}
+    Plugging \eqref{eq.bound psi 1} and \eqref{eq.bound psi 2} into \eqref{eq.target distance initial}, we have
+    \begin{equation*}
+        \left \vert \psi(\sigma,y)-\psi(\sigma,\Bar{y}) \right\vert \leq \frac{1}{\sigma}\|y-\Bar{y}\| +\frac{M}{\sigma^2}\|y-\Bar{y}\|^2 +\frac{2M}{\sigma}\|y-\Bar{y}\|\psi(\sigma,y).
+    \end{equation*}
+    Similarly, we can prove
+    \begin{equation*}
+        \left \vert \psi(\sigma,y)-\psi(\sigma,\Bar{y}) \right\vert \leq \frac{1}{\sigma}\|y-\Bar{y}\| +\frac{M}{\sigma^2}\|y-\Bar{y}\|^2 +\frac{2M}{\sigma}\|y-\Bar{y}\|\psi(\sigma,\Bar{y}).
+    \end{equation*}
+    Hence we have proved \eqref{eq.psi property wrt y}, by applying triangle inequality, we have \eqref{eq.psi property wrt y advanced}.
+\end{proof}
+\subsection*{Proof to \Cref{lem.reduce line search}}
+\begin{proof}
+    If \eqref{eq.bracket small lambda} holds, we have
+    \begin{equation*}
+        \|d\| = \left \|\left(\nabla^2 f(y(\sigma))+\sigma I\right)^{-1}\nabla f(y(\sigma))\right\|<\frac{\eta}{M}\sigma,
+    \end{equation*}
+    which is $\psi(\sigma,y(\sigma))<\frac{\eta}{M}$.
+    Else if \eqref{eq.bracket big lambda} holds, we have
+    \begin{equation*}
+        \|d\| = \left \|\left(\nabla^2 f(y(\sigma))+\sigma I+\lambda I\right)^{-1}\nabla f(y(\sigma))\right\|=\frac{1}{M}\sigma.
+    \end{equation*}
+    By \eqref{eq.psi property wrt sigma}, we have
+    \begin{equation*}
+        \left \|\left(\nabla^2 f(y(\sigma))+\sigma I\right)^{-1}\nabla f(y(\sigma))\right\|>\left \|\left(\nabla^2 f(y(\sigma))+\sigma I+\lambda I\right)^{-1}\nabla f(y(\sigma))\right\|=\frac{1}{M}\sigma,
+    \end{equation*}
+    which means $\psi \left(\sigma,y(\sigma)\right)>\frac{1}{M}$.
+\end{proof}
+
+
+\subsection*{Proof to \Cref{lem.complexity bisection}}
+In fact, we prove a more detailed version of \Cref{lem.complexity bisection} here, which is \cref{coro.bisection bound} here. First, we need the following auxiliary lemmas below.
+
+First, we introduce the following property of $y(\cdot)$, since it is an auxiliary lemma, and the proof is almost the same as in \citet{monteiro2013accelerated}.
+\begin{lemma}[Lemma 7.13, \citet{monteiro2013accelerated}]
+    \label{lem.curve condition}
+    Suppose Assumption~\ref{assm.solvable} holds, and there exists $M_0>0$ such that
+    \begin{equation}\label{eq.bounded assm point}
+        \|x-x^*\|\leq M_0, \ \|v-x^*\|\leq M_0,
+    \end{equation}
+    then the curve $y(\cdot)$ satisfies
+    \begin{equation}
+        \label{eq.curve condition}
+        \|y(s)-y(t)\| \leq \frac{M_0}{t}(s-t), \ \forall s\geq t >0.
+    \end{equation}
+\end{lemma}
+\begin{proof}
+    We have
+    \begin{equation*}
+        \begin{aligned}
+            y(\sigma) & = \frac{A}{A+a(\sigma)}x+\frac{a(\sigma)}{A+a(\sigma)}v \\
+                      & = x + \tau (\sigma) (v-x),
+        \end{aligned}
+    \end{equation*}
+    where $\tau(\sigma) = \frac{a(\sigma)}{A+a(\sigma)}.$ For any $s\geq t>0$,
+    \begin{equation*}
+        \|y(s)-y(t)\| = \left|\tau(s)-\tau(t)\right| \|v-x\|,
+    \end{equation*}
+    by the mean value theorem, we have
+    \begin{equation*}
+        \|y(s)-y(t)\| = \left|\tau'(\xi)\right|(s-t) \|v-x\|\leq M_0\left|\tau'(\xi)\right|(s-t),
+    \end{equation*}
+    where $\xi \in \left[t,s\right]$. Note that from \eqref{eq.update ak} we have
+    \begin{equation*}
+        \sigma a^2=a+A,
+    \end{equation*}
+    it leads to
+    \begin{equation*}
+        \tau(\sigma) = \frac{a(\sigma)}{A+a(\sigma)} = \frac{1}{\sigma a(\sigma)} = \frac{2}{1+\sqrt{1+4A\sigma}}.
+    \end{equation*}
+    Its derivative is
+    \begin{equation*}
+        \tau'(\sigma) = -\frac{2A}{\sqrt{1+4A\sigma}\left(1+\sqrt{1+4A\sigma}\right)^2},
+    \end{equation*}
+    therefore for all $\sigma>0$, we have
+    \begin{equation*}
+        \begin{aligned}
+            \left|\tau'(\sigma)\right| & \leq \frac{2A}{\left(1+\sqrt{1+4A\sigma}\right)^2} \\
+                                       & \leq \frac{2A}{4A\sigma}                           \\
+                                       & = \frac{1}{2\sigma}.
+        \end{aligned}
+    \end{equation*}
+    Therefore we have
+    \begin{equation*}
+        \begin{aligned}
+            \|y(s)-y(t)\| & \leq \left|\tau'(\xi)\right|(s-t)\|x-v\|                          \\
+                          & \leq \left|\tau'(\xi)\right|(s-t)\left(\|x-x^*\|+\|v-x^*\|\right) \\
+                          & \leq 2M_0\left|\tau'(\xi)\right|(s-t)                             \\
+                          & \leq \frac{M_0}{t}(s-t).
+        \end{aligned}
+    \end{equation*}
+\end{proof}
+Next, we proceed to introduce the lemma with analyzes the difference between $\psi_-$ and $\psi_+$:
+\begin{lemma}
+    \label{lem.bound gap bisection}
+    Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.solvable} hold, and there exists $M_0>0$ such that \eqref{eq.bounded assm point} holds. Then in \textnormal{R\&B}~(\Cref{alg.bisection ms}), we have
+    \begin{equation}\label{eq.bound gap bisection}
+        \begin{aligned}
+            \psi_- - \psi_+
+            \leq\; & \left( \frac{\sigma_+}{\sigma_-} \right)^2 \Bigg[
+                \frac{1}{\sigma_+} \|y(\sigma_-)-y(\sigma_+)\|
+            + \frac{M}{\sigma_+^2} \|y(\sigma_-)-y(\sigma_+)\|^2                          \\
+                   & \quad + \frac{2M}{\sigma_+} \|y(\sigma_-)-y(\sigma_+)\| \cdot \psi_+
+                \Bigg]
+            + \left[ \left( \frac{\sigma_+}{\sigma_-} \right)^2 - 1 \right] \psi_+.
+        \end{aligned}
+    \end{equation}
+    Further, it gives
+    \begin{equation}
+        \label{eq.bounded gap bisection sigma}
+        \psi_- - \psi_+
+        \leq \frac{\sigma_+}{\sigma_-^2} \Bigg[
+            \frac{M_0}{\sigma_-}
+            + \frac{M M_0^2}{\sigma_-^2}+ 2\left( \frac{M M_0}{\sigma_-} + 1 \right)\psi_+
+            \Bigg](\sigma_+ - \sigma_-).
+    \end{equation}
+\end{lemma}
+\begin{proof}
+    \begin{equation*}
+        \begin{aligned}
+            \psi_- -\psi_+
+             & = \psi(\sigma_-,y(\sigma_-))-\psi(\sigma_+,y(\sigma_+))                                               \\
+             & \leq \left(\frac{\sigma_+}{\sigma_-}\right)^2 \psi(\sigma_+,y(\sigma_-)) - \psi(\sigma_+,y(\sigma_+)) \\
+             & \leq \left(\frac{\sigma_+}{\sigma_-}\right)^2 \Bigg[
+                \frac{1}{\sigma_+}\|y(\sigma_-)-y(\sigma_+)\|
+            + \frac{M}{\sigma_+^2} \|y(\sigma_-)-y(\sigma_+)\|^2                                                     \\
+             & \quad + \left( \frac{2M}{\sigma_+} \|y(\sigma_-)-y(\sigma_+)\| + 1 \right)\psi_+
+            \Bigg] - \psi_+                                                                                          \\
+             & = \left(\frac{\sigma_+}{\sigma_-} \right)^2 \Bigg[
+                \frac{1}{\sigma_+} \|y(\sigma_-)-y(\sigma_+)\|
+            + \frac{M}{\sigma_+^2} \|y(\sigma_-)-y(\sigma_+)\|^2                                                     \\
+             & \quad + \frac{2M}{\sigma_+} \|y(\sigma_-)-y(\sigma_+)\|\psi_+
+                \Bigg] + \left[ \left(\frac{\sigma_+}{\sigma_-} \right)^2 - 1 \right] \psi_+.
+        \end{aligned}
+    \end{equation*}
+    The second line is because of \Cref{lem.psi property wrt sigma}, the third line is because of \Cref{lem.psi property wrt y}. To derive \eqref{eq.bounded gap bisection sigma}, just plug \eqref{eq.curve condition} into \eqref{eq.bound gap bisection}.
+\end{proof}
+Now we can proceed with the main proof.
+\begin{lemma}
+    \label{coro.bisection bound}
+    Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.solvable} hold, and there exists $M_0>0$ such that \eqref{eq.bounded assm point} holds. Then in \textnormal{R\&B}, we have
+    \begin{equation*}
+        \begin{aligned}
+             & \frac{\sigma_+}{\sigma_-^2}\left[\frac{M_0}{\sigma_-}+\frac{MM_0^2}{\sigma_-^2}+2\left(\frac{MM_0}{\sigma_-}+1\right)\psi_+
+            \right]                                                                                                                                                                                                                                          \\
+             & \leq \sqrt{G_0}\left(\frac{(1+2\theta)^{3/2}M_0}{2\sqrt{2}M\eta \epsilon^{3/2}}+\frac{(1+2\theta)^2M_0^2}{4\sqrt{M}\eta\epsilon^2}+\frac{(1+2\theta)^{3/2}M_0}{\sqrt{2}M\epsilon^{3/2}}+\frac{(1+2\theta)\sqrt{G_0}}{M^{3/2}\epsilon}\right).
+        \end{aligned}
+    \end{equation*}
+    Denote
+    $$C(G_0,M_0,M,\epsilon):= M\sqrt{G_0}\left(\frac{(1+2\theta)^{3/2}M_0}{2\sqrt{2}M\eta \epsilon^{3/2}}+\frac{(1+2\theta)^2M_0^2}{4\sqrt{M}\eta\epsilon^2}+\frac{(1+2\theta)^{3/2}M_0}{\sqrt{2}M\epsilon^{3/2}}+\frac{(1+2\theta)\sqrt{G_0}}{M^{3/2}\epsilon}\right),$$
+    we have
+    \begin{equation}
+        \label{eq.bound value by brackets}
+        \sigma_+-\sigma_->\frac{1-\eta}{C(G_0,M_0,M,\epsilon)}.
+    \end{equation}
+    Further, the oracle called during the bisection is bounded by
+    \begin{equation*}
+        \log \left(\frac{\sqrt{\frac{MG_0}{\eta}}C(G_0,M_0,M,\epsilon)}{1-\eta}\right).
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    Note that if the bisection procedure does not terminate, from \eqref{eq.bound value by brackets} we have
+    \begin{equation*}
+        \sigma_+-\sigma- > \frac{1-\eta}{ C(G_0,M_0,M,\epsilon)}.
+    \end{equation*}
+    Note that the bracket points are defined as in \eqref{eq.bracket points}, therefore by the mechanism of the bisection method, the total number of bisection in the $k$-th iteration $N_k$ is bounded by
+    \begin{equation*}
+        \begin{aligned}
+            N_k & \leq \log \left(\frac{\left(\sqrt{\frac{MG_0}{\eta}}-\sqrt{\frac{2M\epsilon}{1+2\theta}}\right)C(G_0,M_0,M,\epsilon)}{1-\eta}\right) \\
+                & \leq \log \left(\frac{\sqrt{\frac{MG_0}{\eta}}C(G_0,M_0,M,\epsilon)}{1-\eta}\right).
+        \end{aligned}
+    \end{equation*}
+    Since $G_0,M_0$ is polynomial in $D_0$, by the definition of $C(G_0,M_0,M,\epsilon)$ and omitting the algorithm parameters, we conclude $N_k \leq O\left(\log MD_0/\epsilon\right)$.
+\end{proof}
+
+\subsection*{Proof to \Cref{lem.bounded iterate}}
+\begin{proof}
+    First, we show that \eqref{eq.ub yk sigma} is a direct consequence of \eqref{eq.bounded iterate y}:
+    \begin{equation*}
+        \|\nabla f(y_k(\sigma)) - \nabla f(x^*) -\nabla^2 f(x^*)(y_k(\sigma)-x^*)\| \leq \frac{M}{2}\|y_k(\sigma)-x^*\|^2.
+    \end{equation*}
+    By the triangle inequality, we have
+    \begin{equation*}
+        \begin{aligned}
+            \|\nabla f(y_k(\sigma)) \| & \leq \|\nabla f(x^*)+\nabla^2 f(x^*)(y_k(\sigma)-x^*)\| +\frac{M}{2}\|y_k(\sigma)-x^*\|^2                                    \\
+                                       & \leq \|\nabla^2 f(x^*)(y_k(\sigma)-x^*)\|+\frac{M}{2}\|y_k(\sigma)-x^*\|^2                                                   \\
+                                       & \leq \left(\frac{4}{\sqrt{3\gamma}}+1\right)\|\nabla ^2 f^*\|D_0+\frac{M}{2}\left(\frac{4}{\sqrt{3\gamma}}+1\right)^2 D_0^2.
+        \end{aligned}
+    \end{equation*}
+    Therefore, we only need to prove \eqref{eq.bounded iterate} and \eqref{eq.bounded iterate y} hold. We prove them by induction. It is trivial that they hold for $i=0$. Suppose that they hold for $i=k$. We will prove that they also hold for $i=k+1$. Note that
+    \begin{equation*}
+        \begin{aligned}
+            \|x_{k+1}-x^*\| & \leq \|x_{k+1}-y_k\| + \|y_k-x^*\|                                            \\
+                            & \leq \|d_k\|+ \frac{A_k}{A_{k+1}} \|x_k-x^*\| +\frac{a_k}{A_{k+1}}\|v_k-x^*\| \\
+                            & \leq \frac{1}{A_{k+1}}\left(A_{k+1}\|d_k\| +A_k\|x_k-x^*\| +  a_k D_0\right)  \\
+                            & \leq \frac{1}{A_{k+1}}\left (\sum_{i=0}^k A_{i+1}\|d_i\|\right)+D_0.
+        \end{aligned}
+    \end{equation*}
+    The second line is from \eqref{eq.update yk}, the third line is from \eqref{eq.ms estimate advanced}, and the fourth line is derived by iterating
+    \begin{equation*}
+        A_{k+1} \|x_{k+1}-x^*\|\leq A_{k+1}\|d_k\|+A_k\|x_k-x^*\|+a_k D_0,
+    \end{equation*}
+    which is derived by multiplying both sides of the third line by $A_{k+1}$.
+
+    Summing up \eqref{eq.helper bounded x}, we have
+    \begin{equation*}
+        \frac{3\gamma}{8}\sum_{i=0}^k A_{i+1}\sigma_i \|d_i\|^2 \leq \frac{1}{2}D_0^2,
+    \end{equation*}
+    to bound $\sum_{i=0}^k A_{i+1}\|d_i\|$, we come to the optimization problem:
+    \begin{equation*}
+        \max _{\zeta \in \mathbb{R}^{k+1}_+}\left\{\sum_{i=0}^{k} A_{i+1}\zeta_i: \quad \sum_{i=0}^{k} A_{i+1} \sigma_i\zeta_i^2 \leq \frac{4}{3\gamma}D_0^2\right\},
+    \end{equation*}
+    through similar analysis in \citet[Lemma A.2]{monteiro2013accelerated} we have
+    \begin{equation*}
+        \sum_{i=0}^k A_{i+1}\|d_i\| \leq \sqrt{\frac{4}{3\gamma}}\cdot \sqrt{\sum_{i=0}^k \frac{A_{i+1}}{\sigma_i}} D_0,
+    \end{equation*}
+    therefore,
+    \begin{equation}\label{eq.bound initial x}
+        \begin{aligned}
+            \|x_{k+1}-x^*\| & \leq \frac{1}{A_{k+1}}\left (\sum_{i=0}^k A_{i+1}\|d_i\|\right)+D_0                                                        \\
+                            & \leq \left(\sqrt{\frac{4}{3\gamma}}\cdot \sum_{i=0}^k\sqrt{\frac{1}{\sigma_i}}\cdot \sqrt{\frac{1}{A_{k+1}}} +1\right)D_0.
+        \end{aligned}
+    \end{equation}
+    The second line is from the fact that $A_k$ is monotone and $2$-norm is majorized by $1$-norm. From \eqref{eq.update ak} we have
+    \begin{equation*}
+        a_k \geq \frac{1}{2\sigma_k}+\sqrt{\frac{A_k}{\sigma_k}},
+    \end{equation*}
+    hence
+    \begin{equation*}
+        A_{k+1}\geq A_k+\frac{1}{2\sigma_k}+\sqrt{\frac{A_k}{\sigma_k}}\geq A_k+\frac{1}{4\sigma_k}+\sqrt{\frac{A_k}{\sigma_k}}.
+    \end{equation*}
+    Taking the square root of both sides,
+    \begin{equation*}
+        \sqrt{A_{k+1}}\geq \sqrt{A_k}+\frac{1}{2\sqrt{\sigma_k}},
+    \end{equation*}
+    Iterating the above inequality gives
+    \begin{equation*}
+        \sqrt{A_{k+1}}\geq \sum_{i=0}^k \frac{1}{2\sqrt{\sigma_i}}.
+    \end{equation*}
+    Plugging the above into \eqref{eq.bound initial x}, we have
+    \begin{equation*}
+        \|x_{k+1}-x^*\| \leq \left( \frac{4}{\sqrt{3\gamma}}+1\right) D_0.
+    \end{equation*}
+    For $v_{k+1}$, we have \eqref{eq.bounded iterate}, \eqref{eq.bounded iterate y} and \eqref{eq.ub yk sigma} hold for iteration $k$. As a result, the bisection search procedure is valid and \eqref{eq.relation lambda sigma} holds for the $k$-th iteration due to Corollary~\ref{coro.bisection bound}. Hence $\|v_{k+1}-x^*\|\leq D_0$.
+
+    To prove the boundedness of $y_{k+1}(\sigma)$, just note that $y_{k+1}(\sigma)$ is a linear combination of $v_{k+1}$ and $x_{k+1}$.
+\end{proof}
+%    Text of article.
+
+%    Bibliographies can be prepared with BibTeX using amsplain,
+%    amsalpha, or (for "historical" overviews) natbib style.
+% \bibliographystyle{amsplain}
+%    Insert the bibliography data here.
+
+\clearpage
+
+\tableofcontents
+
+\clearpage
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

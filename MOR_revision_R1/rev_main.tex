@@ -1,0 +1,46 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{color}
+\usepackage{hyperref, amsmath, amssymb, amsthm}
+\usepackage{cleveref}
+\usepackage{natbib}
+\usepackage{algorithm,algorithmic}
+\usepackage{eqparbox}
+\renewcommand\algorithmiccomment[1]{%
+  \hfill\texttt{\#}\ \eqparbox{COMMENT}{\texttt{#1}}%
+}
+\newcommand{\tr}{\textrm{TR}}
+\newcommand{\trp}{\textrm{TR}_+}
+\newcommand{\atr}{\Cref{alg.accelerated utr}}
+\def\algorithmautorefname{Alg.}
+\Crefname{algorithm}{Alg.}{Alg.}
+\newtheorem{lemma}{Lemma}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\textheight 8.5truein
+\parskip 0.1in
+\topmargin -0.05truein \textwidth 6.3truein \oddsidemargin-0.05in
+\evensidemargin -0.05in
+\renewcommand{\baselinestretch}{1.2}
+\parindent0pt
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand\comm[1]{\textit{#1}} % comments
+\newcommand\resp[1]{\textcolor{blue}{Response: #1}} % response
+
+\title{Responses to the Reviewers and Editors}
+\author{Jiang et al.}
+\begin{document}
+
+\maketitle
+
+\input{intro}
+
+\newpage
+\input{reviewer1}
+
+% \newpage
+\input{reviewer2}
+
+\bibliographystyle{plainnat} % outcomment this and next line in Case 1
+\bibliography{sample}
+\end{document}

@@ -1,0 +1,122 @@
+% --------------------------------------------------
+% 基本数学与环境
+% --------------------------------------------------
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools,bm}
+\usepackage{array,booktabs,longtable,multicol,multirow,makecell,tabularx,threeparttable}
+\usepackage{enumitem}
+\setlist[enumerate]{noitemsep, topsep=2pt}
+\setlist[itemize]{noitemsep, topsep=2pt}
+
+% --------------------------------------------------
+% 版面与引用
+% --------------------------------------------------
+\usepackage[margin=1.5in]{geometry}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[colorlinks,citecolor=purple,linkcolor=blue]{hyperref}
+\usepackage{cleveref}
+\usepackage{float}
+\usepackage{caption,subcaption}
+\usepackage{appendix}
+\usepackage{authblk}
+\usepackage{parskip}
+\renewcommand{\baselinestretch}{1.2}
+
+% --------------------------------------------------
+% 算法环境
+% --------------------------------------------------
+% \usepackage[linesnumbered,boxruled,lined,commentsnumbered]{algorithm2e} % 如果只用 algorithmic，可切换掉这一行
+\usepackage{algorithm,algorithmic}
+\usepackage{eqparbox}
+\renewcommand\algorithmiccomment[1]{\hfill\texttt{\#}\ \eqparbox{COMMENT}{\texttt{#1}}}
+
+% 自定义 subroutine 浮动体
+\usepackage{newfloat}
+\newfloat{subroutine}{htbp}{los}
+\floatname{subroutine}{Subroutine}
+\crefname{subroutine}{subroutine}{subroutines}
+\Crefname{subroutine}{Subroutine}{Subroutines}
+\crefname{line}{line}{lines}
+\def\algorithmautorefname{Alg.}
+\Crefname{algorithm}{Alg.}{Alg.}
+
+% --------------------------------------------------
+% Theorem 环境定义
+% --------------------------------------------------
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{strategy}[theorem]{Strategy}
+\newtheorem{question}[theorem]{Question}
+\numberwithin{equation}{section}
+
+% cleveref 自动命名
+\def\subsectionautorefname{Section}
+\def\definitionautorefname{Definition}
+\def\corollaryautorefname{Corollary}
+\def\lemmaautorefname{Lemma}
+\def\assumptionautorefname{Assumption}
+\def\propositionautorefname{Proposition}
+\def\tableautorefname{Table}
+\def\strategyautorefname{Strategy}
+\def\remarkautorefname{Remark}
+\def\conditionautorefname{Condition}
+
+% --------------------------------------------------
+% TikZ & PGFPlots
+% --------------------------------------------------
+\usepackage{tikz,pgfplots}
+\usetikzlibrary{arrows.meta,calc,backgrounds,positioning}
+\usepgfplotslibrary{fillbetween,patchplots}
+\pgfplotsset{compat=newest}
+
+% 自定义颜色与样式
+\definecolor{ao(english)}{rgb}{0.0,0.5,0.0}
+\definecolor{cadmiumgreen}{rgb}{0.0,0.42,0.24}
+\definecolor{darkpastelgreen}{rgb}{0.01,0.75,0.24}
+
+\tikzset{
+  materia/.style={draw, fill=blue!20, text width=6em, text centered, minimum height=1.5em, drop shadow},
+  etape/.style={materia, text width=8em, minimum width=10em, minimum height=3em, rounded corners, drop shadow},
+  linepart/.style={draw, thick, color=black!50, -Latex, dashed},
+  line/.style={draw, thick, color=black!50, -Latex},
+  back group/.style={fill=white!20,rounded corners, draw=black!50, dashed, inner xsep=15pt, inner ysep=10pt},
+}
+\newcommand{\etape}[2]{node (p#1) [etape] {#2}}
+\newcommand{\transreceptor}[3]{\path [linepart] (#1.east) -- node [above] {\scriptsize #2} (#3);}
+
+% --------------------------------------------------
+% 其他常用命令
+% --------------------------------------------------
+\newcommand{\xk}{x_k}
+\newcommand{\Hk}{H_k}
+\newcommand{\gk}{g_k}
+\newcommand{\dk}{d_k}
+\newcommand{\xkn}{x_{k+1}}
+\newcommand{\gkn}{g_{k+1}}
+\newcommand{\dkn}{d_{k+1}}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+% 算法名缩写
+\newcommand{\arc}{\texttt{CubicReg}}
+\newcommand{\arca}{\texttt{CubicReg-A}}
+\newcommand{\utr}{\texttt{UTR}}
+\newcommand{\utrhvp}{\texttt{UTR-HVP}}
+\newcommand{\iutr}{\texttt{iUTR(Hessian)}}
+\newcommand{\iutrhvp}{\texttt{iUTR}}
+\newcommand{\drsom}{\texttt{DRSOM}}
+\newcommand{\drsomh}{\texttt{DRSOM-H}}
+\newcommand{\hsodm}{\texttt{HSODM}}
+\newcommand{\hsodmarc}{\texttt{HSODMArC}}
+\newcommand{\hsodmhvp}{\texttt{HSODM-HVP}}
+\newcommand{\atr}{\Cref{alg.accelerated utr}}
+\newcommand{\atrms}{\Cref{alg.ms accelerated utr}}
+\newcommand{\tr}{\textrm{TR}}
+\newcommand{\trp}{\textrm{TR}_+}
+\numberwithin{equation}{section}
