@@ -33,7 +33,7 @@
 
 \comm{In all proofs, the authors are encouraged to provide more detailed explanations of the transitions from one step to another, even if some of those transitions are trivial.}
     
-\resp{As for your comment on Lemma 3.13, we have now rewrote it~(Lemma 3.11) and improved the dependency over $\nu$.}
+\resp{Thank you for your detailed comments. We carefully reviewed all of our proofs and revised the manuscript accordingly. For comments where the corresponding revisions are straightforward and self-explanatory, we have omitted detailed responses for brevity. Regarding your comment on Lemma 3.13, we have completely rewritten the result (now Lemma 3.11) and improved its dependence on $\nu$.}
 \begin{itemize}
     \item \comm{Page 7, line 16. Even if it is obvious, mention when introducing the sequence $\{\phi_k(x)\}_{k\ge 0}$ that it is a monotone non-increasing sequence, since this property is used in Lemma 3.4.}
     
@@ -86,11 +86,9 @@
 
     \item \comm{From the statement of Lemma 3.5, by combining the bound on $\|d_+\|$ and the bound from $\|\nabla f(y_k)\|$, we obtain $\|d_+\|\le \kappa_H/M$. Does this affect any of the results for $k\in\mathcal{L}$?}
     
-    \resp{}
+    \resp{Thanks for the detailed observation. No, it doesn't contradict with any results.}
 
     \item \comm{Page 10, line 56. It would be recommended to link this inequality to the results of Lemma 3.3, since this section is trying to establish the same result for the output of the R\&B Subroutine 1, i.e., for all $k\in\mathcal{L}$, similar to what has been established for all $k\in\mathcal{N}$ in Lemma 3.3.}
-    
-    \resp{}
 
     \item \comm{Lemma 3.11. The proof uses $\|x-x^\ast\|\le r$, but no value of $r$ is specified. A quick comment can be added that Lemma 3.12 specifies the value of $r$.}
 
@@ -107,14 +105,10 @@
     \resp{Thanks for the question. We did not use $\sigma_-\leq \sigma_-^2$, and we have added clarification in the paper.}
 
     \item \comm{Lemma 4.2, Page 16, line 13. Typo: it should be $y_k(\sigma_k)$. The same applies to $a_k(\sigma_k)$.}
-    
-    \resp{}
 
     \item \comm{Lemma 4.2, Page 16, line 20. Please also mention that $A_{k+1}=A_k+a_k$ follows from Algorithm 2.}
 
     \item \comm{Lemma 4.2, Page 16, line 23. In the first inequality, the term $2\gamma A_k(f(x_k)-f^\ast)$ is added to the right-hand side. Please clarify this step.}
-    
-    \resp{}
 
     \item \comm{Lemma 4.2, Page 16, line 29. For the second inequality, the proof uses (2.7). However, to use (2.7), one needs $\mu\ge M\|d\|$. From (4.3), $\|d_k\|\ge \eta\sigma_k/M$, and it is not clear how the required condition holds. Please provide more details.}
 
@@ -133,7 +127,16 @@
     \item \comm{Proof of Lemma 2.3. The proof implicitly assumes $M\ge 1$, but this is not mentioned in the paper. For example, Assumption 2.1 assumes $M>0$, but for the proof to work, it needs $M\ge 1$. The second inequality is in fact based on $\mu\ge \sqrt{M}\|d\|$, rather than $\mu\ge M\|d\|$. The same applies to line 28. It should be $\frac{3}{4}M\|d\|^4$ instead of $\frac{3}{4}M^2\|d\|^4$, unless one assumes $1\le M\le M^2$ and hence $-\frac{M}{4}\|d\|^4\ge -\frac{M^2}{4}\|d\|^4$. This needs to be fixed and it affects other lemmas, including Lemma 3.3 and others. The fix is to assume $M\ge 1$, so one can use $\mu\ge M\|d\|\ge \sqrt{M}\|d\|$ for the first part, and for the second part use
     $-\frac{M}{4}\|d\|^4\ge -\frac{M^2}{4}\|d\|^4$.}
     
-    \resp{}
+    \resp{Thank you for looking into this. The second inequality is based on that
+    \begin{equation*}
+        M^2\|d\|^2 \leq \mu^2, \text{and thus } M^2\|d\|^4\leq \mu^2\|d\|^2.
+    \end{equation*}
+    The same applies to line 28
+    \begin{equation*}
+        4M\|d\| \langle \nabla f(x+d),-d \rangle \geq_{(a)} 2\mu \langle \nabla f(x+d),-d \rangle \geq \|\nabla f(x+d)\|^2 +\frac{3}{4}\mu^2 \|d\|^2\geq_{(b)}  \|\nabla f(x+d)\|^2 +\frac{3}{4} M^2 \|d\|^4,
+    \end{equation*}
+    where $(a)$ is from $\mu \leq 2M\|d\|$, $(b)$ is from $\mu \geq M\|d\|$.
+    }
 
     \item \comm{Proof of Lemma 3.8, Page 21, line 30. There is a typo: the third line is because of $\mu_u>\xi$ instead of $\mu_+>\xi$.}
 
@@ -149,7 +152,7 @@
     $\sum_{i=1}^n \frac{\beta_i}{(\lambda_i+\xi)^2}$
     by $\|(\nabla^2 f(y)+\xi I)^{-1}\nabla f(y)\|$ is not properly done.}
     
-    \resp{}
+    \resp{We have now rewrote the proof accrording to your comment.}
 
     \item \comm{Proof of Lemma 3.9, Page 22, line 24. Please refer to Subroutine 1, line 16, for the starting value of $r_+$. Although $r_+$ decreases during bisection, the starting value of $r_+$ gives an upper bound for the bisection-complexity analysis.}
 
@@ -184,7 +187,7 @@
 
     \item \comm{Lemma B.2 and its proof, Page 24, line 14. The definition $\eta_0=Ca_0$ is not the same as the definition of $\eta_0$ under Corollary 3.2, equation (3.5). Please clarify.}
     
-    \resp{}
+    \resp{We have rewrote the proof.}
 
     \item \comm{Lemma B.2 and its proof, Page 24, line 30. First, it is not clear how $w\le w^{-2}$ gives $\ln(1/w)\ge 2$. Also, in line 30, the proof uses $\ln(1/w)\le 2$ for the inequality to hold.}
     
@@ -193,16 +196,14 @@
     \item \comm{Proof of Lemma 4.3, Page 24, line 45. For $\sigma_i a_i^2=A_i+a_i$, please add that this follows from (4.2).}
 
     \item \comm{Lemma C.2. Please add more details explaining how (C.8) was derived.}
-    
-    \resp{}
 
     \item \comm{Lemma C.3, Page 28, line 5. There is a minor calculation mistake in the computation of the derivative. It should be $4A$ instead of $2A$. This affects the final bound in the lemma.}
     
-    \resp{}
+    \resp{Thank. We have revised it and the corresponding bound.}
 
     \item \comm{Lemma C.5. There is a typo in the definition of $C(G_0,M_0,M,\epsilon)$; I think there is an extra $M$. Please also recompute the bound on lines 10--12. I think there is a minor computation mistake: the first term should be $(1+2\theta)^3$ instead of $(1+2\theta)^{3/2}$, and $\eta^2$ instead of $\eta$; also, for the fourth term, it should be $(1+2\theta)^2$ instead of $(1+2\theta)$, and there should be $\eta^{3/2}$ in the denominator.}
     
-    \resp{}
+    \resp{Thanks. We have recomputed the bound as you suggested and added more details to the proof.}
 \end{itemize}
 
 \paragraph{Algorithm}
