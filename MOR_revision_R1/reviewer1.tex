@@ -93,24 +93,14 @@
     \resp{}
 
     \item \comm{Lemma 3.11. The proof uses $\|x-x^\ast\|\le r$, but no value of $r$ is specified. A quick comment can be added that Lemma 3.12 specifies the value of $r$.}
-    
-    \resp{}
 
     \item \comm{Lemma 3.14, Page 13, line 25. Please add a minor detail referring to Algorithm 1, line 4, for the value of $\sigma_k$.}
-    
-    \resp{}
 
     \item \comm{Lemma 3.14, Page 13, line 29. It would be recommended to add a reference to Algorithm 1, line 4, for the value of $r_k$.}
-    
-    \resp{}
 
     \item \comm{Theorem 3.3, Page 13, line 51. Please add a reference to Corollary 3.1 when proving the first case for line 3 of Subroutine 1.}
-    
-    \resp{}
 
     \item \comm{Lemma 4.1, Page 15, line 32. Typo: it should refer to Lemma 2.1 instead of Assumption 2.1.}
-    
-    \resp{}
 
     \item \comm{Lemma 4.1, Page 15, line 42. For the last inequality, please add more details about the derivation. For example, mention that $\|d_-\|\le r_-$, where $r_-=\frac{1}{M}\sigma_-$ from Subroutine 2, line 3. The same applies to the value of $\sigma_-$. Also, in this lemma, the proof uses $\sigma_-\le \sigma_-^2$ in the last inequality, but that is not clarified. From the value of $\sigma_-$ in Subroutine 2, line 3, this is not clear unless the assumption $2M\epsilon\ge 1+2\theta$ is made.}
     
@@ -121,38 +111,24 @@
     \resp{}
 
     \item \comm{Lemma 4.2, Page 16, line 20. Please also mention that $A_{k+1}=A_k+a_k$ follows from Algorithm 2.}
-    
-    \resp{}
 
     \item \comm{Lemma 4.2, Page 16, line 23. In the first inequality, the term $2\gamma A_k(f(x_k)-f^\ast)$ is added to the right-hand side. Please clarify this step.}
     
     \resp{}
 
     \item \comm{Lemma 4.2, Page 16, line 29. For the second inequality, the proof uses (2.7). However, to use (2.7), one needs $\mu\ge M\|d\|$. From (4.3), $\|d_k\|\ge \eta\sigma_k/M$, and it is not clear how the required condition holds. Please provide more details.}
-    
-    \resp{}
 
     \item \comm{Lemma 4.2, Page 16, line 30. The proof uses ``Because $\sigma_k\ge M\|d_k\|$.'' Here the proof is using the fact that $\mu_k=\sigma_k+\lambda_k$, with $\lambda_k=0$ since the argument is in Subroutine 2. This is the same assumption as the previous point, namely $\mu_k\ge M\|d_k\|$, but the proof does not explain why it holds.}
-    
-    \resp{}
 
     \item \comm{Lemma 4.2. Even if it is technical, I would prefer to see how the term
     $\gamma^2 a_k^2-\frac{\gamma A_{k+1}}{\theta\sigma_k}$
     is eliminated in line 32.}
-    
-    \resp{}
 
     \item \comm{Lemma 4.2. Please provide more details on how (4.5) is derived, since the statement ``Iterating the above inequality gives (4.5)'' is not enough.}
-    
-    \resp{}
 
     \item \comm{Theorem 4.1. Please provide a proof, or mention that the proof follows the same strategy as Nesterov [47, Theorem 4.3.2].}
-    
-    \resp{}
 
     \item \comm{Proof of Lemma 2.3, Page 20, lines 28, 31, and 34. Typos: $\|\nabla f(x+d)\|$ should be used instead of $\|f(x+d)\|$.}
-    
-    \resp{}
 
     \item \comm{Proof of Lemma 2.3. The proof implicitly assumes $M\ge 1$, but this is not mentioned in the paper. For example, Assumption 2.1 assumes $M>0$, but for the proof to work, it needs $M\ge 1$. The second inequality is in fact based on $\mu\ge \sqrt{M}\|d\|$, rather than $\mu\ge M\|d\|$. The same applies to line 28. It should be $\frac{3}{4}M\|d\|^4$ instead of $\frac{3}{4}M^2\|d\|^4$, unless one assumes $1\le M\le M^2$ and hence $-\frac{M}{4}\|d\|^4\ge -\frac{M^2}{4}\|d\|^4$. This needs to be fixed and it affects other lemmas, including Lemma 3.3 and others. The fix is to assume $M\ge 1$, so one can use $\mu\ge M\|d\|\ge \sqrt{M}\|d\|$ for the first part, and for the second part use
     $-\frac{M}{4}\|d\|^4\ge -\frac{M^2}{4}\|d\|^4$.}
@@ -160,12 +136,8 @@
     \resp{}
 
     \item \comm{Proof of Lemma 3.8, Page 21, line 30. There is a typo: the third line is because of $\mu_u>\xi$ instead of $\mu_+>\xi$.}
-    
-    \resp{}
 
     \item \comm{Proof of Lemma 3.9. For the equality on line 49, please also refer to Lemma B.1 for the computation of $r'(\xi)$.}
-    
-    \resp{}
 
     \item \comm{Proof of Lemma 3.9. There are issues with the second and third inequalities. For example, based on Lemma B.1, the second inequality should involve
     $\|(\nabla^2 f(y)+\xi I)^{-1}\nabla f(y)\|^3$.
@@ -180,24 +152,14 @@
     \resp{}
 
     \item \comm{Proof of Lemma 3.9, Page 22, line 24. Please refer to Subroutine 1, line 16, for the starting value of $r_+$. Although $r_+$ decreases during bisection, the starting value of $r_+$ gives an upper bound for the bisection-complexity analysis.}
-    
-    \resp{}
 
     \item \comm{Proof of Lemma 3.9, Page 22, line 30. Please refer to Algorithm 1, line 9, for the starting value of $\mu_+$. Also, there is a typo: $\mu_+=\frac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2}$.}
     
-    \resp{}
-
     \item \comm{Proof of Lemma 3.9, Page 22, line 16. There is a calculation mistake. Plugging in the inequality from line 30, with the typo above fixed, gives a different bound, namely $\frac{1}{8M^2\|d\|^3}$.}
-    
-    \resp{}
 
     \item \comm{Proof of Lemma 3.9, line 20. Please add details explaining how this inequality was derived.}
-    
-    \resp{}
 
     \item \comm{Proof of Lemma 3.13, Page 22, line 54. Please add details explaining how the second inequality holds.}
-    
-    \resp{}
 
     \item \comm{Proof of Lemma 3.13, Page 23, line 5. Please add details explaining how the inequality follows from
     $k\ge \frac{3^{4/3}M\|x_0-x^\ast\|}{2\nu}$.}
