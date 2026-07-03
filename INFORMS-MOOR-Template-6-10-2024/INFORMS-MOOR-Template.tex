@@ -382,7 +382,7 @@ When using the estimating sequence technique in~\cite{nesterov2008accelerating},
 \end{subequations}
 Here $\{\phi_k(x)\}_{k\geq 0}$ is a sequence of functions that approximate $f(x)$ from with $\{v_k\}_{k\geq0}$ being the optimum, $\{A_k\}_{k\geq 0}$ is a sequence that measures the convergence rate of the sequence $\{x_k\}_{k\geq 0}$. As a result of \eqref{eq.es relation}, we have
 \begin{equation*}
-    f(x_k)-f(x)\leq \frac{1}{A_k}\phi_0(x), \quad \forall x\in \mathbb{R}^n, \ {\color{red} k\geq 1}.
+    f(x_k)-f(x)\leq \frac{1}{A_k}\phi_0(x),\quad \forall x\in \mathbb{R}^n, \ {\color{red} k\geq 1}.
 \end{equation*}
 Therefore, the global iteration complexity directly follows from the choice of $A_k$ and $\phi_0(x)$.
 
@@ -1184,7 +1184,7 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
     \begin{lemma}
         \label{lem.property of phi}
         For the function sequence $\phi_k(x)$, they have the following properties
-        \begin{enumerate}
+        \begin{enumerate}[label=(\roman*)]
             \item $\phi_k(x)$ is uniformly convex of degree $3$ with constant $12M$.
             \item $v_k$ is the unique minimizer of $\phi_k(x)$, and
                   \begin{equation}
@@ -1268,11 +1268,11 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
         \begin{aligned}
             g_y'(\mu) & = \frac{1}{\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\zeta_i+\mu\right )^2}}}+\mu \frac{1}{\left ( \sum_{i=1}^n \frac{\beta_i^2}{\left (\zeta_i+\mu\right )^2}\right )^{3/2}}\sum_{i=1}^n\frac{\beta_i^2}{\left (\zeta_i+\mu\right )^3} \\
                       & = \frac{1}{\| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|}+\frac{\mu}{\| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\left (\zeta_i+\mu\right )^3}                                                            \\
-                      & \leq \frac{1}{ \| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|}+\frac{\mu}{\| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\mu\left (\zeta_i+\mu\right )^2}                                                     \\
+                      & \leq_{(a)} \frac{1}{ \| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|}+\frac{\mu}{\| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\mu\left (\zeta_i+\mu\right )^2}                                                     \\
                       & =  \frac{2}{\| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|}.
         \end{aligned}
     \end{equation*}
-    The inequality is because of $\zeta_i \geq 0$ for $i=1,\ldots,n$.
+    $(a)$ is because of $\zeta_i \geq 0$ for $i=1,\ldots,n$.
     \Halmos \endproof
 
     Now we are ready to formally prove \Cref{lem.bound target interval}.
@@ -1285,9 +1285,9 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
     \end{equation*}
     combine the above with \eqref{eq.derivative bound} and \eqref{eq.target interval bracketing points} we have
     \begin{equation*}
-        \mu_u-\mu_l =  \frac{1}{g_y'(\xi)}\left(g_y(\mu_u)-g_y(\mu_l)\right) \geq \frac{M\| (\nabla ^2 f(y)+\xi I  )^{-1}\nabla f(y)\|}{2} \geq \frac{M\| (\nabla ^2 f(y)+\mu_u I  )^{-1}\nabla f(y)\|}{2}.
+        \mu_u-\mu_l =  \frac{1}{g_y'(\xi)}\left(g_y(\mu_u)-g_y(\mu_l)\right) \geq \frac{M\| (\nabla ^2 f(y)+\xi I  )^{-1}\nabla f(y)\|}{2} \geq_{(a)} \frac{M\| (\nabla ^2 f(y)+\mu_u I  )^{-1}\nabla f(y)\|}{2}.
     \end{equation*}
-    The third line is because of $\mu_u >\xi$.
+    $(a)$ is because of $\mu_u >\xi$.
     \Halmos \endproof
     \subsection*{Proof to \Cref{lem.bound initial interval}}
     {\color{red}
@@ -1761,9 +1761,9 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
             \leq \frac{\rho}{2}.
         \]
         Consequently,
-        \[
+        \(
             \|y_k-x^*\|\leq \rho.
-        \]
+        \)
         Therefore,
         \[
             \|y_k-x^*\|\leq \frac{2\nu}{3M},
@@ -1894,10 +1894,8 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
     \end{equation*}
     Thus $C_k \geq \omega^{1 / 7}\left(1+\frac{2}{3}(k-1)\right), k \geq 1$. For $A_k$, by \eqref{eq.Ak helper 2} we have
     \begin{equation*}
-        \begin{aligned}
-            A_k & \geq \omega\left(C_k^{3 / 2}\right)^{7 / 3} \geq \omega\left(\omega^{1 / 7} \cdot \frac{2 k+1}{3}\right)^{7 / 2}=\omega^{3 / 2}\left(\frac{2 k+1}{3}\right)^{7 / 2} \\
-                & =\left(\frac{\eta}{4}\left (\frac{3\gamma}{4M^2\|v_0-x^*\|^2}\right)^{1/3}\right)^{3 / 2}\left(\frac{2 k+1}{3}\right)^{3.5}
-        \end{aligned}
+            A_k  \geq \omega\left(C_k^{3 / 2}\right)^{7 / 3} \geq \omega\left(\omega^{1 / 7} \cdot \frac{2 k+1}{3}\right)^{7 / 2}=\omega^{3 / 2}\left(\frac{2 k+1}{3}\right)^{7 / 2} 
+                 =\left(\frac{\eta}{4}\left (\frac{3\gamma}{4M^2\|v_0-x^*\|^2}\right)^{1/3}\right)^{3 / 2}\left(\frac{2 k+1}{3}\right)^{3.5}
     \end{equation*}
     \Halmos \endproof
     \subsection*{Properties of $\psi(\sigma,y)$}
@@ -2381,9 +2379,8 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
     By the mechanism of bisection, the total number of bisection steps in the
     \(k\)-th iteration, denoted by \(N_k\), satisfies
     \[
-        \begin{aligned}
             N_k
-             & \le
+              \le
             \log\left(
             \frac{
                     \left(
@@ -2395,8 +2392,8 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
                 }{
                     1-\eta
                 }
-            \right) \\
-             & \le
+            \right) 
+              \le
             \log\left(
             \frac{
                     M\sqrt{\frac{MG_0}{\eta}}\,
@@ -2405,7 +2402,6 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
                     1-\eta
                 }
             \right).
-        \end{aligned}
     \]
     Since \(G_0\) and \(M_0\) are polynomially bounded in \(D_0\), by the
     definition of \(C(G_0,M_0,M,\epsilon_g)\), and omitting fixed algorithmic
@@ -2466,9 +2462,9 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
         \|x_{k+1}-x^*\|  \leq \frac{1}{A_{k+1}}\left (\sum_{i=0}^k A_{i+1}\|d_i\|\right)+D_0  \leq \left(\sqrt{\frac{4}{3\gamma}}\cdot \sum_{i=0}^k\sqrt{\frac{1}{\sigma_i}}\cdot \sqrt{\frac{1}{A_{k+1}}} +1\right)D_0.
     \end{equation}
     The second inequality is from the fact that $A_k$ is monotone and $2$-norm is majorized by $1$-norm. From \eqref{eq.update ak} we have
-    \begin{equation*}
+    \(
         a_k \geq \frac{1}{2\sigma_k}+\sqrt{\frac{A_k}{\sigma_k}},
-    \end{equation*}
+    \)
     hence
     \begin{equation*}
         A_{k+1}\geq A_k+\frac{1}{2\sigma_k}+\sqrt{\frac{A_k}{\sigma_k}}\geq A_k+\frac{1}{4\sigma_k}+\sqrt{\frac{A_k}{\sigma_k}}.
