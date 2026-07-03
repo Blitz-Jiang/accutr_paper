@@ -145,7 +145,7 @@ The first method, \emph{Accelerated Trust-Region Method with Local Detection} (\
 The second method, \emph{Accelerated Trust-Region Extragradient Method} (\Cref{alg.ms accelerated utr}), is designed to pursuit the limits of global performance, reaching the near-optimal global oracle complexity of $\tilde{O}(\epsilon^{-2/7})$, but does not retain the same local quadratic guarantee. Thus, our analysis and experiments reveal a phase transition in accelerated trust-region type methods: pushing global efficiency to its limits naturally entails a trade-off with local performance.
 This behavior is caused by the fact that, in \Cref{alg.ms accelerated utr}, the primal regularizer must be selected through an extragradient search coupled with the extrapolation point, which prevents the simple $\lambda=0$ local-detection mechanism used in \Cref{alg.accelerated utr}.
 
-Our theoretical findings are corroborated by numerical experiments. On a global scale, all accelerated SOMs, including ours and \cite{nesterov2008accelerating,monteiro2013accelerated}, consistently outperform the non-accelerated trust-region method~\cite{jiang2026beyond} and cubic Newton method~\cite{nesterov2006cubic}. Locally, \Cref{alg.accelerated utr} exhibits quadratic convergence, and \atrms{} cannot retain superlinear convergence near the solution, similar to the empirical conclusions in \cite{carmon2022optimal,jiang2024accelerated,huang2024inexact}. These findings again confirm the necessity of local detection.
+Our theoretical findings are corroborated by numerical experiments. On a global scale, all accelerated SOMs, {\color{red}including ours and \cite{nesterov2008accelerating}}, consistently outperform the non-accelerated trust-region method~\cite{jiang2026beyond} and cubic Newton method~\cite{nesterov2006cubic}. Locally, \Cref{alg.accelerated utr} exhibits quadratic convergence, and \atrms{} cannot retain superlinear convergence near the solution, similar to the empirical conclusions in \cite{carmon2022optimal,jiang2024accelerated,huang2024inexact}. These findings again confirm the necessity of local detection.
 
 \subsection{Related works}
 We review related works along two main lines: TR-type methods and accelerated SOMs that aim to achieve faster-than-sublinear efficiency. Despite the strong empirical success of TR-type methods, their theoretical analysis mainly focuses on nonconvex problems~\cite{ye2005second,curtis2017trust,curtis2021trust,zhang2025homogeneous,hamad2022consistently,grapiglia2015on,hamad2024simple,curtis2023worst_i,ouyang2025trust}, while their global oracle complexity analysis for convex problems remains incomplete.
@@ -954,10 +954,10 @@ Note the way we update $v_{k+1}$ in \Cref{alg.ms accelerated utr}.
 
 The third line comes from \eqref{eq.update yk}. The last line is from the convexity of $f$. {\color{red} Using $A_{k+1}=A_k+a_k$ as in \Cref{alg.ms accelerated utr}} and rearranging terms gives
 \begin{align*}
-         & \|v_{k+1}-x^*\|^2 +2\gamma A_{k+1} \left (f(x_{k+1})-f^*\right)                                                                                                                                                                   \\
-    \leq & \|v_k-x^*\|^2+2\gamma A_k \left (f(x_k)-f^*\right )+\gamma^2 a_k^2 \|\nabla f(x_{k+1})\|^2 -2\gamma \left (A_k+a_k\right)\langle \nabla f(x_{k+1}), y_k-x_{k+1} \rangle                                                           \\
-    \leq&_{(a)} \|v_k-x^*\|^2+2\gamma A_k \left (f(x_k)-f^*\right )+\gamma^2 a_k^2 \|\nabla f(x_{k+1})\|^2 -\gamma \left (A_k+a_k\right)\left (\frac{\|\nabla f(x_{k+1})\|^2}{\sigma_k+\lambda_k}+\frac{3(\sigma_k+\lambda_k)}{4}\|d_k\|^2\right) \\
-    \leq&_{(b)} \|v_k-x^*\|^2+2\gamma A_k \left (f(x_k)-f^*\right )+\left(\gamma^2 a_k^2-\frac{\gamma(A_k+a_k)}{\theta \sigma_k}\right)\|\nabla f(x_{k+1})\|^2 -\frac{3\gamma(A_k+a_k)(\sigma_k+\lambda_k)}{4}\|d_k\|^2.
+         & \|v_{k+1}-x^*\|^2 +2\gamma A_{k+1} \left (f(x_{k+1})-f^*\right)                                                                                                                                                                          \\
+    \leq & \|v_k-x^*\|^2+2\gamma A_k \left (f(x_k)-f^*\right )+\gamma^2 a_k^2 \|\nabla f(x_{k+1})\|^2 -2\gamma \left (A_k+a_k\right)\langle \nabla f(x_{k+1}), y_k-x_{k+1} \rangle                                                                  \\
+    \leq & _{(a)} \|v_k-x^*\|^2+2\gamma A_k \left (f(x_k)-f^*\right )+\gamma^2 a_k^2 \|\nabla f(x_{k+1})\|^2 -\gamma \left (A_k+a_k\right)\left (\frac{\|\nabla f(x_{k+1})\|^2}{\sigma_k+\lambda_k}+\frac{3(\sigma_k+\lambda_k)}{4}\|d_k\|^2\right) \\
+    \leq & _{(b)} \|v_k-x^*\|^2+2\gamma A_k \left (f(x_k)-f^*\right )+\left(\gamma^2 a_k^2-\frac{\gamma(A_k+a_k)}{\theta \sigma_k}\right)\|\nabla f(x_{k+1})\|^2 -\frac{3\gamma(A_k+a_k)(\sigma_k+\lambda_k)}{4}\|d_k\|^2.
 \end{align*}
 $(a)$ is from {\color{red} whenever we call the oracle at Line~\ref{line.def G0} and \ref{line.call-utr-bisec}, we have $\sigma \geq M\|d\|$, hence we can apply \eqref{eq.inner product g d}}. $(b)$ is from \eqref{eq.relation lambda sigma}. {\color{red} Note that $\gamma \leq \frac{1}{\theta}$ and \eqref{eq.update ak} hold. We have
 \begin{equation*}
@@ -1126,7 +1126,7 @@ We implement two different accelerated TR methods (\atr{} and \atrms{}) and comp
         \resizebox{0.42\columnwidth}{!}{\input{../figs/e-logistic-w8a-k}}
     }
 
-    \caption{Logistic regression using the LIBSVM datasets}\label{fig.logistic regression}
+    \caption{Logistic regression using the LIBSVM datasets.}\label{fig.logistic regression}
     \normalsize
 \end{figure}
 
@@ -1292,294 +1292,294 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
     \Halmos \endproof
     \subsection*{Proof to \Cref{lem.bound initial interval}}
     {\color{red}
-    \proof{Proof.}
-    Note
-    \[
-    r_y(\mu)
-    =
-    \|(\nabla^2 f(y)+\mu I)^{-1}\nabla f(y)\|.
-    \]
-    Let the target interval for \(r\) be \([r_l,r_u]\), where
-    \[
-    r_l=r_y(\mu_u),
-    \qquad
-    r_u=r_y(\mu_l).
-    \]
-    Since \(r_y(\mu)\) is decreasing in \(\mu\), we have \(r_l<r_u\). The
-    bisection procedure terminates whenever the current radius \(r\) lies in
-    \([r_l,r_u]\). Hence the number of bisection steps is bounded by
-    \begin{equation}
-        \label{eq.rb-complexity-basic}
-        O\left(
-        \log\frac{r_+-r_-}{r_u-r_l}
-        \right)
-        \le
-        O\left(
-        \log\frac{r_+}{r_u-r_l}
-        \right).
-    \end{equation}
+        \proof{Proof.}
+        Note
+        \[
+            r_y(\mu)
+            =
+            \|(\nabla^2 f(y)+\mu I)^{-1}\nabla f(y)\|.
+        \]
+        Let the target interval for \(r\) be \([r_l,r_u]\), where
+        \[
+            r_l=r_y(\mu_u),
+            \qquad
+            r_u=r_y(\mu_l).
+        \]
+        Since \(r_y(\mu)\) is decreasing in \(\mu\), we have \(r_l<r_u\). The
+        bisection procedure terminates whenever the current radius \(r\) lies in
+        \([r_l,r_u]\). Hence the number of bisection steps is bounded by
+        \begin{equation}
+            \label{eq.rb-complexity-basic}
+            O\left(
+            \log\frac{r_+-r_-}{r_u-r_l}
+            \right)
+            \le
+            O\left(
+            \log\frac{r_+}{r_u-r_l}
+            \right).
+        \end{equation}
 
-    We first lower bound the length \(r_u-r_l\). Let
-    \[
-    \nabla^2 f(y)=V\operatorname{diag}(\zeta_1,\ldots,\zeta_n)V^\top,
-    \qquad
-    \beta_i=\nabla f(y)^\top v_i.
-    \]
-    By convexity and Assumption~\ref{assm.bounded hessian}, we have
-    \[
-    0\le \zeta_i\le \kappa_H,
-    \qquad i=1,\ldots,n.
-    \]
-    For \(\mu>0\),
-    \[
-    r_y(\mu)
-    =
-    \left(
-    \sum_{i=1}^n
-    \frac{\beta_i^2}{(\zeta_i+\mu)^2}
-    \right)^{1/2}.
-    \]
-    Therefore,
-    \begin{equation}
-        \label{eq.derivative-ry}
-        r_y'(\mu)
-        =
-        -
-        \frac{
-        \sum_{i=1}^n
-        \frac{\beta_i^2}{(\zeta_i+\mu)^3}
-        }{
-        r_y(\mu)
-        }.
-    \end{equation}
-    By the mean value theorem, there exists
-    \(\xi\in[\mu_l,\mu_u]\) such that
-    \begin{align}
-    r_u-r_l
-    &=
-    r_y(\mu_l)-r_y(\mu_u) \nonumber\\
-    &=
-    -r_y'(\xi)(\mu_u-\mu_l) \nonumber\\
-    &=
-    \frac{
-    \sum_{i=1}^n
-    \frac{\beta_i^2}{(\zeta_i+\xi)^3}
-    }{
-    r_y(\xi)
-    }
-    (\mu_u-\mu_l).
-    \label{eq.radius-interval-mvt}
-    \end{align}
-    Since \(\xi\le \mu_u\) and \(\zeta_i\le \kappa_H\), we have
-    \[
-    \frac{1}{\zeta_i+\xi}
-    \ge
-    \frac{1}{\kappa_H+\mu_u}.
-    \]
-    Thus
-    \begin{align}
-    \sum_{i=1}^n
-    \frac{\beta_i^2}{(\zeta_i+\xi)^3}
-    &=
-    \sum_{i=1}^n
-    \frac{\beta_i^2}{(\zeta_i+\xi)^2}
-    \frac{1}{\zeta_i+\xi} \nonumber\\
-    &\ge
-    \frac{1}{\kappa_H+\mu_u}
-    \sum_{i=1}^n
-    \frac{\beta_i^2}{(\zeta_i+\xi)^2} \nonumber\\
-    &=
-    \frac{r_y(\xi)^2}{\kappa_H+\mu_u}.
-    \label{eq.s3-lower-by-s2}
-    \end{align}
-    Combining \eqref{eq.radius-interval-mvt} and \eqref{eq.s3-lower-by-s2}, we obtain
-    \begin{equation}
-        \label{eq.radius-interval-lower-1}
-        r_u-r_l
-        \ge
-        \frac{r_y(\xi)}{\kappa_H+\mu_u}
-        (\mu_u-\mu_l).
-    \end{equation}
-    Since \(r_y(\mu)\) is decreasing and \(\xi\le \mu_u\), we have
-    \[
-    r_y(\xi)\ge r_y(\mu_u).
-    \]
-    Moreover, by \Cref{lem.bound target interval},
-    \[
-    \mu_u-\mu_l
-    \ge
-    \frac{M r_y(\mu_u)}{2}.
-    \]
-    Therefore,
-    \begin{equation}
-        \label{eq.radius-interval-lower-2}
-        r_u-r_l
-        \ge
-        \frac{M r_y(\mu_u)^2}{2(\kappa_H+\mu_u)}.
-    \end{equation}
-    Finally, since \(0\preceq \nabla^2 f(y)\preceq \kappa_H I\), we have
-    \[
-    r_y(\mu_u)
-    =
-    \|(\nabla^2 f(y)+\mu_u I)^{-1}\nabla f(y)\|
-    \ge
-    \frac{\|\nabla f(y)\|}{\kappa_H+\mu_u}.
-    \]
-    Substituting this into \eqref{eq.radius-interval-lower-2} gives
-    \begin{equation}
-        \label{eq.radius-interval-lower-final}
-        r_u-r_l
-        \ge
-        \frac{M\|\nabla f(y)\|^2}{2(\kappa_H+\mu_u)^3}.
-    \end{equation}
+        We first lower bound the length \(r_u-r_l\). Let
+        \[
+            \nabla^2 f(y)=V\operatorname{diag}(\zeta_1,\ldots,\zeta_n)V^\top,
+            \qquad
+            \beta_i=\nabla f(y)^\top v_i.
+        \]
+        By convexity and Assumption~\ref{assm.bounded hessian}, we have
+        \[
+            0\le \zeta_i\le \kappa_H,
+            \qquad i=1,\ldots,n.
+        \]
+        For \(\mu>0\),
+        \[
+            r_y(\mu)
+            =
+            \left(
+            \sum_{i=1}^n
+            \frac{\beta_i^2}{(\zeta_i+\mu)^2}
+            \right)^{1/2}.
+        \]
+        Therefore,
+        \begin{equation}
+            \label{eq.derivative-ry}
+            r_y'(\mu)
+            =
+            -
+            \frac{
+                \sum_{i=1}^n
+                \frac{\beta_i^2}{(\zeta_i+\mu)^3}
+            }{
+                r_y(\mu)
+            }.
+        \end{equation}
+        By the mean value theorem, there exists
+        \(\xi\in[\mu_l,\mu_u]\) such that
+        \begin{align}
+            r_u-r_l
+             & =
+            r_y(\mu_l)-r_y(\mu_u) \nonumber   \\
+             & =
+            -r_y'(\xi)(\mu_u-\mu_l) \nonumber \\
+             & =
+            \frac{
+                \sum_{i=1}^n
+                \frac{\beta_i^2}{(\zeta_i+\xi)^3}
+            }{
+                r_y(\xi)
+            }
+            (\mu_u-\mu_l).
+            \label{eq.radius-interval-mvt}
+        \end{align}
+        Since \(\xi\le \mu_u\) and \(\zeta_i\le \kappa_H\), we have
+        \[
+            \frac{1}{\zeta_i+\xi}
+            \ge
+            \frac{1}{\kappa_H+\mu_u}.
+        \]
+        Thus
+        \begin{align}
+            \sum_{i=1}^n
+            \frac{\beta_i^2}{(\zeta_i+\xi)^3}
+             & =
+            \sum_{i=1}^n
+            \frac{\beta_i^2}{(\zeta_i+\xi)^2}
+            \frac{1}{\zeta_i+\xi} \nonumber             \\
+             & \ge
+            \frac{1}{\kappa_H+\mu_u}
+            \sum_{i=1}^n
+            \frac{\beta_i^2}{(\zeta_i+\xi)^2} \nonumber \\
+             & =
+            \frac{r_y(\xi)^2}{\kappa_H+\mu_u}.
+            \label{eq.s3-lower-by-s2}
+        \end{align}
+        Combining \eqref{eq.radius-interval-mvt} and \eqref{eq.s3-lower-by-s2}, we obtain
+        \begin{equation}
+            \label{eq.radius-interval-lower-1}
+            r_u-r_l
+            \ge
+            \frac{r_y(\xi)}{\kappa_H+\mu_u}
+            (\mu_u-\mu_l).
+        \end{equation}
+        Since \(r_y(\mu)\) is decreasing and \(\xi\le \mu_u\), we have
+        \[
+            r_y(\xi)\ge r_y(\mu_u).
+        \]
+        Moreover, by \Cref{lem.bound target interval},
+        \[
+            \mu_u-\mu_l
+            \ge
+            \frac{M r_y(\mu_u)}{2}.
+        \]
+        Therefore,
+        \begin{equation}
+            \label{eq.radius-interval-lower-2}
+            r_u-r_l
+            \ge
+            \frac{M r_y(\mu_u)^2}{2(\kappa_H+\mu_u)}.
+        \end{equation}
+        Finally, since \(0\preceq \nabla^2 f(y)\preceq \kappa_H I\), we have
+        \[
+            r_y(\mu_u)
+            =
+            \|(\nabla^2 f(y)+\mu_u I)^{-1}\nabla f(y)\|
+            \ge
+            \frac{\|\nabla f(y)\|}{\kappa_H+\mu_u}.
+        \]
+        Substituting this into \eqref{eq.radius-interval-lower-2} gives
+        \begin{equation}
+            \label{eq.radius-interval-lower-final}
+            r_u-r_l
+            \ge
+            \frac{M\|\nabla f(y)\|^2}{2(\kappa_H+\mu_u)^3}.
+        \end{equation}
 
-    We now return to the bisection complexity. From \eqref{eq.rb-complexity-basic}
-    and \eqref{eq.radius-interval-lower-final}, we obtain
-    \begin{equation}
-        \label{eq.rb-complexity-1}
-        O\left(
-        \log\frac{r_+}{r_u-r_l}
-        \right)
-        \le
-        O\left(
-        \log
-        \frac{
-        2r_+(\kappa_H+\mu_u)^3
-        }{
-        M\|\nabla f(y)\|^2
-        }
-        \right).
-    \end{equation}
-    By the definition of \(r_+\) in line~\ref{line.left bracketing point} of
-    \Cref{alg.local detection},
-    \[
-    r_+
-    =
-    \|(\nabla^2 f(y)+M\|d_+\|I)^{-1}\nabla f(y)\|.
-    \]
-    Since \(\nabla^2 f(y)\succeq0\), we have
-    \[
-    r_+
-    \le
-    \frac{\|\nabla f(y)\|}{M\|d_+\|}.
-    \]
-    Together with \(\mu_u\le\mu_+\), this yields
-    \begin{equation}
-        \label{eq.rb-complexity-2}
-        O\left(
-        \log
-        \frac{
-        2r_+(\kappa_H+\mu_u)^3
-        }{
-        M\|\nabla f(y)\|^2
-        }
-        \right)
-        \le
-        O\left(
-        \log
-        \frac{
-        2(\kappa_H+\mu_+)^3
-        }{
-        M^2\|d_+\|\|\nabla f(y)\|
-        }
-        \right).
-    \end{equation}
+        We now return to the bisection complexity. From \eqref{eq.rb-complexity-basic}
+        and \eqref{eq.radius-interval-lower-final}, we obtain
+        \begin{equation}
+            \label{eq.rb-complexity-1}
+            O\left(
+            \log\frac{r_+}{r_u-r_l}
+            \right)
+            \le
+            O\left(
+            \log
+            \frac{
+                    2r_+(\kappa_H+\mu_u)^3
+                }{
+                    M\|\nabla f(y)\|^2
+                }
+            \right).
+        \end{equation}
+        By the definition of \(r_+\) in line~\ref{line.left bracketing point} of
+        \Cref{alg.local detection},
+        \[
+            r_+
+            =
+            \|(\nabla^2 f(y)+M\|d_+\|I)^{-1}\nabla f(y)\|.
+        \]
+        Since \(\nabla^2 f(y)\succeq0\), we have
+        \[
+            r_+
+            \le
+            \frac{\|\nabla f(y)\|}{M\|d_+\|}.
+        \]
+        Together with \(\mu_u\le\mu_+\), this yields
+        \begin{equation}
+            \label{eq.rb-complexity-2}
+            O\left(
+            \log
+            \frac{
+                    2r_+(\kappa_H+\mu_u)^3
+                }{
+                    M\|\nabla f(y)\|^2
+                }
+            \right)
+            \le
+            O\left(
+            \log
+            \frac{
+                    2(\kappa_H+\mu_+)^3
+                }{
+                    M^2\|d_+\|\|\nabla f(y)\|
+                }
+            \right).
+        \end{equation}
 
-    When the bisection procedure is invoked, line~\ref{line.check right bracket point}
-    of \Cref{alg.local detection} implies
-    \[
-    \frac{\mu_+}{\|d_+\|}>2M.
-    \]
-    Since
-    \[
-    \mu_+
-    =
-    \frac{\sqrt{2M}}{2}\|\nabla f(y)\|^{1/2},
-    \]
-    we have
-    \[
-    \|\nabla f(y)\|
-    =
-    \frac{2\mu_+^2}{M}
-    >
-    8M\|d_+\|^2.
-    \]
-    Therefore,
-    \[
-    M^2\|d_+\|\|\nabla f(y)\|
-    >
-    8M^3\|d_+\|^3.
-    \]
-    Hence \eqref{eq.rb-complexity-2} further implies
-    \begin{equation}
-        \label{eq.rb-complexity-3}
-        O\left(
-        \log
-        \frac{
-        2(\kappa_H+\mu_+)^3
-        }{
-        M^2\|d_+\|\|\nabla f(y)\|
-        }
-        \right)
-        \le
-        O\left(
-        \log
-        \frac{
-        (\kappa_H+\mu_+)^3
-        }{
-        M^3\|d_+\|^3
-        }
-        \right).
-    \end{equation}
+        When the bisection procedure is invoked, line~\ref{line.check right bracket point}
+        of \Cref{alg.local detection} implies
+        \[
+            \frac{\mu_+}{\|d_+\|}>2M.
+        \]
+        Since
+        \[
+            \mu_+
+            =
+            \frac{\sqrt{2M}}{2}\|\nabla f(y)\|^{1/2},
+        \]
+        we have
+        \[
+            \|\nabla f(y)\|
+            =
+            \frac{2\mu_+^2}{M}
+            >
+            8M\|d_+\|^2.
+        \]
+        Therefore,
+        \[
+            M^2\|d_+\|\|\nabla f(y)\|
+            >
+            8M^3\|d_+\|^3.
+        \]
+        Hence \eqref{eq.rb-complexity-2} further implies
+        \begin{equation}
+            \label{eq.rb-complexity-3}
+            O\left(
+            \log
+            \frac{
+                    2(\kappa_H+\mu_+)^3
+                }{
+                    M^2\|d_+\|\|\nabla f(y)\|
+                }
+            \right)
+            \le
+            O\left(
+            \log
+            \frac{
+                    (\kappa_H+\mu_+)^3
+                }{
+                    M^3\|d_+\|^3
+                }
+            \right).
+        \end{equation}
 
-    It remains to use the fact that the early-termination test in
-    \Cref{alg.local detection} has not been satisfied before entering R\&B.
-    Thus
-    \[
-    \|d_+\|
-    >
-    \min\left\{
-    \frac{\epsilon_g}{2\kappa_H},
-    \sqrt{\frac{\epsilon_g}{M}}
-    \right\}.
-    \]
-    Consequently,
-    \[
-    \frac{1}{\|d_+\|^3}
-    \le
-    \max\left\{
-    \left(\frac{2\kappa_H}{\epsilon_g}\right)^3,
-    \left(\frac{M}{\epsilon_g}\right)^{3/2}
-    \right\}.
-    \]
-    Substituting this into \eqref{eq.rb-complexity-3}, we obtain
-    \begin{align*}
-    O\left(
-    \log
-    \frac{
-    (\kappa_H+\mu_+)^3
-    }{
-    M^3\|d_+\|^3
-    }
-    \right)
-    &\le
-    O\left(
-    \log
-    \left[
-    \frac{(\kappa_H+\mu_+)^3}{M^3}
-    \max\left\{
-    \left(\frac{2\kappa_H}{\epsilon_g}\right)^3,
-    \left(\frac{M}{\epsilon_g}\right)^{3/2}
-    \right\}
-    \right]
-    \right) \\
-    &=
-    O\left(
-    \log\frac{\kappa_H+\mu_+}{\epsilon_g}
-    \right).
-    \end{align*}
-    \Halmos
-    \endproof
+        It remains to use the fact that the early-termination test in
+        \Cref{alg.local detection} has not been satisfied before entering R\&B.
+        Thus
+        \[
+            \|d_+\|
+            >
+            \min\left\{
+            \frac{\epsilon_g}{2\kappa_H},
+            \sqrt{\frac{\epsilon_g}{M}}
+            \right\}.
+        \]
+        Consequently,
+        \[
+            \frac{1}{\|d_+\|^3}
+            \le
+            \max\left\{
+            \left(\frac{2\kappa_H}{\epsilon_g}\right)^3,
+            \left(\frac{M}{\epsilon_g}\right)^{3/2}
+            \right\}.
+        \]
+        Substituting this into \eqref{eq.rb-complexity-3}, we obtain
+        \begin{align*}
+            O\left(
+            \log
+            \frac{
+                    (\kappa_H+\mu_+)^3
+                }{
+                    M^3\|d_+\|^3
+                }
+            \right)
+             & \le
+            O\left(
+            \log
+            \left[
+                \frac{(\kappa_H+\mu_+)^3}{M^3}
+                \max\left\{
+                \left(\frac{2\kappa_H}{\epsilon_g}\right)^3,
+                \left(\frac{M}{\epsilon_g}\right)^{3/2}
+                \right\}
+                \right]
+            \right) \\
+             & =
+            O\left(
+            \log\frac{\kappa_H+\mu_+}{\epsilon_g}
+            \right).
+        \end{align*}
+        \Halmos
+        \endproof
     }
     \subsection*{Proof to \Cref{lem.enter region}}
     % \proof{Proof.}
@@ -1690,7 +1690,7 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
         \]
         Therefore,
         \(
-            \|v_k-x^*\|\leq 2^{1/3}R.
+        \|v_k-x^*\|\leq 2^{1/3}R.
         \)
 
         Next we show that $x_k$ is already in $\mathcal{LQ}_p$ for the values of $k$
@@ -1727,7 +1727,7 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
 
         Using the definition of $y_k$:
         \(
-            y_k=\frac{k}{k+3}x_k+\frac{3}{k+3}v_k,
+        y_k=\frac{k}{k+3}x_k+\frac{3}{k+3}v_k,
         \)
         we obtain
         \[
@@ -1856,9 +1856,9 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
         \qquad i=0,\ldots,k-1.
     \end{equation*}
     Equivalently, \(
-        \frac{1}{\zeta_i^2}
-        =
-        6\lambda A_{i+1}\zeta_i^5. \) Letting \(w:=6\lambda\), we obtain
+    \frac{1}{\zeta_i^2}
+    =
+    6\lambda A_{i+1}\zeta_i^5. \) Letting \(w:=6\lambda\), we obtain
     \begin{equation*}
         \frac{1}{\zeta_i^2}
         =
@@ -1866,11 +1866,11 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
         \qquad i=0,\ldots,k-1.
     \end{equation*}
     Thus \(
-        \zeta_i
-        =
-        \left(
-        \frac{1}{wA_{i+1}}
-        \right)^{1/7}. \)} We have $w>0$ and the constraint is active,
+    \zeta_i
+    =
+    \left(
+    \frac{1}{wA_{i+1}}
+    \right)^{1/7}. \)} We have $w>0$ and the constraint is active,
     \begin{equation*}
         D=\sum_{i=0}^{k-1} A_{i+1}\left(\frac{1}{w A_{i+1}}\right)^{6 / 7}=\frac{1}{w^{6 / 7}} \sum_{i=0}^{k-1} A_{i+1}^{1 / 7},
     \end{equation*}
@@ -1969,31 +1969,31 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
     \end{gather}
     {\color{red} By \eqref{eq.def v}, we have
     \(
-        v=-\sigma(x-y).
+    v=-\sigma(x-y).
     \)
     Moreover, from the optimality condition,
     \(
-        x-y=-(\nabla^2 f(y)+\sigma I)^{-1}\nabla f(y).
+    x-y=-(\nabla^2 f(y)+\sigma I)^{-1}\nabla f(y).
     \)
     Therefore, by the definition of \(\psi(\sigma,y)\),
     \(
-        \sigma\psi(\sigma,y)
-        =
-        \|(\nabla^2 f(y)+\sigma I)^{-1}\nabla f(y)\|
-        =
-        \|x-y\|.
+    \sigma\psi(\sigma,y)
+    =
+    \|(\nabla^2 f(y)+\sigma I)^{-1}\nabla f(y)\|
+    =
+    \|x-y\|.
     \)
     Hence
     \(
-        \|v\|
-        =
-        \sigma\|x-y\|
-        =
-        \sigma^2\psi(\sigma,y),
+    \|v\|
+    =
+    \sigma\|x-y\|
+    =
+    \sigma^2\psi(\sigma,y),
     \)
     or equivalently,
     \(
-        \psi(\sigma,y)=\frac{\|v\|}{\sigma^2}.
+    \psi(\sigma,y)=\frac{\|v\|}{\sigma^2}.
     \)
     Similarly, \(\psi(\sigma,\bar y)=\frac{\|\bar v\|}{\sigma^2}. \)
     Consequently, we have \eqref{eq.target distance initial}.}
@@ -2087,7 +2087,7 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
     \begin{equation*}
         \tau(\sigma) = \frac{a(\sigma)}{A+a(\sigma)} = \frac{1}{\sigma a(\sigma)} = \frac{2}{1+\sqrt{1+4A\sigma}}.
     \end{equation*}
-    {\color{red} 
+    {\color{red}
     Its derivative is
     \begin{equation*}
         \tau'(\sigma) = -\frac{4A}{\sqrt{1+4A\sigma}\left(1+\sqrt{1+4A\sigma}\right)^2},
@@ -2123,22 +2123,22 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
             \end{aligned}
         \end{equation}
         Further, it gives
-    \begin{equation}
-        \label{eq.bounded gap bisection sigma}
-        \psi_- - \psi_+
-        \leq
-        \frac{\sigma_+}{\sigma_-^2}
-        \Bigg[
-            \frac{2M_0}{\sigma_-}
-            +
-            \frac{4MM_0^2}{\sigma_-^2}
-            +
-            2\left(
-            \frac{2MM_0}{\sigma_-}+1
-            \right)\psi_+
-        \Bigg]
-        (\sigma_+-\sigma_-).
-    \end{equation}
+        \begin{equation}
+            \label{eq.bounded gap bisection sigma}
+            \psi_- - \psi_+
+            \leq
+            \frac{\sigma_+}{\sigma_-^2}
+            \Bigg[
+                \frac{2M_0}{\sigma_-}
+                +
+                \frac{4MM_0^2}{\sigma_-^2}
+                +
+                2\left(
+                \frac{2MM_0}{\sigma_-}+1
+                \right)\psi_+
+                \Bigg]
+            (\sigma_+-\sigma_-).
+        \end{equation}
     \end{lemma}
     \proof{Proof.}
     \begin{equation*}
@@ -2171,88 +2171,88 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
     \Halmos \endproof
     Now we can proceed with the main proof.
     \begin{lemma}
-    \label{coro.bisection bound}
-    Suppose Assumption~\ref{assm.lipschitz} and
-    Assumption~\ref{assm.solvable} hold, and there exists \(M_0>0\) such that
-    \eqref{eq.bounded assm point} holds. Then in \textnormal{R\&B}, we have
-    \begin{equation}
-        \label{eq.bisection-coefficient-bound}
-        \frac{\sigma_+}{\sigma_-^2}
-        \left[
-            \frac{2M_0}{\sigma_-}
+        \label{coro.bisection bound}
+        Suppose Assumption~\ref{assm.lipschitz} and
+        Assumption~\ref{assm.solvable} hold, and there exists \(M_0>0\) such that
+        \eqref{eq.bounded assm point} holds. Then in \textnormal{R\&B}, we have
+        \begin{equation}
+            \label{eq.bisection-coefficient-bound}
+            \frac{\sigma_+}{\sigma_-^2}
+            \left[
+                \frac{2M_0}{\sigma_-}
+                +
+                \frac{4MM_0^2}{\sigma_-^2}
+                +
+                2\left(
+                \frac{2MM_0}{\sigma_-}+1
+                \right)\psi_+
+                \right] \leq
+            C(G_0,M_0,M,\epsilon_g),
+        \end{equation}
+        where
+        \begin{equation}
+            \label{eq.definition C bisection}
+            C(G_0,M_0,M,\epsilon_g)
+            :=
+            \sqrt{G_0}\Bigg(
+            \frac{(1+2\theta)^3M_0}
+                {\sqrt{2}M\eta^2\epsilon_g^{3/2}}
             +
-            \frac{4MM_0^2}{\sigma_-^2}
+            \frac{(1+2\theta)^2M_0^2}
+                {\sqrt{M}\eta\epsilon_g^2}
             +
-            2\left(
-            \frac{2MM_0}{\sigma_-}+1
-            \right)\psi_+
-        \right] \leq
-        C(G_0,M_0,M,\epsilon_g),
-    \end{equation}
-    where
-    \begin{equation}
-        \label{eq.definition C bisection}
-        C(G_0,M_0,M,\epsilon_g)
-        :=
-        \sqrt{G_0}\Bigg(
-        \frac{(1+2\theta)^3M_0}
-        {\sqrt{2}M\eta^2\epsilon_g^{3/2}}
-        +
-        \frac{(1+2\theta)^2M_0^2}
-        {\sqrt{M}\eta\epsilon_g^2}
-        +
-        \frac{\sqrt{2}(1+2\theta)^{3/2}M_0}
-        {M\epsilon_g^{3/2}}
-        +
-        \frac{(1+2\theta)^2}
-        {M^{3/2}\eta^{3/2}\epsilon_g}
-        \Bigg).
-    \end{equation}
-    If the bisection procedure does not terminate, then
-    \begin{equation}
-        \label{eq.bound value by brackets}
-        \sigma_+-\sigma_-
-        >
-        \frac{1-\eta}
-        {M C(G_0,M_0,M,\epsilon_g)}.
-    \end{equation}
-    Further, the number of oracle calls during the bisection is bounded by
-    \begin{equation}
-        \label{eq.bisection-oracle-bound}
-        \log\left(
-        \frac{
-        M\sqrt{\frac{MG_0}{\eta}}\,
-        C(G_0,M_0,M,\epsilon_g)
-        }{
-        1-\eta
-        }
-        \right).
-    \end{equation}
+            \frac{\sqrt{2}(1+2\theta)^{3/2}M_0}
+                {M\epsilon_g^{3/2}}
+            +
+            \frac{(1+2\theta)^2}
+                {M^{3/2}\eta^{3/2}\epsilon_g}
+            \Bigg).
+        \end{equation}
+        If the bisection procedure does not terminate, then
+        \begin{equation}
+            \label{eq.bound value by brackets}
+            \sigma_+-\sigma_-
+            >
+            \frac{1-\eta}
+            {M C(G_0,M_0,M,\epsilon_g)}.
+        \end{equation}
+        Further, the number of oracle calls during the bisection is bounded by
+        \begin{equation}
+            \label{eq.bisection-oracle-bound}
+            \log\left(
+            \frac{
+                    M\sqrt{\frac{MG_0}{\eta}}\,
+                    C(G_0,M_0,M,\epsilon_g)
+                }{
+                    1-\eta
+                }
+            \right).
+        \end{equation}
     \end{lemma}
     \proof{Proof.}
     Let
     \(
-        \underline{\sigma}
-        :=
-        \sqrt{\frac{2M\epsilon_g}{1+2\theta}},
-        \overline{\sigma}
-        :=
-        \sqrt{\frac{MG_0}{\eta}}.
+    \underline{\sigma}
+    :=
+    \sqrt{\frac{2M\epsilon_g}{1+2\theta}},
+    \overline{\sigma}
+    :=
+    \sqrt{\frac{MG_0}{\eta}}.
     \)
     By the construction of the bracket points in \eqref{eq.bracket points},
     throughout the bisection we have
     \(
-        \underline{\sigma}
-        \le
-        \sigma_-
-        \le
-        \sigma_+
-        \le
-        \overline{\sigma}.
+    \underline{\sigma}
+    \le
+    \sigma_-
+    \le
+    \sigma_+
+    \le
+    \overline{\sigma}.
     \)
     Moreover, the upper bracket satisfies
     \(
-        \psi_+\le \frac{\eta}{M}.
+    \psi_+\le \frac{\eta}{M}.
     \)
     Using \eqref{eq.bounded gap bisection sigma}, we get
     \[
@@ -2273,28 +2273,28 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
             2\left(
             \frac{2MM_0}{\sigma_-}+1
             \right)\psi_+
-        \right].
+            \right].
     \]
     We now upper bound \(B_k\). First,
     \[
         \frac{2\sigma_+M_0}{\sigma_-^3}
         \le
         \frac{
-        2\sqrt{\frac{MG_0}{\eta}}M_0
+            2\sqrt{\frac{MG_0}{\eta}}M_0
         }{
-        \left(
-        \sqrt{\frac{2M\epsilon_g}{1+2\theta}}
-        \right)^3
+            \left(
+            \sqrt{\frac{2M\epsilon_g}{1+2\theta}}
+            \right)^3
         }  =
         \frac{
-        \sqrt{G_0}(1+2\theta)^{3/2}M_0
+            \sqrt{G_0}(1+2\theta)^{3/2}M_0
         }{
-        \sqrt{2}M\sqrt{\eta}\epsilon_g^{3/2}
+            \sqrt{2}M\sqrt{\eta}\epsilon_g^{3/2}
         } \le
         \frac{
-        \sqrt{G_0}(1+2\theta)^3M_0
+            \sqrt{G_0}(1+2\theta)^3M_0
         }{
-        \sqrt{2}M\eta^2\epsilon_g^{3/2}
+            \sqrt{2}M\eta^2\epsilon_g^{3/2}
         }.
     \]
     Second,
@@ -2302,21 +2302,21 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
         \frac{4\sigma_+MM_0^2}{\sigma_-^4}
         \le
         \frac{
-        4\sqrt{\frac{MG_0}{\eta}}MM_0^2
+            4\sqrt{\frac{MG_0}{\eta}}MM_0^2
         }{
-        \left(
-        \sqrt{\frac{2M\epsilon_g}{1+2\theta}}
-        \right)^4
+            \left(
+            \sqrt{\frac{2M\epsilon_g}{1+2\theta}}
+            \right)^4
         } =
         \frac{
-        \sqrt{G_0}(1+2\theta)^2M_0^2
+            \sqrt{G_0}(1+2\theta)^2M_0^2
         }{
-        \sqrt{M}\sqrt{\eta}\epsilon_g^2
+            \sqrt{M}\sqrt{\eta}\epsilon_g^2
         } \le
         \frac{
-        \sqrt{G_0}(1+2\theta)^2M_0^2
+            \sqrt{G_0}(1+2\theta)^2M_0^2
         }{
-        \sqrt{M}\eta\epsilon_g^2
+            \sqrt{M}\eta\epsilon_g^2
         }.
     \]
     Third, using \(\psi_+\le \eta/M\),
@@ -2325,14 +2325,14 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
         \le
         \frac{4\eta M_0\sigma_+}{\sigma_-^3} \le
         \frac{
-        \sqrt{2G_0}(1+2\theta)^{3/2}M_0\sqrt{\eta}
+            \sqrt{2G_0}(1+2\theta)^{3/2}M_0\sqrt{\eta}
         }{
-        M\epsilon_g^{3/2}
+            M\epsilon_g^{3/2}
         } \le
         \frac{
-        \sqrt{2G_0}(1+2\theta)^{3/2}M_0
+            \sqrt{2G_0}(1+2\theta)^{3/2}M_0
         }{
-        M\epsilon_g^{3/2}
+            M\epsilon_g^{3/2}
         }.
     \]
     Finally,
@@ -2341,14 +2341,14 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
         \le
         \frac{2\eta\sigma_+}{M\sigma_-^2} \le
         \frac{
-        \sqrt{G_0}(1+2\theta)\sqrt{\eta}
+            \sqrt{G_0}(1+2\theta)\sqrt{\eta}
         }{
-        M^{3/2}\epsilon_g
+            M^{3/2}\epsilon_g
         } \le
         \frac{
-        \sqrt{G_0}(1+2\theta)^2
+            \sqrt{G_0}(1+2\theta)^2
         }{
-        M^{3/2}\eta^{3/2}\epsilon_g
+            M^{3/2}\eta^{3/2}\epsilon_g
         }.
     \]
     Combining the above four estimates gives
@@ -2368,9 +2368,9 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
     If the bisection procedure does not terminate, then by the bracket condition
     we have
     \(
-        \psi_- - \psi_+
-        >
-        \frac{1-\eta}{M}.
+    \psi_- - \psi_+
+    >
+    \frac{1-\eta}{M}.
     \)
     Therefore,
     \[
@@ -2384,41 +2384,41 @@ Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \at
     By the mechanism of bisection, the total number of bisection steps in the
     \(k\)-th iteration, denoted by \(N_k\), satisfies
     \[
-    \begin{aligned}
-        N_k
-        &\le
-        \log\left(
-        \frac{
-        \left(
-        \sqrt{\frac{MG_0}{\eta}}
-        -
-        \sqrt{\frac{2M\epsilon_g}{1+2\theta}}
-        \right)
-        M C(G_0,M_0,M,\epsilon_g)
-        }{
-        1-\eta
-        }
-        \right) \\
-        &\le
-        \log\left(
-        \frac{
-        M\sqrt{\frac{MG_0}{\eta}}\,
-        C(G_0,M_0,M,\epsilon_g)
-        }{
-        1-\eta
-        }
-        \right).
-    \end{aligned}
+        \begin{aligned}
+            N_k
+             & \le
+            \log\left(
+            \frac{
+                    \left(
+                    \sqrt{\frac{MG_0}{\eta}}
+                    -
+                    \sqrt{\frac{2M\epsilon_g}{1+2\theta}}
+                    \right)
+                    M C(G_0,M_0,M,\epsilon_g)
+                }{
+                    1-\eta
+                }
+            \right) \\
+             & \le
+            \log\left(
+            \frac{
+                    M\sqrt{\frac{MG_0}{\eta}}\,
+                    C(G_0,M_0,M,\epsilon_g)
+                }{
+                    1-\eta
+                }
+            \right).
+        \end{aligned}
     \]
     Since \(G_0\) and \(M_0\) are polynomially bounded in \(D_0\), by the
     definition of \(C(G_0,M_0,M,\epsilon_g)\), and omitting fixed algorithmic
     parameters, we conclude
     \(
-        N_k
-        =
-        O\left(
-        \log\frac{MD_0}{\epsilon_g}
-        \right).
+    N_k
+    =
+    O\left(
+    \log\frac{MD_0}{\epsilon_g}
+    \right).
     \)
     \Halmos
     \endproof
