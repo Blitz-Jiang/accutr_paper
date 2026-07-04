@@ -27,6 +27,7 @@
 \usepackage{multirow}
 \usepackage{tabularx}
 \usepackage{makecell}
+\usepackage[normalem]{ulem}
 \usepackage{tikz}
 \usepackage{pgfplots}
 \usetikzlibrary{arrows}
@@ -35,8 +36,8 @@
 \usetikzlibrary{backgrounds}
 \usepgfplotslibrary{patchplots}
 \usepgfplotslibrary{fillbetween}
-% \usepackage[inline]{showlabels}
-% \renewcommand{\showlabelfont}{\tiny\color{blue}}
+\usepackage[inline]{showlabels}
+\renewcommand{\showlabelfont}{\tiny\color{blue}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{eqparbox}
 \renewcommand\algorithmiccomment[1]{%
@@ -76,7 +77,7 @@
       3d box foreground style={/pgfplots/on layer=axis foreground},%
     },
 }
-
+\newcommand{\cz}[1]{{\color{darkpastelgreen}#1}}
 \newcommand{\etape}[2]{node (p#1) [etape] {#2}}
 
 \newcommand{\transreceptor}[3]{%
@@ -131,7 +132,8 @@ minimum height=2em, text centered,color=black!50]
 \def\strategyautorefname{Strategy}
 \def\remarkautorefname{Remark}
 \def\conditionautorefname{Condition}
-
+\crefname{assumption}{Assumption}{Assumptions}
+\Crefname{assumption}{Assumption}{Assumptions}
 
 \newcommand{\arca}{\texttt{CubicReg-A}}
 \newcommand{\hsodm}{\texttt{HSODM}}
@@ -179,6 +181,7 @@ minimum height=2em, text centered,color=black!50]
 \Crefname{subroutine}{Subroutine}{Subroutines}
 \def\algorithmautorefname{Alg.}
 \Crefname{algorithm}{Alg.}{Alg.}
+\Crefname{equation}{Eq.}{Eqs.}
 
 \allowdisplaybreaks
 
