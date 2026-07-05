@@ -494,8 +494,7 @@ We have the following global iteration complexity result of \Cref{alg.accelerate
 \begin{theorem}
     \label{thm.convergence outer loop}
     Suppose \Cref{assm.lipschitz,assm.solvable}
-    hold, and suppose that \cz{\sout{the ratio condition required by
-            \ref{lem.estimate sequence}}\Cref{eq.output of alg2}} is satisfied at every non-terminated
+    hold, and suppose that \Cref{eq.output of alg2} is satisfied at every non-terminated
     iteration. Then for every generated iterate $x_k$, $k\geq 1$, we have
     \[
         f(x_k)-f^*
@@ -513,7 +512,7 @@ By \Cref{lem.estimate sequence} with $x=x^*$, for every $k\ge1$, $f(x_k)-f^*\le 
     Suppose Assumption~\ref{assm.lipschitz} and Assumption~\ref{assm.solvable}
     hold, and suppose that the ratio condition required by
     \Cref{lem.estimate sequence} is satisfied at every non-terminated
-    iteration. Then it takes \Cref{alg.accelerated utr} \cz{$O\left(\frac{M^{1/3}D_0}{\epsilon_f^{1/3}}\right)$} iterations to find $\epsilon_f$-function-value solutions as in \Cref{def.approximate solution}.
+    iteration. Then it takes \Cref{alg.accelerated utr} $O\left(\frac{M^{1/3}D_0}{\epsilon_f^{1/3}}\right)$ iterations to find $\epsilon_f$-function-value solutions as in \Cref{def.approximate solution}.
 \end{corollary}
 }
 \begin{comment}
@@ -659,7 +658,7 @@ After using the one-to-one correspondence to transfer the target interval to the
     \end{equation}
 \end{lemma}
 \end{comment}
-\subsubsection{Oracle calls of \Cref{alg.local detection}}\label{sec.line search}
+\subsubsection{Number of Oracle calls of \Cref{alg.local detection}}\label{sec.line search}
 \cz{We now estimate the number of oracle calls in \Cref{alg.local detection}.
     As the argument is quite technical, some of the proofs are postponed to Appendix~\ref{sec.proof variant 1}.
     In this part of the analysis, we may assume that $\|d_+\| > \min\{\frac{\epsilon_g}{2\kappa_H},\sqrt{\frac{\epsilon_g}{M}}\}$; otherwise, it ends at {Track 0}. Furthermore, since we also limit the calls in {Track~1}, we only have to estimate number of oracle calls in Track 2 (R\&B), i.e., the complexity of bisection over radius $r$ on the interval $[r_-,r_+]$. % to make \eqref{eq.output of alg2} hold.
@@ -725,7 +724,7 @@ Using this one-to-one correspondence, when we perform bisection on $r$ over the 
         In \textnormal{R\&B} of \Cref{alg.local detection}, if ET=False, then \Cref{eq.output of alg2} holds.
     \end{lemma}
 }%
-The following lemma validates the choices of the bracketing points at line~\ref{line.left bracketing point}.
+The following lemma validates the choices of the bracketing points at line~\ref{line.left bracketing point} of \Cref{alg.local detection}.
 \begin{lemma}
     \label{lem.valid bracketing}
     In \textnormal{R\&B} of \Cref{alg.local detection}, when the bisection begins, we have
@@ -860,7 +859,7 @@ If the above assumption holds, it is a well-known result that Newton's method co
         R_{i+1} < \frac{3M}{2\nu}R_i^2<R_i.
     \end{equation}
 \end{lemma}
-The subscript $p$ is mnemonic for point-wise. Similar to the standard quadratic convergence region discussed above, the gradient norm also exhibits quadratic convergence when the initial point is sufficiently close to $x^*$. To establish this result, we first present the following technical lemma, which will be central to the subsequent analysis~{\color{red} (we will specify the value of $r$ \sout{in the following lemma later} there after)}.
+The subscript $p$ is mnemonic for point-wise. Similar to the standard quadratic convergence region discussed above, the gradient norm also exhibits quadratic convergence when the initial point is sufficiently close to $x^*$. To establish this result, we first present the following technical lemma, which will be central to the subsequent analysis~{\color{red} (we will specify the value of $r$ there after)}.
 \begin{lemma}[Corollary 1.2.2,~\cite{nesterov2018lectures}]
     Suppose~\Cref{assm.lipschitz} and \Cref{assm.local strongly convex} hold, for any $x$ with $\|x-x^*\| \leq r$, we have
     \begin{equation}
@@ -1163,7 +1162,7 @@ Hence, as a direct consequence of \eqref{eq.ms estimate advanced} and \eqref{eq.
     hold, and suppose that \eqref{eq.relation lambda sigma} is satisfied at every non-terminated
     iteration. Then it takes \Cref{alg.ms accelerated utr} $O\left(\left(\frac{MD_0^3}{\epsilon_f}\right)^{2/7}\right)$ iterations to find $\epsilon_f$-function-value solutions as in \Cref{def.approximate solution}.
 \end{theorem}
-\subsubsection{\cz{Oracle calls of \Cref{alg.bisection ms}}}\label{sec.validty of bisection}
+\subsubsection{\cz{Number of Oracle calls of \Cref{alg.bisection ms}}}\label{sec.validty of bisection}
 Next, we elaborate on how R\&B~(\Cref{alg.bisection ms}) safeguards \eqref{eq.relation lambda sigma}, and then provide the estimate of the number of \ref{eq.newTR} oracles needed during this procedure. We omit the subscripts in the analysis for the bisection for simplicity. We now define the auxiliary function in the analysis, which is bivariate in $y$ and $\sigma$.
 \begin{equation}
     \label{eq.linesearch quantity}
