@@ -88,15 +88,19 @@ In this paper, we consider the unconstrained convex optimization problem
 where $f:\mathbb{R}^n \to \mathbb{R}$ is a convex function.
 When the Hessian of the objective is available, second-order methods (SOMs) are particularly effective for solving~\eqref{eq.main problem}, especially when high-accuracy solutions are desired. Their power stems from a central property: Newton’s method achieves quadratic convergence in a neighborhood of any nondegenerate minimizer~\cite{polyak2007newton,more1982newton,nocedal1999numerical}. Many SOMs are thus designed to approximate the Newton direction, allowing them to inherit its excellent local convergence behavior.
 
-In addition to local convergence, another important criterion for evaluating the effectiveness of optimization methods is their non-asymptotic global oracle complexity, which refers to the number of second-order subproblems (the oracle calls) needed to find an approximate solution~\cite{cartis2022evaluation}. Over the past decades, a few SOMs have been developed with such emphases ~\cite{nesterov2006cubic,mishchenko2023regularized,jiang2026beyond,he2025homogeneous,curtis2021trust,he2023newton,cartis2011adaptive,cartis2011adaptive_i,curtis2017trust}.  In convex optimization, some of these methods can be further improved through acceleration techniques.
+In addition to local convergence, another important criterion for evaluating the effectiveness of optimization methods is their non-asymptotic global oracle complexity, \cz{namely, the number of oracle calls (i.e., second-order subproblems) required to obtain an approximate solution~\cite{cartis2022evaluation}.}  Over the past decades, a few SOMs have been developed with such emphases ~\cite{nesterov2006cubic,mishchenko2023regularized,jiang2026beyond,he2025homogeneous,curtis2021trust,he2023newton,cartis2011adaptive,cartis2011adaptive_i,curtis2017trust}.
+% In convex optimization, some of these methods can be further improved through acceleration techniques.
+\cz{In the convex setting, several of these methods admit further improvements.}
 
-In this context, two major approaches have emerged. The first approach, accelerated cubic regularized Newton (CRN) method~\cite{nesterov2008accelerating}, achieves a global oracle complexity of $O(\epsilon^{-1/3})$ based on the cubic regularization oracle \cite{nesterov2006cubic}. A different strategy is adopted in the accelerated Newton proximal extragradient (A-NPE) method~\cite{monteiro2013accelerated}, which improves the oracle complexity to $\tilde{O}(\epsilon^{-2/7})$ and is compatible with second-order oracles that satisfy certain error bound conditions~\cite{carmon2022optimal}.
-These developments, largely based on the estimating sequence technique~\cite{nesterov1983method,baes2009estimate}, have inspired a wide range of enhancements~\cite{jiang2021optimal,chen2022accelerating,lin2022explicit,agafonov2023inexact,agafonov2024advancing,jiang2024accelerated,huang2024inexact,doikov2020contracting}.
-Recently, the oracle complexity of the A-NPE method was improved to be an optimal rate in $O(\epsilon^{-2/7})$~\cite{carmon2022optimal,kovalev2022first}. These acceleration techniques are broadly applicable and are by no means limited to the domain of SOMs~\cite{xu2017accelerated,xu2018accelerated,lan2012optimal,ghadimi2016accelerated}.
+In this context, two major approaches have emerged. \cz{The first is the accelerated cubic regularized Newton (CRN) method~\cite{nesterov2008accelerating}, which builds upon the cubic regularization oracle~\cite{nesterov2006cubic} and achieves a global oracle complexity of $O(\epsilon^{-1/3})$.}
+\cz{
+    The second is the accelerated Newton proximal extragradient (A-NPE) method~\cite{monteiro2013accelerated}, which attains an oracle complexity of $\tilde{O}(\epsilon^{-2/7})$~\cite{carmon2022optimal} using second-order oracles satisfying certain error-bound conditions.
+}
+These developments \cz{are largely built upon} the estimating sequence technique~\cite{nesterov1983method,baes2009estimate} and have inspired a wide range of enhancements~\cite{jiang2021optimal,chen2022accelerating,lin2022explicit,agafonov2023inexact,agafonov2024advancing,jiang2024accelerated,huang2024inexact,doikov2020contracting}.
+\cz{More recently, the logarithmic factor in the oracle complexity of A-NPE was eliminated, yielding the optimal rate of} $O(\epsilon^{-2/7})$~\cite{carmon2022optimal,kovalev2022first}. In fact, these acceleration techniques are broadly applicable and are by no means limited to the domain of SOMs~\cite{xu2017accelerated,xu2018accelerated,lan2012optimal,ghadimi2016accelerated}.
 
 
-However,  it is challenging to balance the global and local efficiency of second-order optimization algorithms. For instance,
-the classical Newton's method possesses excellent local convergence but lacks global guarantees, often exhibiting divergence when the starting point is far from the optimal solution~\cite{more1982newton,dennisjr1996numerical}. In contrast, stronger worst-case complexity results of accelerated SOMs often come at the cost of local efficiency.
+However, it is challenging to balance the global and local efficiency of second-order optimization algorithms. \cz{While the classical Newton's method possesses quadratic local convergence,} it lacks global guarantees and often diverges when the starting point is far from the optimal solution~\cite{more1982newton,dennisjr1996numerical}. In contrast, stronger worst-case complexity results of accelerated SOMs often come at the cost of local efficiency.
 % While classical SOMs achieve local quadratic convergence, no existing accelerated SOM successfully retains this property. 
 Empirical evidence shows that in tasks such as logistic regression, accelerated SOMs are often outperformed by unaccelerated ones~\cite{jiang2020unified,huang2024inexact,chen2022accelerating,carmon2022optimal}, and practical implementations often switch to Newton-type steps to obtain highly accurate solutions~\cite{jiang2020unified,huang2024inexact,chen2022accelerating}. The above phenomenon underscores a fundamental dilemma in accelerated SOMs, and raises the following question:
 \begin{center}
@@ -145,7 +149,7 @@ The first method, \emph{Accelerated Trust-Region Method with Local Detection} (\
 The second method, \emph{Accelerated Trust-Region Extragradient Method} (\Cref{alg.ms accelerated utr}), is designed to pursuit the limits of global performance, reaching the near-optimal global oracle complexity of $\tilde{O}(\epsilon^{-2/7})$, but does not retain the same local quadratic guarantee. Thus, our analysis and experiments reveal a phase-transition-like phenomenon in accelerated trust-region type methods: pushing global efficiency to its limits naturally entails a trade-off with local performance.
 This behavior is caused by the fact that, in \Cref{alg.ms accelerated utr}, the primal regularizer must be selected through an extragradient search coupled with the extrapolation point, which prevents the simple $\lambda=0$ local-detection mechanism used in \Cref{alg.accelerated utr}.
 
-Our theoretical findings are corroborated by numerical experiments. On a global scale, all accelerated SOMs, {\color{red}including ours and \cite{nesterov2008accelerating}}, consistently outperform the non-accelerated trust-region method~\cite{jiang2026beyond} and cubic Newton method~\cite{nesterov2006cubic}. Locally, \Cref{alg.accelerated utr} exhibits quadratic convergence, and \atrms{} cannot retain superlinear convergence near the solution, similar to the empirical conclusions in \cite{carmon2022optimal,jiang2024accelerated,huang2024inexact}. These findings again confirm the necessity of local detection.
+Our theoretical findings are corroborated by numerical experiments. On a global scale, \cz{the accelerated trust-region methods and the accelerated cubic regularized Newton method~\cite{nesterov2008accelerating}} consistently outperform the non-accelerated \cz{counterparts~\cite{jiang2026beyond,nesterov2006cubic}}. Locally, \Cref{alg.accelerated utr} exhibits quadratic convergence, and \atrms{} cannot retain superlinear convergence near the solution, similar to the empirical conclusions in \cite{carmon2022optimal,jiang2024accelerated,huang2024inexact}. These findings confirm the necessity of local detection \cz{when retaining local quadratic convergence in TR-type methods.}
 
 \subsection{Related works}
 We review related works along two main lines: TR-type methods and accelerated SOMs that aim to achieve faster-than-sublinear efficiency. Despite the strong empirical success of TR-type methods, their theoretical analysis mainly focuses on nonconvex problems~\cite{ye2005second,curtis2017trust,curtis2021trust,zhang2025homogeneous,hamad2022consistently,grapiglia2015on,hamad2024simple,curtis2023worst_i,ouyang2025trust}, while their global oracle complexity analysis for convex problems remains incomplete.
@@ -768,13 +772,13 @@ After using the one-to-one correspondence to transfer the target interval to the
     \end{equation}
 \end{lemma}
 \cz{
-    To summarize, in \Cref{alg.local detection}, the number of oracle calls  reduces to 
+    To summarize, in \Cref{alg.local detection}, the number of oracle calls  reduces to
     \begin{equation*}
         \max\left\{O\left(\log \tfrac{\|\nabla f(y)\|}{\epsilon_g}\right),
         O\left(\log\tfrac{\kappa_H+\mu_+}{\epsilon_g}\right)
         \right\}.
-\end{equation*}
-    }
+    \end{equation*}
+}
 \subsubsection{\cz{Oracle complexity of \Cref{alg.accelerated utr}}}\label{sec.oracle compl}
 \cz{
     We begin with the following property of the iterates $y_k$ if $k\in\mathcal{Z}$, which invoked \Cref{alg.local detection}, cf. \eqref{eq.outer index catagory}.}
@@ -1308,7 +1312,7 @@ Secondly, in the beginning of the iterations, all accelerated methods, including
 
 Secondly, the global convergence does come at the expense of local superlinear convergence.
 Notably, \atr{} is the only accelerated method that has the local rate of superlinear convergence because of the diving track.
-Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \atrms{} is slightly better because of its superior $\tilde O(\epsilon_f^{-2/7})$ non-asymptotic performance. These results are in accordance with what is predicted in the convergence analysis.
+Both \atrms{} and \arca{} converge sublinearly in the local regime, in which \atrms{} is slightly better because of its superior $\tilde O(\epsilon_f^{-2/7})$ non-asymptotic performance. These results are in accordance with what is predicted in the convergence analysis. \cz{Can we design a locally superlinear method based on the A-NPE framework? This question is left as a future work.}
 
 % \addcontentsline{toc}{section}{References}
 

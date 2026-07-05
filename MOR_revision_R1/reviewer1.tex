@@ -33,7 +33,7 @@
 
 \comm{In all proofs, the authors are encouraged to provide more detailed explanations of the transitions from one step to another, even if some of those transitions are trivial.}
 
-\resp{Thank you for your detailed comments. We carefully reviewed all of our proofs and revised the manuscript accordingly. For comments where the corresponding revisions are straightforward and self-explanatory, we have omitted detailed responses for brevity. Regarding your comment on Lemma 3.13, we have completely rewritten the result (now Lemma 3.11) and improved its dependence on $\nu$.}
+\resp{Thank you for your detailed comments. We carefully reviewed all of our proofs and revised the manuscript accordingly. {\bf To improve the flow, the analysis for each variant is now organized into iteration complexity, oracle calls, and finally, oracle complexity.} We add more details to the derivations for the proofs to improve the clarity. For comments where the corresponding revisions are straightforward and self-explanatory, we have omitted detailed responses for brevity. Regarding your comment on Lemma 3.13, we have completely rewritten the result (now Lemma 3.11) and improved its dependence on $\nu$.}
 \begin{itemize}
       \item \comm{Page 7, line 16. Even if it is obvious, mention when introducing the sequence $\{\phi_k(x)\}_{k\ge 0}$ that it is a monotone non-increasing sequence, since this property is used in Lemma 3.4.}
 
@@ -229,11 +229,16 @@
 \begin{itemize}
       \item \comm{In the Contribution section, Page 3, line 28, the paper refers to [42] and states: ``On a global scale, all accelerated SOM, including ours and [42, 46].'' However, the plots do not show the performance of running [42]. Please either remove that statement or add the results of running this method.}
 
-            \resp{Thanks. We have narroed down the reference to [46] after careful consideration. The main reason to exclude [42] in the numerical experiments is that it needs a searching procedure (e.g., Section 7 of [42]) to find the parameters, which turns out be highly inefficient in practice (also see the discussion in Section 4.3.3 of [47]). For the MS-type method to be practical, we need highly non-trivial enhancements to the original method; see, e.g., [7]. For the purpose of the paper, we decide not to exploit these possibilities due to space constraints.}
+            \resp{Thanks. We have narrowed down the reference to [46] after careful consideration. The main reason to exclude [42] in the numerical experiments is that the original MS method (A-NPE) [42] paired with the searching procedure (Section 7 of [42]) turns out to be incompetent in practice (also see the discussion in Section 4.3.3 of [47]).
+                  In fact, the MS method is more of an algorithmic framework \citep{carmon2022optimal} with many possible choices of second-order oracles, each of which needs a separate searching procedure to meet the required condition to justify the iteration complexity. \\
+                  For a specific MS-type method to be practical, we need highly non-trivial enhancements, for example, those in \citep{carmon2022optimal,jiang2020unified} for the cubic regularization oracle. However, these enhancements also bring additional ingredients to the original A-NPE, such as adaptive searching of the Lipschitz constant, warm-start for the searching procedure, etc.  \\
+                  Due to space constraints, the sophistication of the enhancements makes it difficult to fairly compare it with other methods in the current numerical experiments. Further exploitation and ablation studies seem to stray away from our main motivation that focuses on the possibility of accelerating trust-region-type methods.
+                  For the purpose of the paper, we decide not to exploit these possibilities for the sake of clarity. We believe that the performance evaluation of the MS-type methods with different second-order oracles (including the $\trp$ oracle) itself forms a valuable contribution to the optimization community and will be a topic of our future work.
+            }
 
       \item \comm{Please provide a link to the Git source code. This will help others use the method and compare against it.}
 
-            \resp{Thanks for the suggestion. We have added a link to our current implementation under long-term maintenance: \url{https://github.com/bzhangcw/UTR.jl/tree/@260702-MOR-rev1}.}
+            \resp{Thanks for the suggestion. We have added a link to our current implementation under long-term maintenance: \url{https://github.com/bzhangcw/UTR.jl}.}
 
       \item \comm{In the plots, the paper uses ATR and ATR (MS), but these two notations are never introduced. I think ATR and ATR (MS) refer to Algorithm 1 and Algorithm 2, but it would be easier to define these, especially for readers who skim the paper and check the plots directly.}
 
@@ -241,15 +246,16 @@
 
       \item \comm{I recommend adding one line to quickly explain the difference between the datasets, for example the size of each one, $N$, or the ratio of both classes. The motivation behind running all algorithms on these different datasets is currently unclear.}
 
-            \resp{Thanks for this suggestion. We add a sentence to explain the difference between the datasets. Each row of presented figures share the sparsity and dimension but different sample size $N$.}
+            \resp{Thanks for this suggestion. We add a sentence to explain the difference between the datasets. Each row of presented figures share the sparsity and dimension but different sample size.}
 
       \item \comm{Please provide extra details on the $\epsilon$ value used and the $\theta$ and $\eta$ parameter values used for Algorithm 2.}
 
-            \resp{}
+            \resp{Thanks for this suggestion. In the implementation, $\eta = 0.3$, $\theta = 1.3$, and $\epsilon_g$ is the precision parameter (also see the next comment).}
 
       \item \comm{Please provide extra details on the computation of $D_0$ and $G_0$ in the implementation of Algorithm 2, since these quantities are required for Subroutine 2. For example, how did you compute $x^\ast$?}
-
-            \resp{}
+            \resp{Thanks for this suggestion. Note that in Algorithm 2, we only use $D_0$ and $G_0$ to set $\sigma_-$ and $\sigma_+$.
+                  These values only form a safe interval for $\sigma \in [\sigma_-, \sigma_+]$ to handle the search, and the actual values of $\sigma_-$ and $\sigma_+$ can be determined without actually computing $x^\ast$. }
+      \item[] {\color{blue} For example, we can set a $\sigma_-$ that is smaller than $\sqrt{\tfrac{2M\epsilon_g}{1+2\theta}}$. While for $\sigma_+$, it is set according to $G_0$ (the maximum gradient norm) because in the analysis of Lemma 4.5, we used argument such that $\|\nabla f(y(\sigma_+))\| \le G_0$. Thus, it only needs a safe constant value to bound the gradient norm from above along the iterates. As long as the search can terminate successfully, it implies that the choice $\sigma_-, \sigma_+$ is valid.}
 \end{itemize}
 
 \subsection{Minor concerns}
