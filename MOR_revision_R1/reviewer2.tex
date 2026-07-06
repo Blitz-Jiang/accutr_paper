@@ -1,13 +1,26 @@
-\section{Response to Reviewer 2}
-\resp{We sincerely thank you for your careful reading of our manuscript and for your constructive and insightful comments. We have revised the manuscript accordingly and have answered all your questions in detail. In particular, we have clarified the relevant definitions and algorithmic stopping criteria, and we have provided rigorous mathematical statements to address your concerns. We are grateful for your suggestions, which helped us improve the clarity and completeness of the paper.}
+\section{Response to Reviewer 2}\label{sec.response-to-reviewer2}
+{
+    \color{blue} We sincerely thank you for your careful reading of our manuscript and for your constructive and insightful comments. We have revised the manuscript accordingly and addressed all of your questions in detail. We are grateful for your suggestions, which have helped improve the clarity and completeness of the paper.
+
+    In particular, we would like to thank you for raising the three valuable discussion points in \S\ref{sec.discussion-points}. To investigate these issues more rigorously, we have provided an outline of the analysis concerning
+    \begin{enumerate}[leftmargin=*]
+        \item the inexact solution of the $\trp$ subproblem, together with the corresponding global and local convergence analysis; and
+        \item a simple adaptive mechanism for incorporating an estimate of the Hessian Lipschitz constant $M$ into the algorithms.
+    \end{enumerate}
+    Due to space limitations, we have chosen not to include the full technical details in the manuscript in order to maintain its conciseness. We believe that the analysis outlined here provides a clear roadmap for addressing these important practical aspects in a future extension of the current work.
+}
+
 \subsection{Main concerns}
 
 \begin{itemize}
     \item \comm{Definition 2.1 combines function value residuals and gradient norms under a single tolerance $\epsilon$. Since these two measures usually operate on different scales and orders of magnitude, a unified $\epsilon$ may not be well-defined for all problems. The authors should justify the use of this combined stopping criterion or discuss the implications of the scale mismatch between $f(x)-f^*$ and $\|\nabla f(x)\|$.}
+          \resp{
+              We see that these this question and the one below are closely related thus we answer them together. Please see the response below.
+          }
 
     \item \comm{In the pseudocode for both Algorithm 1 and Algorithm 2, the main iteration loop is defined as ``for $k=0,1,\ldots,K_\epsilon$.'' However, as the complexity analysis demonstrates, $K_\epsilon$ depends on unknown constants such as the initial distance to the optimum, $D_0=\|x_0-x^*\|$. Since $D_0$ is unknown a priori, $K_\epsilon$ cannot be used as a practical limit for the total number of iterations. For the sake of clarity, the authors should explicitly define the verifiable stopping criteria, e.g., $\|\nabla f(x_k)\|\le \epsilon$, that would be used in a numerical implementation to trigger the termination of the loop.}
 
-          \resp{Thank you for the valuable insight. We assume that these two questions are closely related thus we answer them together. We have now revised the Definition 2.1. The two tolerances $\epsilon_f$ and $\epsilon_g$ are kept separate because
+          \resp{Thank you for the valuable insight.  We have now revised the Definition 2.1. The two tolerances $\epsilon_f$ and $\epsilon_g$ are kept separate because
               the function-value residual $f(x)-f^*$ and the gradient norm
               $\|\nabla f(x)\|$ generally have different scales as you said. Under the bounded hessian assumption and convexity, the two
               measures are related by
@@ -25,7 +38,7 @@
           }
 \end{itemize}
 
-\subsection{Discussion points}
+\subsection{Discussion points}\label{sec.discussion-points}
 
 \begin{itemize}
     \item \comm{Given that trust-region methods naturally handle negative curvature, it would be interesting to hear the authors' views on whether the $\trp$ oracle and estimating sequence techniques could be extended to non-convex settings to find second-order stationary points. Specifically, could such an extension potentially improve upon the complexity bounds of existing unaccelerated non-convex trust-region methods?}

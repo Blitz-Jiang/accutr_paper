@@ -1,5 +1,13 @@
 \section{Response to Reviewer 1}
-\resp{We sincerely thank you for your careful reading of our manuscript and for your detailed, constructive, and insightful comments. We have revised the manuscript accordingly and have answered all your questions in detail. In particular, we have improved the organization and notation, clarified the algorithmic descriptions, added missing proof details, corrected the typos and derivation issues you pointed out, and provided additional explanations for the numerical experiments. We are grateful for your suggestions, which helped us substantially improve the clarity, rigor, and presentation of the paper.}
+ {\color{blue}
+  We sincerely thank you for your insightful review of our manuscript and especially for your detailed, constructive, and insightful comments on the organization of the proofs.
+  We have revised the manuscript accordingly and have answered all your questions in detail.
+
+  In particular, we have improved the organization and notation, clarified the algorithmic descriptions, added missing proof details, corrected the typos and derivation issues you pointed out.  We have also improved the clarity and organization of many of the proofs. We believe that the presentation is now in good shape to convey the main ideas of the paper.
+
+  We also provided additional explanations for the numerical experiments. We are grateful for your suggestions, which helped us substantially improve the clarity, rigor, and presentation of the paper.
+
+ }
 \subsection{Major concerns}
 
 \paragraph{General organization of the paper}
@@ -33,7 +41,8 @@
 
 \comm{In all proofs, the authors are encouraged to provide more detailed explanations of the transitions from one step to another, even if some of those transitions are trivial.}
 
-\resp{Thank you for your detailed comments. We carefully reviewed all of our proofs and revised the manuscript accordingly. {\bf To improve the flow, the analysis for each variant is now organized into iteration complexity, oracle calls, and finally, oracle complexity.} We add more details to the derivations for the proofs to improve the clarity. For comments where the corresponding revisions are straightforward and self-explanatory, we have omitted detailed responses for brevity. Regarding your comment on Lemma 3.13, we have completely rewritten the result (now Lemma 3.11) and improved its dependence on $\nu$.}
+\resp{Thank you for your detailed comments. We carefully reviewed all of our proofs and revised the manuscript accordingly. {\bf To improve the flow, the analysis for each variant is now organized into iteration complexity, oracle calls, and finally, oracle complexity.} We add more details to the derivations for the proofs to improve the clarity. \\
+      For comments where the corresponding revisions are straightforward and self-explanatory, we have omitted detailed responses for brevity and adopted proper revision in the manuscript. Regarding your comment on Lemma 3.13, we have completely rewritten the result (now Lemma 3.11) and improved its dependence on $\nu$.}
 \begin{itemize}
       \item \comm{Page 7, line 16. Even if it is obvious, mention when introducing the sequence $\{\phi_k(x)\}_{k\ge 0}$ that it is a monotone non-increasing sequence, since this property is used in Lemma 3.4.}
 
@@ -229,11 +238,7 @@
 \begin{itemize}
       \item \comm{In the Contribution section, Page 3, line 28, the paper refers to [42] and states: ``On a global scale, all accelerated SOM, including ours and [42, 46].'' However, the plots do not show the performance of running [42]. Please either remove that statement or add the results of running this method.}
 
-            \resp{Thanks. We have narrowed down the reference to [46] after careful consideration. The main reason to exclude [42] in the numerical experiments is that the original MS method (A-NPE) [42] paired with the searching procedure (Section 7 of [42]) turns out to be incompetent in practice (also see the discussion in Section 4.3.3 of [47]).
-                  In fact, the MS method is more of an algorithmic framework \citep{carmon2022optimal} with many possible choices of second-order oracles, each of which needs a separate searching procedure to meet the required condition to justify the iteration complexity. \\
-                  For a specific MS-type method to be practical, we need highly non-trivial enhancements, for example, those in \citep{carmon2022optimal,jiang2020unified} for the cubic regularization oracle. However, these enhancements also bring additional ingredients to the original A-NPE, such as adaptive searching of the Lipschitz constant, warm-start for the searching procedure, etc.  \\
-                  Due to space constraints, the sophistication of the enhancements makes it difficult to fairly compare it with other methods in the current numerical experiments. Further exploitation and ablation studies seem to stray away from our main motivation that focuses on the possibility of accelerating trust-region-type methods.
-                  For the purpose of the paper, we decide not to exploit these possibilities for the sake of clarity. We believe that the performance evaluation of the MS-type methods with different second-order oracles (including the $\trp$ oracle) itself forms a valuable contribution to the optimization community and will be a topic of our future work.
+            \resp{Thanks. After careful consideration, we have narrowed the reference to [46]. The original MS method (A-NPE) in [42], together with the searching procedure in Section 7 of [42], is primarily intended as a general algorithmic framework rather than a practical implementation, and its practical limitations have also been discussed in Section 4.3.3 of [47]. In practice, competitive MS-type methods require substantial enhancements \citep{carmon2022optimal,jiang2020unified}. Since our primary objective is to investigate the acceleration of trust-region-type methods and because the space limitation here, we have chosen to focus the experiments accordingly. A systematic empirical study of MS-type methods with different second-order oracles, including the $\trp$ oracle, is an interesting direction that we plan to pursue in future work.
             }
 
       \item \comm{Please provide a link to the Git source code. This will help others use the method and compare against it.}

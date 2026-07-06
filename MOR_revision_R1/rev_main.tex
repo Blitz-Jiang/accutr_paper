@@ -3,7 +3,7 @@
 \usepackage{color}
 \usepackage{hyperref, amsmath, amssymb, amsthm}
 \usepackage{cleveref}
-\usepackage{natbib}
+\usepackage{natbib,enumitem}
 \usepackage{algorithm,algorithmic}
 \usepackage{eqparbox,ulem}
 \renewcommand\algorithmiccomment[1]{%
@@ -36,11 +36,17 @@
 
 \input{intro}
 \newpage
-\section{Response to the Associate Editor}
-\resp{We sincerely thank the Associate Editor for the careful handling of our manuscript and for the thoughtful and constructive assessment of the referee reports. We are also grateful for the valuable guidance on the main issues that should be addressed in the revision.
-In the revised manuscript and the accompanying response letter, we have provided detailed, point-by-point responses to all comments raised by the two referees. In particular, we have substantially improved the organization and exposition of the paper, clarified several proof details and algorithmic statements, corrected the inaccurate or unclear statements identified by the referees, and revised the numerical section accordingly. We have also incorporated a practically meaningful tolerance-based stopping rule into the algorithms and clarified the use of a single tolerance for function-value residuals and gradient norms.
-Regarding the three broader questions raised by Referee 2, we have provided mathematically rigorous and affirmative responses. Specifically, we have clarified how the framework and analysis can be extended to the nonconvex setting, how the convergence guarantees are affected when the $\trp$ oracle is solved inexactly, and how the assumption that the global Lipschitz constant is known can be relaxed through an adaptive procedure. In particular, we agree that the inexact solution of the $\trp$ oracle is important for the practical relevance of the proposed methods, and we have added a detailed treatment showing that the main convergence guarantees remain valid under suitable inexactness conditions.
-We believe that these revisions address all major concerns raised by the referees and substantially improve the clarity, rigor, and practical relevance of the paper. We hope that the revised manuscript is now suitable for further consideration.}
+\section{Reply to Associate Editor}
+ {\color{blue} We sincerely thank the Associate Editor for the careful handling of our manuscript and for the thoughtful and constructive assessment of the referee reports. We are also grateful for the valuable guidance on the main issues that should be addressed in the revision.
+  In the revised manuscript and the accompanying response letter, we have provided detailed, point-by-point responses to all comments raised by the two referees.
+
+  In particular, we have substantially improved the organization and exposition of the paper, clarified several proof details and algorithmic statements, corrected the inaccurate or unclear statements identified by the referees, and revised the numerical section accordingly. We have also incorporated a practically meaningful tolerance-based stopping rule into the algorithms and clarified the use of a single tolerance for function-value residuals and gradient norms.
+
+  Regarding the three broader questions raised by Referee 2 (see \S\ref{sec.discussion-points}), we have clarified how the framework and analysis can be extended to the nonconvex setting, and how the convergence guarantees are affected when the $\trp$ oracle is solved inexactly, and how the assumption that the global Lipschitz constant is known can be relaxed through an adaptive procedure.
+  In particular, we agree that the inexact solution of the $\trp$ oracle is important for the practical relevance of the proposed methods, and we have added a detailed treatment showing that the main convergence guarantees remain valid under suitable inexactness conditions. To keep the manuscript concise, we have chosen not to include the full technical details in the manuscript.
+
+  We believe that these revisions address all major concerns raised by the referees and substantially improve the clarity, rigor, and practical relevance of the paper. We believe that the revised manuscript is now suitable for further consideration.
+ }
 \newpage
 \input{reviewer1}
 
