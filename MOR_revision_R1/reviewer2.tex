@@ -1,51 +1,1113 @@
-\section{Reviewer 2}
+\section{Response to Reviewer 2}\label{sec.response-to-reviewer2}
+{
+    \color{blue} We sincerely thank you for your careful reading of our manuscript and for your constructive and insightful comments. We have revised the manuscript accordingly and addressed all of your questions in detail. We are grateful for your suggestions, which have helped improve the clarity and completeness of the paper.
+
+    In particular, we would like to thank you for raising the three valuable discussion points in \S\ref{sec.discussion-points}. To investigate these issues more rigorously, we have provided an outline of the analysis concerning
+    \begin{enumerate}[leftmargin=*]
+        \item the inexact solution of the $\trp$ subproblem, together with the corresponding global and local convergence analysis; and
+        \item a simple adaptive mechanism for incorporating an estimate of the Hessian Lipschitz constant $M$ into the algorithms.
+    \end{enumerate}
+    Due to space limitations, we have chosen not to include the full technical details in the manuscript in order to maintain its conciseness. We believe that the analysis outlined here provides a clear roadmap for addressing these important practical aspects in a future extension of the current work.
+}
 
 \subsection{Main concerns}
 
 \begin{itemize}
     \item \comm{Definition 2.1 combines function value residuals and gradient norms under a single tolerance $\epsilon$. Since these two measures usually operate on different scales and orders of magnitude, a unified $\epsilon$ may not be well-defined for all problems. The authors should justify the use of this combined stopping criterion or discuss the implications of the scale mismatch between $f(x)-f^*$ and $\|\nabla f(x)\|$.}
+          \resp{
+              We see that these this question and the one below are closely related thus we answer them together. Please see the response below.
+          }
 
     \item \comm{In the pseudocode for both Algorithm 1 and Algorithm 2, the main iteration loop is defined as ``for $k=0,1,\ldots,K_\epsilon$.'' However, as the complexity analysis demonstrates, $K_\epsilon$ depends on unknown constants such as the initial distance to the optimum, $D_0=\|x_0-x^*\|$. Since $D_0$ is unknown a priori, $K_\epsilon$ cannot be used as a practical limit for the total number of iterations. For the sake of clarity, the authors should explicitly define the verifiable stopping criteria, e.g., $\|\nabla f(x_k)\|\le \epsilon$, that would be used in a numerical implementation to trigger the termination of the loop.}
 
-    \resp{Thank you for the valuable insight. We assume that these two questions are closely related thus we answer them together. We have now revised the Definition 2.1. The two tolerances $\epsilon_f$ and $\epsilon_g$ are kept separate because
-    the function-value residual $f(x)-f^*$ and the gradient norm
-    $\|\nabla f(x)\|$ generally have different scales as you said. Under the bounded hessian assumption and convexity, the two
-    measures are related by
-    \[
-        \frac{1}{2\kappa_H}\|\nabla f(x)\|^2
-        \leq f(x)-f^*.
-    \]
-    Hence an $\epsilon_f$-function-value solution is also a
-    $\sqrt{2\kappa_H\epsilon_f}$-first-order stationary solution. Conversely,
-    under local strong convexity, a sufficiently small gradient norm also
-    controls the local function-value residual.\\
-    In particular, the
-    algorithms below use only the verifiable first-order condition
-    $\|\nabla f(x)\|\leq \epsilon_g$ as a stopping criterion. The tolerance $\epsilon_f$ is introduced only for complexity analysis and is reported as an anytime guarantee. It is not used as an input or stopping rule in the algorithm.
-    }
+          \resp{Thank you for the valuable insight.  We have now revised the Definition 2.1. The two tolerances $\epsilon_f$ and $\epsilon_g$ are kept separate because
+              the function-value residual $f(x)-f^*$ and the gradient norm
+              $\|\nabla f(x)\|$ generally have different scales as you said. Under the bounded hessian assumption and convexity, the two
+              measures are related by
+              \[
+                  \frac{1}{2\kappa_H}\|\nabla f(x)\|^2
+                  \leq f(x)-f^*.
+              \]
+              Hence an $\epsilon_f$-function-value solution is also a
+              $\sqrt{2\kappa_H\epsilon_f}$-first-order stationary solution. Conversely,
+              under local strong convexity, a sufficiently small gradient norm also
+              controls the local function-value residual.\\
+              In particular, the
+              algorithms below use only the verifiable first-order condition
+              $\|\nabla f(x)\|\leq \epsilon_g$ as a stopping criterion. The tolerance $\epsilon_f$ is introduced only for complexity analysis and is reported as an anytime guarantee. It is not used as an input or stopping rule in the algorithm.
+          }
 \end{itemize}
 
-\subsection{Discussion points}
+\subsection{Discussion points}\label{sec.discussion-points}
 
 \begin{itemize}
     \item \comm{Given that trust-region methods naturally handle negative curvature, it would be interesting to hear the authors' views on whether the $\trp$ oracle and estimating sequence techniques could be extended to non-convex settings to find second-order stationary points. Specifically, could such an extension potentially improve upon the complexity bounds of existing unaccelerated non-convex trust-region methods?}
 
-    \resp{We thank the reviewer for this insightful question. Trust-region methods are indeed naturally suited to nonconvex problems because the trust-region subproblem can exploit negative curvature. $\trp$ oracle framework can be used to find second-order stationary points in nonconvex optimization, see~\citet{jiang2024nonconvexityuniversaltrustregionmethod}. That said, combining it with estimating sequence is not immediate. In the convex setting, the estimating-sequence argument relies crucially on global convexity, since affine lower models of $f$ are used to maintain the estimate-sequence inequalities. This mechanism breaks down in general nonconvex problems. We expect it to be useful only under additional structural assumptions, such as higher-order smoothness, controlled nonconvexity, or other conditions that allow suitable surrogate lower models to be constructed~(like the paper~\citet{carmon2017convex} did under second-order smoothness).\\
-    Regarding complexity, \citet{carmon_lower_2020} established a lower bound of order
-    \[
-        \Omega\!\left(\sqrt{M}\,(f(x_0)-f^*)\,\epsilon^{-3/2}\right)
-    \]
-    for finding first-order stationary points using second-order information under Hessian Lipschitz continuity. To the best of our knowledge, among trust-region-type methods, \citet{hamad2022consistently} matches this bound up to absolute constants. However, their guarantee is for first-order stationarity and does not directly provide an approximate second-order stationary point. Other trust-region-type methods can find approximate second-order stationary points, such as those in
-    \citet{jiang2024nonconvexityuniversaltrustregionmethod,curtis2017trust,curtis2021trust}, but their complexity guarantees typically involve additional dependencies or less streamlined bounds.\\
-    Our view is that it may be possible to design a trust-region-type method that both matches the optimal first-order complexity order and returns an approximate second-order stationary point, but doing so would be highly nontrivial. Moreover, the estimating-sequence technique by itself is unlikely to yield an acceleration benefit in fully general nonconvex problems, because the extra dependency in complexity results is more likely a trust-region-method-related problem.}
+          \resp{We thank the reviewer for this insightful question. Trust-region methods are indeed naturally suited to nonconvex problems because the trust-region subproblem can exploit negative curvature. $\trp$ oracle framework can be used to find second-order stationary points in nonconvex optimization, see~\citet{jiang2026beyond}.}
+    \item[]{\color{blue} That said, how to use the estimating sequence technique in the nonconvex setting is not immediate. The estimating sequence itself relies on affine lower models of $f$; this mechanism breaks down without convexity. We expect it to be useful only under additional structural assumptions, such as higher-order smoothness, weak convexity, or other conditions that allow suitable surrogate lower models to be constructed~(like the paper~\citet{carmon2017convex} did under second-order smoothness). Beyond that, the estimating sequence is unlikely to be a proper algorithmic ingredient. \\
+          Regarding complexity, \citet{carmon2020lower} established a lower bound in
+          \[
+              \Omega\!\left(\sqrt{M}\,(f(x_0)-f^*)\,\epsilon^{-3/2}\right)
+          \]
+          for finding first-order stationary points using second-order information under Hessian Lipschitz continuity. To the best of our knowledge, among trust-region-type methods, \citet{hamad2022consistently} already matches this bound up to absolute constants. Thus, it is very unlikely to improve this bound any further by the estimating sequence technique.
+
+          However, their guarantee is for first-order stationarity and does not directly provide an approximate second-order stationary point. Since it is known that trust-region-type methods can find approximate second-order stationary points
+          \citep{jiang2026beyond,curtis2017trust,curtis2021trust} in $O(\epsilon^{-3/2}\log(\epsilon^{-1}))$ oracle calls, our view is that it may be possible to design a trust-region-type method that both matches the optimal first-order complexity (i.e., $O(\epsilon^{-3/2})$ oracle calls) and returns an approximate second-order stationary point, but doing so would be highly nontrivial. Still, the estimating sequence technique is unlikely to yield a benefit for this purpose, because the extra dependency in complexity results is more likely a issue specific to trust-region-type subproblems.}
 
     \item \comm{The theoretical guarantees for the $\trp$ oracle rely on exact primal-dual solutions. In large-scale settings, these are typically solved inexactly via iterative methods, e.g., Krylov methods or truncated conjugate gradient methods. Could the authors clarify whether the estimating sequence in Algorithm 1 and the $\lambda=0$ local detection trigger remain robust under relative inexactness? It would be useful to know if the $\widetilde{O}(\epsilon^{-1/3})$ complexity bound is preserved under these conditions.}
 
-    \resp{}
+          \resp{Thank you for the great question. The estimating-sequence argument is robust to a controlled inexact solution
+              of the \(\trp\) subproblem.
+                  {\bf To be rigorous, we present the analysis here to briefly demonstrate how to incorporate the inexact solution into the analysis.  We will describe the inexact solution of the $\trp$ subproblem below, then, we will show how the global and local convergence results can be adapted to the inexact case.}
+              \paragraph{Inexact solution of the $\trp$ subproblem}
+              At the \(k\)-th iteration, the \(\trp\) subproblem is solved at the point
+              \(y_k\). Let
+              \[
+                  g_k:=\nabla f(y_k),
+                  \qquad
+                  H_k:=\nabla^2 f(y_k),
+                  \qquad
+                  \mu_k:=\sigma_k+\lambda_k.
+              \]
+              We consider an inexact primal-dual pair \((d_k,\lambda_k)\) satisfying the
+              following conditions, similar in spirit to~\citet[Equation~(6)]{hamad2022consistently}:
+              for some constants
+              \(
+              \gamma_1\in\left[0,\frac12\right), \gamma_2\in(0,1],
+              \)
+              we require
+              \begin{align}
+                  \label{eq.opt-inexact-fo}
+                  \|g_k+(H_k+\sigma_k I+\lambda_k I)d_k\|
+                          & \leq \gamma_1 M\|d_k\|^2, \\
+                  \label{eq.opt-inexact-primal}
+                  \|d_k\| & \leq r_k,                 \\
+                  \label{eq.opt-inexact-cs}
+                  \gamma_2\lambda_k r_k
+                          & \leq \lambda_k \|d_k\|.
+              \end{align}
+              Here \eqref{eq.opt-inexact-fo} is the relative residual condition,
+              \eqref{eq.opt-inexact-primal} and \eqref{eq.opt-inexact-cs} are approximate
+              primal feasibility and complementarity.
+              \paragraph{Global acceleration} For the global estimating-sequence
+              argument, the essential ingredient is the
+              ratio bound between \(\mu_k\) and \(\|d_k\|\).\\
+              Indeed, when \(\lambda_k>0\), \eqref{eq.opt-inexact-primal} and
+              \eqref{eq.opt-inexact-cs} imply
+              \[
+                  \gamma_2 r_k\le \|d_k\|\le r_k.
+              \]
+              Using the choice
+              \[
+                  \sigma_k=Mr_k,
+                  \qquad
+                  r_k=\frac{1}{\sqrt{2M}}\|g_k\|^{1/2},
+              \]
+              we have
+              \[
+                  \mu_k\ge \sigma_k=Mr_k\ge M\|d_k\|.
+              \]
+              Moreover, by convexity, \(H_k\succeq0\), and hence
+              \[
+                  \mu_k\|d_k\|
+                  \le
+                  \|(H_k+\mu_k I)d_k\|.
+              \]
+              Combining this with \eqref{eq.opt-inexact-fo}, we obtain
+              \[
+                  \mu_k\|d_k\|
+                  \le
+                  \|g_k\|+\gamma_1 M\|d_k\|^2.
+              \]
+              Since \(\|g_k\|=2Mr_k^2\) and \(\|d_k\|\ge \gamma_2 r_k\), it follows that
+              \[
+                  \mu_k
+                  \le
+                  \left(\frac{2}{\gamma_2^2}+\gamma_1\right)M\|d_k\|.
+              \]
+              Thus, for all iterations with \(\lambda_k>0\),
+              \begin{equation}
+                  \label{eq.inexact-ratio}
+                  M\|d_k\|
+                  \le
+                  \mu_k
+                  \le
+                  \beta M\|d_k\|,
+                  \qquad
+                  \beta:=\frac{2}{\gamma_2^2}+\gamma_1.
+              \end{equation}
+              When \(\lambda_k=0\), one can use the same R\&B step as
+              in the exact case, but now with the target interval
+              \[
+                  M\|d_k\|\le \mu_k\le \beta M\|d_k\|.
+              \]
+              Therefore, {\bf the following lemma is an inexact version of Lemma~2.3}, and
+              is sufficient to prove the global convergence of Alg. 1. \\
+              \begin{lemma}
+                  \label{lem.inexact-inner-product-g-d}
+                  Suppose \(f\) is convex and Assumption~2.1 holds. Let
+                  \(x\in\mathbb R^n\), \(d\in\mathbb R^n\), and \(\mu>0\). Suppose that
+                  \[
+                      \|\nabla f(x)+(\nabla^2 f(x)+\mu I)d\|
+                      \le
+                      \gamma_1 M\|d\|^2
+                  \]
+                  for some \(\gamma_1\in[0,1/2)\), and suppose that
+                  \[
+                      M\|d\|\le \mu\le \beta M\|d\|
+                  \]
+                  for some \(\beta\ge1\). Define
+                  \[
+                      \delta:=\frac12+\gamma_1,
+                      \qquad
+                      \eta:=\frac{1-\delta^2}{2}>0.
+                  \]
+                  Then
+                  \begin{equation}
+                      \label{eq.inexact-inner-product-first}
+                      \left\langle \nabla f(x+d),-d\right\rangle
+                      \ge
+                      \frac{\|\nabla f(x+d)\|^2}{2\mu}
+                      +
+                      \eta\mu\|d\|^2.
+                  \end{equation}
+                  Consequently,
+                  \begin{equation}
+                      \label{eq.inexact-inner-product-advanced}
+                      \left\langle \nabla f(x+d),-d\right\rangle
+                      \ge
+                      c_{\rm in}
+                      \frac{\|\nabla f(x+d)\|^{3/2}}{\sqrt M},
+                  \end{equation}
+                  where
+                  \begin{equation}
+                      \label{eq.cin-def}
+                      c_{\rm in}
+                      :=
+                      \frac{4\eta^{1/4}}{6^{3/4}\sqrt{\beta}}
+                      =
+                      \frac{4}{6^{3/4}\sqrt{\beta}}
+                      \left(\frac{1-(\frac12+\gamma_1)^2}{2}\right)^{1/4}.
+                  \end{equation}
+              \end{lemma}
+              \begin{proof}
+                  By Assumption~2.1,
+                  \[
+                      \left\|
+                      \nabla f(x+d)-\nabla f(x)-\nabla^2 f(x)d
+                      \right\|
+                      \le
+                      \frac{M}{2}\|d\|^2.
+                  \]
+                  Combining this with the inexact residual condition gives
+                  \[
+                      \|\nabla f(x+d)+\mu d\|
+                      \le
+                      \left(\frac12+\gamma_1\right)M\|d\|^2
+                      =
+                      \delta M\|d\|^2.
+                  \]
+                  Since \(\mu\ge M\|d\|\), we further have
+                  \[
+                      \|\nabla f(x+d)+\mu d\|
+                      \le
+                      \delta \mu\|d\|.
+                  \]
+                  Define
+                  \[
+                      w:=\nabla f(x+d)+\mu d.
+                  \]
+                  Then
+                  \[
+                      \nabla f(x+d)=-\mu d+w,
+                      \qquad
+                      \|w\|\le \delta\mu\|d\|.
+                  \]
+                  Therefore,
+                  \[
+                      \left\langle \nabla f(x+d),-d\right\rangle
+                      =
+                      \mu\|d\|^2-\langle w,d\rangle,
+                  \]
+                  and
+                  \[
+                      \|\nabla f(x+d)\|^2
+                      =
+                      \|-\mu d+w\|^2
+                      =
+                      \mu^2\|d\|^2-2\mu\langle w,d\rangle+\|w\|^2.
+                  \]
+                  Hence
+                  \begin{align*}
+                      \left\langle \nabla f(x+d),-d\right\rangle
+                      -
+                      \frac{\|\nabla f(x+d)\|^2}{2\mu}
+                       & =
+                      \mu\|d\|^2-\langle w,d\rangle
+                      -
+                      \frac{1}{2\mu}
+                      \left(
+                      \mu^2\|d\|^2-2\mu\langle w,d\rangle+\|w\|^2
+                      \right)                                \\
+                       & =
+                      \frac12\mu\|d\|^2-\frac{\|w\|^2}{2\mu} \\
+                       & \ge
+                      \frac12\mu\|d\|^2
+                      -
+                      \frac{\delta^2\mu^2\|d\|^2}{2\mu}      \\
+                       & =
+                      \frac{1-\delta^2}{2}\mu\|d\|^2.
+                  \end{align*}
+                  This proves \eqref{eq.inexact-inner-product-first}.\\
+                  Next, using \(\mu\le \beta M\|d\|\), we have
+                  \[
+                      \|d\|
+                      \ge
+                      \frac{\mu}{\beta M}.
+                  \]
+                  Therefore, from \eqref{eq.inexact-inner-product-first},
+                  \[
+                      \left\langle \nabla f(x+d),-d\right\rangle
+                      \ge
+                      \frac{\|\nabla f(x+d)\|^2}{2\mu}
+                      +
+                      \eta\mu\|d\|^2
+                      \ge
+                      \frac{\|\nabla f(x+d)\|^2}{2\mu}
+                      +
+                      \frac{\eta\mu^3}{\beta^2M^2}.
+                  \]
+                  Let \(p:=\|\nabla f(x+d)\|\). If \(p=0\), then
+                  \eqref{eq.inexact-inner-product-advanced} holds trivially. If \(p>0\),
+                  minimizing the right-hand side over \(\mu>0\) yields
+                  \[
+                      \frac{p^2}{2\mu}
+                      +
+                      \frac{\eta\mu^3}{\beta^2M^2}
+                      \ge
+                      \frac{4\eta^{1/4}}{6^{3/4}\sqrt{\beta}}
+                      \frac{p^{3/2}}{\sqrt M}.
+                  \]
+                  This proves \eqref{eq.inexact-inner-product-advanced}.
+              \end{proof}
+              The same complexity can still be preserved by increasing only
+              the constant in the estimating sequence. Specifically, define
+              \[
+                  C_{\rm in}
+                  :=
+                  \max\left\{
+                  8,\frac{4}{3c_{\rm in}^2}
+                  \right\},
+              \]
+              and replace the initial estimate sequence by
+              \[
+                  \phi_0(x)=C_{\rm in}M\|x-x_0\|^3,
+              \]
+              with the corresponding minimizer update
+              \[
+                  v_{k+1}
+                  =
+                  x_0-\sqrt{
+                      \frac{1}{3C_{\rm in}M\|s_{k+1}\|}
+                  }
+                  s_{k+1}.
+              \]
+              The estimating-sequence proof then goes through with \(8M\) replaced by
+              \(C_{\rm in}M\). Consequently,
+              \[
+                  f(x_k)-f^*
+                  \le
+                  \frac{C_{\rm in}M\|x^*-x_0\|^3}{A_k}
+                  \le
+                  \frac{6C_{\rm in}M\|x^*-x_0\|^3}{k^3}.
+              \]
+              Since \(C_{\rm in}\) depends only on the fixed inexactness parameters
+              \(\gamma_1,\gamma_2\), and not on \(\epsilon_f\), the accelerated global
+              complexity remains
+              \(
+              \tilde O(\epsilon_f^{-1/3}).
+              \)\\
+              \paragraph{Local detection} We first note that the local trigger \(\lambda_k=0\) is exact in the
+              exact-oracle case, but under relative inexactness one should be slightly
+              more careful. The inexact conditions imply an explicit upper bound on
+              \(\lambda_k\), and \(\lambda_k=0\) follows once \(y_k\) enters a slightly
+              smaller local region.\\
+              Recall that
+              \[
+                  \sigma_k=\frac{\sqrt{2M}}{2}\|g_k\|^{1/2},
+                  \qquad
+                  r_k=\frac{\sqrt{2}}{2\sqrt M}\|g_k\|^{1/2}.
+              \]
+              Equivalently,
+              \[
+                  \sigma_k=Mr_k,
+                  \qquad
+                  \|g_k\|=2Mr_k^2=2\sigma_k r_k.
+              \]
+              \begin{lemma}
+                  \label{lem.inexact-lambda-local-upper}
+                  Suppose Assumptions~2.1 and 3.1 hold. Suppose \(y_k\in\mathcal{LQ}_g\) and \(\|g_k\|>0\). Let
+                  \[
+                      \sigma_k=\frac{\sqrt{2M}}{2}\|g_k\|^{1/2},
+                      \qquad
+                      r_k=\frac{\sqrt 2}{2\sqrt M}\|g_k\|^{1/2}.
+                  \]
+                  Equivalently,
+                  \[
+                      \sigma_k=Mr_k,
+                      \qquad
+                      \|g_k\|=2Mr_k^2.
+                  \]
+                  Assume that the inexact primal-dual pair \((d_k,\lambda_k)\) satisfies
+                  \begin{align}
+                      \label{eq.opt-inexact-fo-local}
+                      \|g_k+(H_k+\sigma_k I+\lambda_k I)d_k\|
+                       & \leq \gamma_1 M\|d_k\|^2, \\
+                      \label{eq.opt-inexact-primal-local}
+                      \|d_k\|
+                       & \leq r_k,                 \\
+                      \label{eq.opt-inexact-cs-local}
+                      \gamma_2\lambda_k r_k
+                       & \leq \lambda_k \|d_k\|,
+                  \end{align}
+                  where \(\gamma_1\in[0,1)\) and \(\gamma_2\in(0,1]\). Then
+                  \begin{equation}
+                      \label{eq.lambda-local-upper-simple}
+                      0\le \lambda_k
+                      \le
+                      \left[
+                          \left(
+                          \gamma_1+\frac{2}{\gamma_2^2}-1
+                          \right)\sigma_k
+                          -
+                          \frac{\nu}{3}
+                          \right]_+,
+                  \end{equation}
+                  where \([a]_+:=\max\{a,0\}\). Consequently, if
+                  \begin{equation}
+                      \label{eq.inexact-smaller-lqg-simple}
+                      \|\nabla f(y_k)\|
+                      <
+                      \frac{2\nu^2}{
+                          9M
+                          \left(
+                          \gamma_1+\frac{2}{\gamma_2^2}-1
+                          \right)^2
+                      },
+                  \end{equation}
+                  then
+                  \(
+                  \lambda_k=0.
+                  \)
+              \end{lemma}
+              \begin{proof}
+                  Since \(y_k\in\mathcal{LQ}_g\), we have
+                  \(
+                  H_k\succeq \frac{\nu}{3}I.
+                  \)
+                  If \(\lambda_k=0\), then \eqref{eq.lambda-local-upper-simple} is immediate.
+                  Hence we only consider the case \(\lambda_k>0\).\\
+                  From the approximate complementarity condition
+                  \eqref{eq.opt-inexact-cs-local}, since \(\lambda_k>0\), we obtain
+                  \[
+                      \gamma_2 r_k\le \|d_k\|.
+                  \]
+                  Together with \eqref{eq.opt-inexact-primal-local}, this gives
+                  \begin{equation}
+                      \label{eq.local-d-range-simple}
+                      \gamma_2 r_k\le \|d_k\|\le r_k.
+                  \end{equation}
+                  Define the residual
+                  \[
+                      e_k:=g_k+(H_k+\sigma_k I+\lambda_k I)d_k.
+                  \]
+                  Then by \eqref{eq.opt-inexact-fo-local},
+                  \[
+                      \|e_k\|\le \gamma_1M\|d_k\|^2.
+                  \]
+                  Moreover,
+                  \[
+                      (H_k+\sigma_k I+\lambda_k I)d_k=e_k-g_k.
+                  \]
+                  Since
+                  \[
+                      H_k+\sigma_k I+\lambda_k I
+                      \succeq
+                      \left(
+                      \frac{\nu}{3}+\sigma_k+\lambda_k
+                      \right)I,
+                  \]
+                  we have
+                  \begin{align*}
+                      \left(
+                      \frac{\nu}{3}+\sigma_k+\lambda_k
+                      \right)\|d_k\|
+                       & \le
+                      \|(H_k+\sigma_k I+\lambda_k I)d_k\| \\
+                       & =
+                      \|e_k-g_k\|                         \\
+                       & \le
+                      \|e_k\|+\|g_k\|                     \\
+                       & \le
+                      \gamma_1M\|d_k\|^2+\|g_k\|.
+                  \end{align*}
+                  Now, using \(\|d_k\|\ge \gamma_2 r_k\) and \(\|g_k\|=2Mr_k^2\), we directly bound
+                  \[
+                      \|g_k\|
+                      =
+                      2Mr_k^2
+                      \le
+                      \frac{2M}{\gamma_2^2}\|d_k\|^2.
+                  \]
+                  Therefore,
+                  \[
+                      \left(
+                      \frac{\nu}{3}+\sigma_k+\lambda_k
+                      \right)\|d_k\|
+                      \le
+                      \left(
+                      \gamma_1+\frac{2}{\gamma_2^2}
+                      \right)M\|d_k\|^2.
+                  \]
+                  Since \(\lambda_k>0\) implies \(\|d_k\|\ge \gamma_2 r_k>0\), we can divide both sides by \(\|d_k\|\) and obtain
+                  \[
+                      \frac{\nu}{3}+\sigma_k+\lambda_k
+                      \le
+                      \left(
+                      \gamma_1+\frac{2}{\gamma_2^2}
+                      \right)M\|d_k\|.
+                  \]
+                  Using \(\|d_k\|\le r_k\) and \(\sigma_k=Mr_k\), we get
+                  \begin{align*}
+                      \lambda_k
+                       & \le
+                      \left(
+                      \gamma_1+\frac{2}{\gamma_2^2}
+                      \right)Mr_k
+                      -\sigma_k
+                      -\frac{\nu}{3} \\
+                       & =
+                      \left(
+                      \gamma_1+\frac{2}{\gamma_2^2}-1
+                      \right)\sigma_k
+                      -\frac{\nu}{3}.
+                  \end{align*}
+                  Together with \(\lambda_k\ge0\), this proves
+                  \[
+                      0\le \lambda_k
+                      \le
+                      \left[
+                          \left(
+                          \gamma_1+\frac{2}{\gamma_2^2}-1
+                          \right)\sigma_k
+                          -
+                          \frac{\nu}{3}
+                          \right]_+.
+                  \]
+                  It remains to prove the sufficient condition for \(\lambda_k=0\). Since
+                  \[
+                      \sigma_k=\frac{\sqrt{2M}}{2}\|\nabla f(y_k)\|^{1/2}
+                      =
+                      \sqrt{\frac{M\|\nabla f(y_k)\|}{2}},
+                  \]
+                  condition \eqref{eq.inexact-smaller-lqg-simple} implies
+                  \[
+                      \sigma_k
+                      <
+                      \frac{\nu}{
+                          3\left(
+                          \gamma_1+\frac{2}{\gamma_2^2}-1
+                          \right)
+                      }.
+                  \]
+                  Hence
+                  \[
+                      \left(
+                      \gamma_1+\frac{2}{\gamma_2^2}-1
+                      \right)\sigma_k
+                      -
+                      \frac{\nu}{3}
+                      <0.
+                  \]
+                  Therefore, by \eqref{eq.lambda-local-upper-simple}, we must have
+                  \(
+                  \lambda_k=0.
+                  \)
+              \end{proof}
+              The above results implies the detection mechanism $\lambda_k$ detects a smaller local region in the case that the subproblems are solved inexactly. We can detects the region $\mathcal{LQ}_g$ by \eqref{eq.lambda-local-upper-simple}.
+          }
 
     \item \comm{The current ratio conditions and numerical experiments rely on a conservative global estimate of the Lipschitz constant $M$. While theoretically sufficient, this limits practical efficiency. The authors should discuss whether an adaptive backtracking strategy for $M_k$ could be integrated into the $\trp$ framework without degrading the $\widetilde{O}(\epsilon^{-1/3})$ complexity.}
 
-    \resp{Thanks for the question. We believe we can design adaptive/backtracking strategy with similar technique used in \citet{jiang2020unified}. The key is to get rid of the dependence of $M$ in Lemma 2.3.}
+          {
+              \color{blue}
+              Response: Thank you for the question. A monotone adaptive backtracking strategy can be incorporated into the \(\trp\) framework without degrading the global \(\widetilde O(\epsilon^{-1/3})\) oracle complexity, the analysis is similar to \cite{jiang2020unified,he2025history}. The key idea is to replace the algorithmic dependence on the exact value of \(M\) in Lemma~2.3 by a verifiable backtracking certificate. Throughout this response, \(M\) denotes the true Hessian Lipschitz constant in Assumption~2.1, while \(M_k\) denotes the adaptive estimate maintained by the algorithm. The trial estimate used inside the \(k\)-th iteration is denoted by \(\widehat M_k\). The resulting scheme is summarized below.
+              \begin{algorithm}[htbp]
+                  \caption{Accelerated TR with Backtracking}\label{alg.accelerated-utr-backtrack}
+                  \begin{algorithmic}[1]
+                      \STATE \textbf{Input:} initial point \(x_0=v_0\in \mathbb{R}^n\), \(s_0=0\), initial estimate \(M_0>0\), backtracking factor \(\gamma_b>1\), \(n_f=0\).
+                      \FOR{\(k=0,1,2,\ldots\)}
+                      \STATE \(\widehat M_k\leftarrow M_k\), \(\operatorname{accept}\leftarrow \mathrm{False}\).
+                      \WHILE{\(\operatorname{accept}=\mathrm{False}\)}
+                      \IF{\(s_k=0\)}
+                      \STATE \(\widehat v_k=x_0\).
+                      \ELSE
+                      \STATE \(\displaystyle \widehat v_k=x_0-\sqrt{\frac{1}{24\widehat M_k\|s_k\|}}s_k\).
+                      \ENDIF
+                      \STATE \(\displaystyle y_k=\frac{k}{k+3}x_k+\frac{3}{k+3}\widehat v_k\).
+                      \STATE \(\displaystyle
+                      (\sigma_k,r_k)
+                      =
+                      \left(
+                      \frac{\sqrt{2\widehat M_k}}{2}\|\nabla f(y_k)\|^{1/2},
+                      \frac{1}{\sqrt{2\widehat M_k}}\|\nabla f(y_k)\|^{1/2}
+                      \right).
+                      \)
+                      \label{line.adaptive-set-params}
+                      \STATE \((d_k,\lambda_k)=\trp(y_k,\sigma_k,r_k)\), and set \(\mu_k=\sigma_k+\lambda_k\).
+                      \IF{\(\lambda_k=0\)}
+                      \STATE Use R\&B at \(y_k\) with ratio target \(\widehat M_k\) to replace \((d_k,\mu_k)\) so that
+                      \[
+                          (\nabla^2 f(y_k)+\mu_k I)d_k=-\nabla f(y_k),
+                          \qquad
+                          \widehat M_k\|d_k\|\le \mu_k\le 2\widehat M_k\|d_k\|.
+                      \]
+                      \ENDIF
+                      \IF{
+                          \(\displaystyle
+                          \left\langle \nabla f(y_k+d_k),-d_k\right\rangle
+                          <
+                          \frac{\sqrt 6}{6}
+                          \frac{\|\nabla f(y_k+d_k)\|^{3/2}}{\sqrt{\widehat M_k}}
+                          \)
+                      }
+                      \label{line.adaptive-backtrack-test}
+                      \STATE \(\widehat M_k\leftarrow \gamma_b\widehat M_k\).
+                      \STATE \(n_f\leftarrow n_f+1\).
+                      \ELSE
+                      \STATE \(\operatorname{accept}\leftarrow \mathrm{True}\).
+                      \ENDIF
+                      \ENDWHILE
+                      \STATE \(M_{k+1}=\widehat M_k\).
+                      \STATE \(x_{k+1}=y_k+d_k\).
+                      \STATE \(\displaystyle s_{k+1}=s_k+\frac{(k+1)(k+2)}{2}\nabla f(x_{k+1})\).
+                      \label{line.adaptive-update-s}
+                      \STATE \(\displaystyle v_{k+1}
+                      = x_0-\sqrt{\frac{1}{24M_{k+1}\|s_{k+1}\|}}s_{k+1}\).
+                      \label{line.adaptive-update-v}
+                      \ENDFOR
+                  \end{algorithmic}
+              \end{algorithm}
+
+              The main difference from Algorithm 1 is that whenever the trial estimate \(\widehat M_k\) is increased, we recompute not only the parameters \((\sigma_k,r_k)\), but also the current estimate-sequence minimizer \(\widehat v_k\) and the extrapolation point \(y_k\). This is necessary because the cubic coefficient in the estimate sequence depends on the current value of the adaptive estimate.
+
+              More precisely, let
+              \[
+                  a_k=\frac{(k+1)(k+2)}{2},
+                  \qquad
+                  A_k=\frac{k(k+1)(k+2)}{6},
+                  \qquad
+                  A_{k+1}=A_k+a_k.
+              \]
+              The adaptive estimating sequence is defined as
+              \begin{equation}
+                  \label{eq.adaptive-phi0}
+                  \phi_0(x)=8M_0\|x-x_0\|^3,
+              \end{equation}
+              and
+              \begin{equation}
+                  \label{eq.adaptive-phi-update}
+                  \begin{aligned}
+                      \phi_{k+1}(x)
+                       & =
+                      \phi_k(x)
+                      +
+                      8(M_{k+1}-M_k)\|x-x_0\|^3 \\
+                       & \quad
+                      +
+                      a_k
+                      \left(
+                      f(x_{k+1})
+                      +
+                      \left\langle \nabla f(x_{k+1}),x-x_{k+1}\right\rangle
+                      \right).
+                  \end{aligned}
+              \end{equation}
+              Equivalently, during the backtracking loop, if the trial value is \(\widehat M_k\), we temporarily use
+              \begin{equation}
+                  \label{eq.adaptive-temp-phi}
+                  \widehat \phi_k(x)
+                  =
+                  \phi_k(x)
+                  +
+                  8(\widehat M_k-M_k)\|x-x_0\|^3.
+              \end{equation}
+              Then \(\widehat v_k\) in \Cref{alg.accelerated-utr-backtrack} is exactly
+              \[
+                  \widehat v_k=\arg\min_{x\in\mathbb R^n}\widehat \phi_k(x),
+              \]
+              and the accepted update \eqref{eq.adaptive-phi-update} is equivalent to
+              \[
+                  \phi_{k+1}(x)
+                  =
+                  \widehat \phi_k(x)
+                  +
+                  a_k
+                  \left(
+                  f(x_{k+1})
+                  +
+                  \left\langle \nabla f(x_{k+1}),x-x_{k+1}\right\rangle
+                  \right).
+              \]
+
+              We first show that the backtracking procedure terminates after a uniformly bounded number of failed trials.
+
+              \begin{lemma}
+                  \label{lem.adaptive-finite-backtracking}
+                  Suppose Assumption~2.1 holds. Let \(\widehat M>0\) be a trial estimate, and suppose that the step \(d\) and the regularization parameter \(\mu\) satisfy
+                  \begin{equation}
+                      \label{eq.adaptive-ratio}
+                      (\nabla^2 f(y)+\mu I)d=-\nabla f(y),
+                      \qquad
+                      \widehat M\|d\|\le \mu\le 2\widehat M\|d\|.
+                  \end{equation}
+                  If \(\widehat M\ge M\), then
+                  \begin{equation}
+                      \label{eq.adaptive-bt-pass}
+                      \left\langle \nabla f(y+d),-d\right\rangle
+                      \ge
+                      \frac{\sqrt 6}{6}
+                      \frac{\|\nabla f(y+d)\|^{3/2}}{\sqrt{\widehat M}}.
+                  \end{equation}
+                  Consequently, the total number \(n_f\) of failed backtracking trials in \Cref{alg.accelerated-utr-backtrack} satisfies
+                  \begin{equation}
+                      \label{eq.nf-bound}
+                      n_f
+                      \le
+                      \left\lceil
+                      \log_{\gamma_b}\frac{M}{M_0}
+                      \right\rceil_+,
+                      \qquad
+                      \left\lceil t\right\rceil_+:=\max\{\lceil t\rceil,0\}.
+                  \end{equation}
+                  Moreover,
+                  \begin{equation}
+                      \label{eq.Mk-upper}
+                      M_k\le M_{\max}:=\max\{M_0,\gamma_b M\},
+                      \qquad
+                      \forall k\ge0.
+                  \end{equation}
+              \end{lemma}
+
+              \begin{proof}
+                  Since \(\widehat M\ge M\) and \(\mu\ge \widehat M\|d\|\), we have
+                  \[
+                      \mu\ge M\|d\|.
+                  \]
+                  Therefore, by Lemma 2.3,
+                  \begin{equation}
+                      \label{eq.bt-proof-1}
+                      \left\langle \nabla f(y+d),-d\right\rangle
+                      \ge
+                      \frac{\|\nabla f(y+d)\|^2}{2\mu}
+                      +
+                      \frac{3}{8}\mu\|d\|^2.
+                  \end{equation}
+                  Let
+                  \[
+                      \nabla f(x+d):=\nabla f(y+d),
+                      \qquad
+                      p:=\|\nabla f(x+d)\|.
+                  \]
+                  From \(\mu\le 2\widehat M\|d\|\), we obtain
+                  \[
+                      \|d\|\ge \frac{\mu}{2\widehat M}.
+                  \]
+                  Substituting this into \eqref{eq.bt-proof-1} gives
+                  \[
+                      \left\langle \nabla f(x+d),-d\right\rangle
+                      \ge
+                      \frac{p^2}{2\mu}
+                      +
+                      \frac{3}{8}\mu\cdot \frac{\mu^2}{4\widehat M^2}
+                      =
+                      \frac{p^2}{2\mu}
+                      +
+                      \frac{3\mu^3}{32\widehat M^2}.
+                  \]
+                  If \(p=0\), then \eqref{eq.adaptive-bt-pass} is immediate. If \(p>0\), minimizing the right-hand side over \(\mu>0\) yields
+                  \[
+                      \frac{p^2}{2\mu}
+                      +
+                      \frac{3\mu^3}{32\widehat M^2}
+                      \ge
+                      \frac{1}{\sqrt 3}
+                      \frac{p^{3/2}}{\sqrt{\widehat M}}.
+                  \]
+                  Since
+                  \[
+                      \frac{1}{\sqrt 3}
+                      >
+                      \frac{\sqrt 6}{6},
+                  \]
+                  we obtain
+                  \[
+                      \left\langle \nabla f(y+d),-d\right\rangle
+                      \ge
+                      \frac{\sqrt 6}{6}
+                      \frac{\|\nabla f(y+d)\|^{3/2}}{\sqrt{\widehat M}}.
+                  \]
+                  Thus the backtracking test must pass whenever the trial estimate satisfies \(\widehat M\ge M\).
+
+                  Since the trial estimate is multiplied by \(\gamma_b>1\) after each failed trial, the number of failed trials before reaching a value no smaller than \(M\) is at most
+                  \[
+                      \left\lceil
+                      \log_{\gamma_b}\frac{M}{M_0}
+                      \right\rceil_+.
+                  \]
+                  This proves \eqref{eq.nf-bound}. The bound \eqref{eq.Mk-upper} follows because the first accepted trial value after crossing \(M\) can overshoot \(M\) by at most a factor \(\gamma_b\).
+              \end{proof}
+
+              Next we show that the estimate-sequence argument is preserved under this adaptive update.
+
+              \begin{lemma}
+                  \label{lem.adaptive-estimate-sequence}
+                  Suppose \(f\) is convex and Assumption~2.1 holds. Let \(\{\phi_k\}_{k\ge0}\) be defined by \eqref{eq.adaptive-phi0} and \eqref{eq.adaptive-phi-update}. Suppose that every accepted step in \Cref{alg.accelerated-utr-backtrack} satisfies
+                  \begin{equation}
+                      \label{eq.accepted-bt-condition}
+                      \left\langle \nabla f(x_{k+1}),y_k-x_{k+1}\right\rangle
+                      \ge
+                      \frac{\sqrt 6}{6}
+                      \frac{\|\nabla f(x_{k+1})\|^{3/2}}{\sqrt{M_{k+1}}}.
+                  \end{equation}
+                  Then, for all \(k\ge0\),
+                  \begin{equation}
+                      \label{eq.adaptive-estimating-sequence-relation}
+                      A_k f(x_k)
+                      \le
+                      \phi_k^*
+                      \le
+                      \phi_k(x)
+                      \le
+                      A_k f(x)+8M_k\|x-x_0\|^3,
+                      \qquad
+                      \forall x\in\mathbb R^n.
+                  \end{equation}
+                  In particular, since \(M_k=\gamma_b^{n_f(k)}M_0\), where \(n_f(k)\) is the number of failed backtracking trials before the beginning of iteration \(k\), we also have
+                  \begin{equation}
+                      \label{eq.adaptive-estimating-sequence-relation-nf}
+                      \phi_k(x)
+                      \le
+                      A_k f(x)+8\gamma_b^{n_f(k)}M_0\|x-x_0\|^3,
+                      \qquad
+                      \forall x\in\mathbb R^n.
+                  \end{equation}
+              \end{lemma}
+
+              \begin{proof}
+                  We prove \eqref{eq.adaptive-estimating-sequence-relation} by induction.
+
+                  For \(k=0\), we have \(A_0=0\) and
+                  \[
+                      \phi_0(x)=8M_0\|x-x_0\|^3.
+                  \]
+                  Hence \(\phi_0^*=0=A_0f(x_0)\), and \eqref{eq.adaptive-estimating-sequence-relation} holds.
+
+                  Suppose that \eqref{eq.adaptive-estimating-sequence-relation} holds for some \(k\ge0\). Let \(M_{k+1}\) be the accepted estimate in the \(k\)-th iteration, and define
+                  \[
+                      \widehat \phi_k(x)
+                      =
+                      \phi_k(x)+8(M_{k+1}-M_k)\|x-x_0\|^3.
+                  \]
+                  By the induction hypothesis,
+                  \begin{equation}
+                      \label{eq.adaptive-upper-hatphi}
+                      \widehat \phi_k(x)
+                      \le
+                      A_k f(x)+8M_{k+1}\|x-x_0\|^3,
+                      \qquad
+                      \forall x\in\mathbb R^n.
+                  \end{equation}
+                  Moreover, since \(M_{k+1}\ge M_k\),
+                  \begin{equation}
+                      \label{eq.adaptive-hatphi-star}
+                      \widehat \phi_k^*
+                      =
+                      \min_x \widehat \phi_k(x)
+                      \ge
+                      \min_x \phi_k(x)
+                      =
+                      \phi_k^*
+                      \ge
+                      A_k f(x_k).
+                  \end{equation}
+
+                  We first verify the upper estimate-sequence relation. By \eqref{eq.adaptive-phi-update},
+                  \[
+                      \phi_{k+1}(x)
+                      =
+                      \widehat \phi_k(x)
+                      +
+                      a_k
+                      \left(
+                      f(x_{k+1})
+                      +
+                      \left\langle \nabla f(x_{k+1}),x-x_{k+1}\right\rangle
+                      \right).
+                  \]
+                  Combining this with \eqref{eq.adaptive-upper-hatphi} and the convexity of \(f\), we have
+                  \begin{align*}
+                      \phi_{k+1}(x)
+                       & \le
+                      A_k f(x)+8M_{k+1}\|x-x_0\|^3          \\
+                       & \quad
+                      +
+                      a_k
+                      \left(
+                      f(x_{k+1})
+                      +
+                      \left\langle \nabla f(x_{k+1}),x-x_{k+1}\right\rangle
+                      \right)                               \\
+                       & \le
+                      A_k f(x)+8M_{k+1}\|x-x_0\|^3+a_k f(x) \\
+                       & =
+                      A_{k+1}f(x)+8M_{k+1}\|x-x_0\|^3.
+                  \end{align*}
+                  Thus the rightmost inequality in \eqref{eq.adaptive-estimating-sequence-relation} holds for \(k+1\).
+
+                  We now prove the lower estimate-sequence relation. Since \(\widehat \phi_k\) has the form
+                  \[
+                      \widehat \phi_k(x)
+                      =
+                      c_k+\langle s_k,x\rangle+8M_{k+1}\|x-x_0\|^3
+                  \]
+                  for some scalar \(c_k\), its minimizer is exactly
+                  \[
+                      \widehat v_k
+                      =
+                      \arg\min_x \widehat \phi_k(x)
+                      =
+                      x_0-\sqrt{\frac{1}{24M_{k+1}\|s_k\|}}s_k
+                  \]
+                  with the convention \(\widehat v_k=x_0\) if \(s_k=0\). Moreover, using the same cubic growth property as in equation~(A.3), we have
+                  \begin{equation}
+                      \label{eq.adaptive-cubic-growth}
+                      \widehat \phi_k(x)
+                      \ge
+                      \widehat \phi_k^*
+                      +
+                      4M_{k+1}\|x-\widehat v_k\|^3,
+                      \qquad
+                      \forall x\in\mathbb R^n.
+                  \end{equation}
+                  Combining \eqref{eq.adaptive-hatphi-star} and \eqref{eq.adaptive-cubic-growth}, we obtain
+                  \begin{equation}
+                      \label{eq.adaptive-lower-hatphi}
+                      \widehat \phi_k(x)
+                      \ge
+                      A_k f(x_k)+4M_{k+1}\|x-\widehat v_k\|^3.
+                  \end{equation}
+
+                  Let
+                  \[
+                      g_{k+1}:=\nabla f(x_{k+1}).
+                  \]
+                  Then
+                  \begin{align*}
+                      \phi_{k+1}^*
+                       & =
+                      \min_{x\in\mathbb R^n}
+                      \left\{
+                      \widehat \phi_k(x)
+                      +
+                      a_k
+                      \left(
+                      f(x_{k+1})
+                      +
+                      \langle g_{k+1},x-x_{k+1}\rangle
+                      \right)
+                      \right\}                     \\
+                       & \ge
+                      \min_{x\in\mathbb R^n}
+                      \Bigl\{
+                      A_k f(x_k)
+                      +
+                      4M_{k+1}\|x-\widehat v_k\|^3 \\
+                       & \qquad\qquad\qquad
+                      +
+                      a_k
+                      \left(
+                      f(x_{k+1})
+                      +
+                      \langle g_{k+1},x-x_{k+1}\rangle
+                      \right)
+                      \Bigr\}.
+                  \end{align*}
+                  By convexity of \(f\),
+                  \[
+                      f(x_k)
+                      \ge
+                      f(x_{k+1})+\langle g_{k+1},x_k-x_{k+1}\rangle.
+                  \]
+                  Therefore,
+                  \begin{align*}
+                      \phi_{k+1}^*
+                       & \ge
+                      \min_{x\in\mathbb R^n}
+                      \Bigl\{
+                      A_k f(x_{k+1})
+                      +
+                      A_k\langle g_{k+1},x_k-x_{k+1}\rangle \\
+                       & \qquad
+                      +
+                      4M_{k+1}\|x-\widehat v_k\|^3          \\
+                       & \qquad
+                      +
+                      a_k f(x_{k+1})
+                      +
+                      a_k\langle g_{k+1},x-x_{k+1}\rangle
+                      \Bigr\}                               \\
+                       & =
+                      A_{k+1}f(x_{k+1})
+                      +
+                      \left\langle g_{k+1},
+                      A_kx_k+a_k\widehat v_k-A_{k+1}x_{k+1}
+                      \right\rangle                         \\
+                       & \qquad
+                      +
+                      \min_{z\in\mathbb R^n}
+                      \left\{
+                      4M_{k+1}\|z\|^3
+                      +
+                      a_k\langle g_{k+1},z\rangle
+                      \right\},
+                  \end{align*}
+                  where \(z=x-\widehat v_k\). The last minimum is
+                  \[
+                      \min_{z\in\mathbb R^n}
+                      \left\{
+                      4M_{k+1}\|z\|^3
+                      +
+                      a_k\langle g_{k+1},z\rangle
+                      \right\}
+                      =
+                      -
+                      \frac{a_k^{3/2}}{3\sqrt{3M_{k+1}}}
+                      \|g_{k+1}\|^{3/2}.
+                  \]
+                  Hence
+                  \begin{align*}
+                      \phi_{k+1}^*
+                       & \ge
+                      A_{k+1}f(x_{k+1})
+                      +
+                      A_{k+1}
+                      \left\langle
+                      g_{k+1},
+                      \frac{A_k}{A_{k+1}}x_k
+                      +
+                      \frac{a_k}{A_{k+1}}\widehat v_k
+                      -
+                      x_{k+1}
+                      \right\rangle \\
+                       & \qquad
+                      -
+                      \frac{a_k^{3/2}}{3\sqrt{3M_{k+1}}}
+                      \|g_{k+1}\|^{3/2}.
+                  \end{align*}
+                  By the definition of \(y_k\) in \Cref{alg.accelerated-utr-backtrack},
+                  \[
+                      y_k
+                      =
+                      \frac{A_k}{A_{k+1}}x_k
+                      +
+                      \frac{a_k}{A_{k+1}}\widehat v_k.
+                  \]
+                  Thus
+                  \begin{align*}
+                      \phi_{k+1}^*
+                       & \ge
+                      A_{k+1}f(x_{k+1})
+                      +
+                      A_{k+1}
+                      \left(
+                      \langle g_{k+1},y_k-x_{k+1}\rangle
+                      -
+                      \frac{a_k^{3/2}}{3\sqrt{3}A_{k+1}}
+                      \frac{\|g_{k+1}\|^{3/2}}{\sqrt{M_{k+1}}}
+                      \right).
+                  \end{align*}
+                  Using
+                  \[
+                      \frac{a_k^{3/2}}{3\sqrt{3}A_{k+1}}
+                      =
+                      \frac{\sqrt{(k+1)(k+2)}}{\sqrt 6(k+3)}
+                      \le
+                      \frac{1}{\sqrt 6}
+                      =
+                      \frac{\sqrt 6}{6},
+                  \]
+                  we get
+                  \begin{align*}
+                      \phi_{k+1}^*
+                       & \ge
+                      A_{k+1}f(x_{k+1})
+                      +
+                      A_{k+1}
+                      \left(
+                      \langle g_{k+1},y_k-x_{k+1}\rangle
+                      -
+                      \frac{\sqrt 6}{6}
+                      \frac{\|g_{k+1}\|^{3/2}}{\sqrt{M_{k+1}}}
+                      \right).
+                  \end{align*}
+                  Finally, by the accepted backtracking condition \eqref{eq.accepted-bt-condition}, the term in parentheses is nonnegative. Therefore,
+                  \[
+                      \phi_{k+1}^*
+                      \ge
+                      A_{k+1}f(x_{k+1}).
+                  \]
+                  This completes the induction proof of \eqref{eq.adaptive-estimating-sequence-relation}. The bound \eqref{eq.adaptive-estimating-sequence-relation-nf} follows from the identity \(M_k=\gamma_b^{n_f(k)}M_0\).
+              \end{proof}
+
+              We now explain why the complexity is unchanged. Taking \(x=x^*\) in \eqref{eq.adaptive-estimating-sequence-relation}, we obtain
+              \[
+                  A_k f(x_k)
+                  \le
+                  \phi_k^*
+                  \le
+                  \phi_k(x^*)
+                  \le
+                  A_k f^*
+                  +
+                  8M_k\|x^*-x_0\|^3.
+              \]
+              Therefore,
+              \[
+                  f(x_k)-f^*
+                  \le
+                  \frac{8M_k\|x^*-x_0\|^3}{A_k}.
+              \]
+              By \Cref{lem.adaptive-finite-backtracking}, \(M_k\le M_{\max}:=\max\{M_0,\gamma_b M\}\). Hence
+              \[
+                  f(x_k)-f^*
+                  \le
+                  \frac{8M_{\max}\|x^*-x_0\|^3}{A_k}\leq \frac{8M_{\max}\|x^*-x_0\|^3}{k^3}.
+              \]
+              Thus an \(\epsilon_f\)-function-value solution is obtained after
+              \[
+                  k
+                  =
+                  O\left(
+                  \left(
+                      \frac{M_{\max}\|x^*-x_0\|^3}{\epsilon_f}
+                      \right)^{1/3}
+                  \right)
+                  =
+                  O(\epsilon_f^{-1/3})
+              \]
+              iterations.
+          }
 \end{itemize}
 
 \subsection{Typos}
@@ -53,25 +1115,25 @@
 \begin{itemize}
     \item \comm{Page 4, line 43: There is an extra space before the period in ``can be designed .''.}
 
-    \resp{Thank you. We have removed the extra space.}
+          \resp{Thank you. We have removed the extra space.}
 
     \item \comm{Page 4, line 50: The phrase ``hold, holds'' appears to be a typo. Moreover, the expression ``for some $\mu \ge M\|d\|$'' seems to modify both Assumption 2.1 and (2.5), while Assumption 2.1 is independent of $\mu$. It may be clearer to write: ``Suppose that Assumption 2.1 holds and that (2.5) holds for some $\mu \ge M\|d\|$.''}
 
-    \resp{Thank you. We have revised the sentence as suggested.}
+          \resp{Thank you. We have revised the sentence as suggested.}
 
     \item \comm{Page 8, line 29: $\sqrt{\frac{1}{2M}}\|\nabla f(y_k)\|$ should be $\sqrt{\frac{1}{2M}}\|\nabla f(y_k)\|^{1/2}$.}
 
-    \resp{Thank you. We have corrected this expression.}
+          \resp{Thank you. We have corrected this expression.}
 
     \item \comm{Page 8, line 31: $\sqrt{2M\|\nabla f(y_k)\|}$ should be $\sqrt{2M}\|\nabla f(y_k)\|^{1/2}$.}
 
-    \resp{Thank you. We have corrected this expression.}
+          \resp{Thank you. We have corrected this expression.}
 
     \item \comm{Page 12, lines 19--21: $\nabla f$ should be $\nabla^2 f$. There is also a missing period in equation (3.22).}
 
-    \resp{Thank you. We have corrected the notation and added the missing period.}
+          \resp{Thank you. We have corrected the notation and added the missing period.}
 
     \item \comm{Page 20, line 22: $-\frac{M}{4}\|d\|^4$ should be $-\frac{M^2}{4}\|d\|^4$.}
 
-    \resp{Thank you. We have corrected this typo.}
+          \resp{Thank you. We have corrected this typo.}
 \end{itemize}
