@@ -481,15 +481,18 @@ We show that this correspondence is one-to-one.
 \end{lemma}
 \begin{proof}
     The endpoints correspondence between $r_- \to \mu_+$ and $r_+ \to \mu_-$ follows from line~\ref{line.left bracketing point} of \Cref{alg.local detection} and \eqref{eq.value mu}.
-    For any $r$, the existence of such $\mu$ follows from $(d,\mu)=\trp(y,0,r)$ and $\eqref{eq.optcond firstorder}$. For uniqueness, noting $\nabla^2 f(y) + \mu I \succ 0$ for any $\mu \in [\mu_-, \mu_+]$,
-    we can apply the eigenvalue decomposition
-    $\nabla^2 f(y) = V \Lambda V^\top$ with $\Lambda = \mathrm{diag}(\zeta_1,\dots,\zeta_n)$ and $V$ orthogonal.
+    For any $r$, the existence of such $\mu$ follows from $(d,\mu)=\trp(y,0,r)$ and $\eqref{eq.optcond firstorder}$. For uniqueness, let $H:=\nabla^2 f(y)\succeq0$ and $g:=\nabla f(y)$. Since $H+\mu I\succ0$ for every $\mu\in[\mu_-,\mu_+]$, write
+    \[
+        H=Q\operatorname{diag}(h_1,\ldots,h_n)Q^\top,
+        \qquad Q=[q_1,\ldots,q_n],
+    \]
+    where $Q$ is orthogonal and $h_i\geq0$.
     Then
     \[
-        r = \bigl\|(\nabla^2 f(y) + \mu I)^{-1}\nabla f(y)\bigr\|
-        = \sqrt{\sum_{i=1}^n \frac{\beta_i^2}{(\zeta_i + \mu)^2}},
+        r = \bigl\|(H + \mu I)^{-1}g\bigr\|
+        = \sqrt{\sum_{i=1}^n \frac{\beta_i^2}{(h_i + \mu)^2}},
     \]
-    where $\beta_i = \nabla f(y)^\top v_i$. Since $\zeta_i \ge 0$ and $\mu > 0$, every term in the summation is continuous and strictly decreasing in $\mu$, and thus $r_y(\mu)$ is continuous and strictly decreasing on $[\mu_-, \mu_+]$.
+    where $\beta_i:=q_i^\top g$. Since $h_i\geq0$ and $\mu>0$, $r_y(\mu)$ is continuous and strictly decreasing on $[\mu_-,\mu_+]$.
     Consequently, for any $r \in [r_-, r_+]$, there exists a unique $\mu \in [\mu_-, \mu_+]$ such that
     \[
         r = r_y(\mu) = \bigl\|(\nabla^2 f(y) + \mu I)^{-1}\nabla f(y)\bigr\|.
@@ -1172,33 +1175,37 @@ We call a differentiable function $d(x)$ on $\mathbb{R}^n$ uniformly convex \cit
 To prove \Cref{lem.bound target interval}, we first introduce the following lemma, which discusses the property of the auxiliary function $g_y(\mu)$.
 \begin{lemma}
     \label{lem.property g}
-    For any $y\in \mathbb{R}^n$, $g_y(\mu)$ is continuously differentiable and monotonically increasing for $\mu \in \left(0,+\infty\right)$ and
+    For any $y\in \mathbb{R}^n$, let $H:=\nabla^2 f(y)\succeq0$ and $g:=\nabla f(y)$, and write
+    \[
+        H=Q\operatorname{diag}(h_1,\ldots,h_n)Q^\top,
+        \qquad Q=[q_1,\ldots,q_n],
+    \]
+    where $Q$ is orthogonal. Define $\beta_i:=q_i^\top g$. Then $g_y(\mu)$ is continuously differentiable and monotonically increasing for $\mu \in \left(0,+\infty\right)$ and
     \begin{equation}
         \label{eq.derivative}
-        g_y'(\mu) = \frac{1}{\|\left (\nabla ^2 f(y)+\mu I \right)^{-1}\nabla f(y)\|}+\frac{\mu}{\| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{ (\zeta_i+\mu )^3},
+        g_y'(\mu) = \frac{1}{\|\left(H+\mu I\right)^{-1}g\|}+\frac{\mu}{\|\left(H+\mu I\right)^{-1}g\|^3}\sum_{i=1}^n\frac{\beta_i^2}{(h_i+\mu)^3},
     \end{equation}
     and it is bounded both below and above
     \begin{equation}
         \label{eq.derivative bound}
-        0< g_y'(\mu) \leq \frac{2}{\| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|}.
+        0< g_y'(\mu) \leq \frac{2}{\|\left(H+\mu I\right)^{-1}g\|}.
     \end{equation}
-    Where $\zeta_i$ is the $i$-th eigenvalue of $\nabla ^2 f(y)$, $\beta_i = \nabla f(y)^T v_i$, $v_i$ denotes the eigenvector corresponding to $\zeta_i$.
 \end{lemma}
 \begin{proof}
-    Since $\nabla^2 f(y)+\mu I \succ 0$ for $\mu>0$, we can apply eigen decomposition to it, then
+    Using the spectral decomposition of $H$ above, for $\mu>0$ we have
     \begin{equation*}
-        \left \| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\right\|=\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\zeta_i+\mu\right )^2}}, \ g_y(\mu) = \frac{\mu}{\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\zeta_i+\mu\right )^2}}}.
+        \left\|(H+\mu I)^{-1}g\right\|=\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{(h_i+\mu)^2}}, \qquad g_y(\mu) = \frac{\mu}{\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{(h_i+\mu)^2}}}.
     \end{equation*}
-    Obviously $g_y(\mu)$ is increasing in $\mu \in \left (0,+\infty\right ]$. Also, through some basic calculations, we have
+    Clearly, $g_y(\mu)$ is increasing on $\left(0,+\infty\right)$. Direct differentiation gives
     \begin{equation*}
         \begin{aligned}
-            g_y'(\mu) & = \frac{1}{\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{\left (\zeta_i+\mu\right )^2}}}+\mu \frac{1}{\left ( \sum_{i=1}^n \frac{\beta_i^2}{\left (\zeta_i+\mu\right )^2}\right )^{3/2}}\sum_{i=1}^n\frac{\beta_i^2}{\left (\zeta_i+\mu\right )^3} \\
-                      & = \frac{1}{\| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|}+\frac{\mu}{\| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\left (\zeta_i+\mu\right )^3}                                                            \\
-                      & \leq_{(a)} \frac{1}{ \| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|}+\frac{\mu}{\| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\mu\left (\zeta_i+\mu\right )^2}                                               \\
-                      & =  \frac{2}{\| (\nabla ^2 f(y)+\mu I )^{-1}\nabla f(y)\|}.
+            g_y'(\mu) & = \frac{1}{\sqrt{\sum_{i=1}^n \frac{\beta_i^2}{(h_i+\mu)^2}}}+\mu \frac{1}{\left(\sum_{i=1}^n \frac{\beta_i^2}{(h_i+\mu)^2}\right)^{3/2}}\sum_{i=1}^n\frac{\beta_i^2}{(h_i+\mu)^3} \\
+                      & = \frac{1}{\|(H+\mu I)^{-1}g\|}+\frac{\mu}{\|(H+\mu I)^{-1}g\|^3}\sum_{i=1}^n\frac{\beta_i^2}{(h_i+\mu)^3} \\
+                      & \leq_{(a)} \frac{1}{\|(H+\mu I)^{-1}g\|}+\frac{\mu}{\|(H+\mu I)^{-1}g\|^3}\sum_{i=1}^n\frac{\beta_i^2}{\mu(h_i+\mu)^2} \\
+                      & = \frac{2}{\|(H+\mu I)^{-1}g\|}.
         \end{aligned}
     \end{equation*}
-    $(a)$ is because of $\zeta_i \geq 0$ for $i=1,\ldots,n$.
+    $(a)$ follows from $h_i\geq0$ for $i=1,\ldots,n$.
 \end{proof}
 
 Now we are ready to formally prove \Cref{lem.bound target interval}.
@@ -1217,18 +1224,9 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
 \end{proof}
 \subsection*{Proof to \Cref{lem.bound initial interval}}
 \begin{proof}
-    Note
-    \[
-        r_y(\mu)
-        =
-        \|(\nabla^2 f(y)+\mu I)^{-1}\nabla f(y)\|.
-    \]
+    Recall that \(r_y(\mu)=\|(\nabla^2 f(y)+\mu I)^{-1}\nabla f(y)\|\).
     Let the target interval for \(r\) be \([r_l,r_u]\), where
-    \[
-        r_l=r_y(\mu_u),
-        \qquad
-        r_u=r_y(\mu_l).
-    \]
+    \(r_l=r_y(\mu_u)\) and \(r_u=r_y(\mu_l)\).
     Since \(r_y(\mu)\) is decreasing in \(\mu\), we have \(r_l<r_u\). The
     bisection procedure terminates whenever the current radius \(r\) lies in
     \([r_l,r_u]\). Hence the number of bisection steps is bounded by
@@ -1243,26 +1241,17 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
         \right).
     \end{equation}
 
-    We first lower bound the length \(r_u-r_l\). Let
+    We first lower bound the length \(r_u-r_l\). Let \(H:=\nabla^2 f(y)\),
+    \(g:=\nabla f(y)\), and write
     \[
-        \nabla^2 f(y)=V\operatorname{diag}(\zeta_1,\ldots,\zeta_n)V^\top,
+        H=Q\operatorname{diag}(h_1,\ldots,h_n)Q^\top,
         \qquad
-        \beta_i=\nabla f(y)^\top v_i.
+        Q=[q_1,\ldots,q_n],
     \]
-    By convexity and Assumption~\ref{assm.bounded hessian}, we have
-    \[
-        0\le \zeta_i\le \kappa_H,
-        \qquad i=1,\ldots,n.
-    \]
-    For \(\mu>0\),
-    \[
-        r_y(\mu)
-        =
-        \left(
-        \sum_{i=1}^n
-        \frac{\beta_i^2}{(\zeta_i+\mu)^2}
-        \right)^{1/2}.
-    \]
+    where $Q$ is orthogonal, and set \(\beta_i:=q_i^\top g\). By convexity and
+    Assumption~\ref{assm.bounded hessian}, \(0\le h_i\le \kappa_H\) for
+    \(i=1,\ldots,n\). For \(\mu>0\),
+    \(r_y(\mu)=\left(\sum_{i=1}^n\beta_i^2/(h_i+\mu)^2\right)^{1/2}\).
     Therefore,
     \begin{equation}
         \label{eq.derivative-ry}
@@ -1271,7 +1260,7 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
         -
         \frac{
             \sum_{i=1}^n
-            \frac{\beta_i^2}{(\zeta_i+\mu)^3}
+            \frac{\beta_i^2}{(h_i+\mu)^3}
         }{
             r_y(\mu)
         }.
@@ -1287,68 +1276,43 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
         =
         \frac{
             \sum_{i=1}^n
-            \frac{\beta_i^2}{(\zeta_i+\xi)^3}
+            \frac{\beta_i^2}{(h_i+\xi)^3}
         }{
             r_y(\xi)
         }
         (\mu_u-\mu_l).
         \label{eq.radius-interval-mvt}
     \end{equation}
-    Since \(\xi\le \mu_u\) and \(\zeta_i\le \kappa_H\), we have
-    \[
-        \frac{1}{\zeta_i+\xi}
-        \ge
-        \frac{1}{\kappa_H+\mu_u}.
-    \]
-    Thus
+    Since \(\xi\le \mu_u\) and \(h_i\le \kappa_H\), we have
+    \(1/(h_i+\xi)\ge 1/(\kappa_H+\mu_u)\). Hence,
     \begin{equation}
         \sum_{i=1}^n
-        \frac{\beta_i^2}{(\zeta_i+\xi)^3}
+        \frac{\beta_i^2}{(h_i+\xi)^3}
         =
         \sum_{i=1}^n
-        \frac{\beta_i^2}{(\zeta_i+\xi)^2}
-        \frac{1}{\zeta_i+\xi}
+        \frac{\beta_i^2}{(h_i+\xi)^2}
+        \frac{1}{h_i+\xi}
         \ge
         \frac{1}{\kappa_H+\mu_u}
         \sum_{i=1}^n
-        \frac{\beta_i^2}{(\zeta_i+\xi)^2}
+        \frac{\beta_i^2}{(h_i+\xi)^2}
         =
         \frac{r_y(\xi)^2}{\kappa_H+\mu_u}.
         \label{eq.s3-lower-by-s2}
     \end{equation}
     Combining \eqref{eq.radius-interval-mvt} and \eqref{eq.s3-lower-by-s2}, we obtain
-    \begin{equation}
-        \label{eq.radius-interval-lower-1}
-        r_u-r_l
-        \ge
-        \frac{r_y(\xi)}{\kappa_H+\mu_u}
-        (\mu_u-\mu_l).
-    \end{equation}
+    \(r_u-r_l\ge r_y(\xi)(\mu_u-\mu_l)/(\kappa_H+\mu_u)\).
     Since \(r_y(\mu)\) is decreasing and \(\xi\le \mu_u\), we have
-    \[
-        r_y(\xi)\ge r_y(\mu_u).
-    \]
-    Moreover, by \Cref{lem.bound target interval},
-    \[
-        \mu_u-\mu_l
-        \ge
-        \frac{M r_y(\mu_u)}{2}.
-    \]
-    Therefore,
+    \(r_y(\xi)\ge r_y(\mu_u)\). Moreover, \Cref{lem.bound target interval} gives
+    \(\mu_u-\mu_l\ge M r_y(\mu_u)/2\). Therefore,
     \begin{equation}
         \label{eq.radius-interval-lower-2}
         r_u-r_l
         \ge
         \frac{M r_y(\mu_u)^2}{2(\kappa_H+\mu_u)}.
     \end{equation}
-    Finally, since \(0\preceq \nabla^2 f(y)\preceq \kappa_H I\), we have
-    \[
-        r_y(\mu_u)
-        =
-        \|(\nabla^2 f(y)+\mu_u I)^{-1}\nabla f(y)\|
-        \ge
-        \frac{\|\nabla f(y)\|}{\kappa_H+\mu_u}.
-    \]
+    Finally, since \(0\preceq H\preceq \kappa_H I\), we have
+    \(r_y(\mu_u)=\|(H+\mu_u I)^{-1}g\|\ge \|g\|/(\kappa_H+\mu_u)\).
     Substituting this into \eqref{eq.radius-interval-lower-2} gives
     \begin{equation}
         \label{eq.radius-interval-lower-final}
@@ -1376,17 +1340,8 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
     \end{equation}
     By the definition of \(r_+\) in line~\ref{line.left bracketing point} of
     \Cref{alg.local detection},
-    \[
-        r_+
-        =
-        \|(\nabla^2 f(y)+M\|d_+\|I)^{-1}\nabla f(y)\|.
-    \]
-    Since \(\nabla^2 f(y)\succeq0\), we have
-    \[
-        r_+
-        \le
-        \frac{\|\nabla f(y)\|}{M\|d_+\|}.
-    \]
+    \(r_+=\|(H+M\|d_+\|I)^{-1}g\|\). Since \(H\succeq0\), it follows that
+    \(r_+\le \|g\|/(M\|d_+\|)\).
     Together with \(\mu_u\le\mu_+\), this yields
     \begin{equation}
         \label{eq.rb-complexity-2}
@@ -1410,30 +1365,9 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
     \end{equation}
 
     When the bisection procedure is invoked, line~\ref{line.check right bracket point}
-    of \Cref{alg.local detection} implies
-    \(
-    \frac{\mu_+}{\|d_+\|}>2M.
-    \)
-    Since
-    \(
-    \mu_+
-    =
-    \frac{\sqrt{2M}}{2}\|\nabla f(y)\|^{1/2},
-    \)
-    we have
-    \(
-    \|\nabla f(y)\|
-    =
-    \frac{2\mu_+^2}{M}
-    >
-    8M\|d_+\|^2.
-    \)
-    Therefore,
-    \[
-        M^2\|d_+\|\|\nabla f(y)\|
-        >
-        8M^3\|d_+\|^3.
-    \]
+    of \Cref{alg.local detection} gives \(\mu_+/\|d_+\|>2M\). By the definition
+    of \(\mu_+\), \(\|g\|=2\mu_+^2/M\), so \(\|g\|>8M\|d_+\|^2\).
+    Consequently, \(M^2\|d_+\|\|g\|>8M^3\|d_+\|^3\).
     Hence \eqref{eq.rb-complexity-2} further implies
     \begin{equation}
         \label{eq.rb-complexity-3}
@@ -1458,16 +1392,8 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
 
     It remains to use the fact that the early-termination test in
     \Cref{alg.local detection} has not been satisfied before entering R\&B.
-    Thus
-    \[
-        \|d_+\|
-        >
-        \min\left\{
-        \frac{\epsilon_g}{2\kappa_H},
-        \sqrt{\frac{\epsilon_g}{M}}
-        \right\}.
-    \]
-    Consequently,
+    Thus \(\|d_+\|>\min\{\epsilon_g/(2\kappa_H),
+    \sqrt{\epsilon_g/M}\}\). Consequently,
     \[
         \frac{1}{\|d_+\|^3}
         \le
@@ -1505,17 +1431,11 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
 \end{proof}
 \subsection*{Proof to \Cref{lem.enter region}}
 \begin{proof}
-    Let $R=\|x_0-x^*\|$ and define
-    \[
-        \rho:=\min\left\{\frac{2\nu}{3M},\frac{2\nu^2}{9\kappa_HM}\right\}.
-    \]
+    Let $R=\|x_0-x^*\|$ and
+    \(\rho:=\min\{2\nu/(3M),2\nu^2/(9\kappa_HM)\}\).
     It suffices to show $\|y_k-x^*\|<\rho$, since Assumption~\ref{assm.bounded hessian} and
     $\nabla f(x^*)=0$ imply
-    \[
-        \|\nabla f(y_k)\|
-        =\|\nabla f(y_k)-\nabla f(x^*)\|
-        \leq \kappa_H\|y_k-x^*\|.
-    \]
+    \(\|\nabla f(y_k)\|\leq \kappa_H\|y_k-x^*\|\).
 
     We first derive two elementary bounds. From the estimating-sequence relation with
     $x=x^*$, we have, for every $k\geq1$,
@@ -1547,15 +1467,10 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
         = \frac{2\nu^3}{27M^2}.
     \]
     By convexity, the same lower bound holds for every
-    $x$ with $\|x-x^*\|\geq 2\nu/(3M)$. Hence, if
-    \[
-        f(x_k)-f^*<\frac{2\nu^3}{27M^2},
-    \]
-    then $x_k\in\mathcal{LQ}_p$. In particular, the preceding global bound shows that
-    this holds whenever
-    \[
-        k\geq \left(648\right)^{1/3}\frac{MR}{\nu}.
-    \]
+    $x$ with $\|x-x^*\|\geq 2\nu/(3M)$. Hence,
+    \(f(x_k)-f^*<2\nu^3/(27M^2)\) implies $x_k\in\mathcal{LQ}_p$.
+    In particular, the preceding global bound shows that this holds whenever
+    \(k\geq 648^{1/3}MR/\nu\).
 
     For such $k$, \eqref{eq.psd xk} holds along the segment joining $x_k$ and $x^*$,
     and hence
@@ -1564,17 +1479,10 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
         \leq f(x_k)-f^*
         \leq \frac{48MR^3}{k^3}.
     \]
-    Thus
-    \[
-        \|x_k-x^*\|
-        \leq \sqrt{\frac{288MR^3}{\nu k^3}}.
-    \]
+    Thus \(\|x_k-x^*\|\leq \sqrt{288MR^3/(\nu k^3)}\).
 
-    Using the definition of $y_k$:
-    \(
-    y_k=\frac{k}{k+3}x_k+\frac{3}{k+3}v_k,
-    \)
-    we obtain
+    Using the definition
+    \(y_k=\frac{k}{k+3}x_k+\frac{3}{k+3}v_k\), we obtain
     \[
         \|y_k-x^*\|
         \leq \frac{k}{k+3}\|x_k-x^*\|
@@ -1583,21 +1491,12 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
         +\frac{3\cdot 2^{1/3}R}{k}.
     \]
 
-    Finally, since Assumption~\ref{assm.bounded hessian} and
-    Assumption~\ref{assm.local strongly convex} imply $\kappa_H\geq \nu$, we have
-    \[
-        \rho
-        =\min\left\{\frac{2\nu}{3M},\frac{2\nu^2}{9\kappa_HM}\right\}
-        =\frac{2\nu^2}{9\kappa_HM}.
-    \]
-    If
-    \[
-        k\geq 36\,\frac{\kappa_H M R}{\nu^2},
-    \]
-    then this condition also implies
-    \[
-        k\geq (648)^{1/3}\frac{MR}{\nu},
-    \]
+    Finally, Assumptions~\ref{assm.bounded hessian} and
+    \ref{assm.local strongly convex} imply $\kappa_H\geq \nu$, so the second
+    term in the definition of \(\rho\) is smaller and
+    \(\rho=2\nu^2/(9\kappa_HM)\). If
+    \(k\geq 36\kappa_H M R/\nu^2\), then this condition also implies
+    \(k\geq 648^{1/3}MR/\nu\),
     and the two terms above satisfy
     \[
         \sqrt{\frac{288MR^3}{\nu k^3}}
@@ -1606,10 +1505,7 @@ Now we are ready to formally prove \Cref{lem.bound target interval}.
         \frac{3\cdot 2^{1/3}R}{k}
         \leq \frac{\rho}{2}.
     \]
-    Consequently,
-    \(
-    \|y_k-x^*\|\leq \rho.
-    \)
+    Consequently, \(\|y_k-x^*\|\leq \rho\).
     Therefore,
     \[
         \|y_k-x^*\|\leq \frac{2\nu}{3M},

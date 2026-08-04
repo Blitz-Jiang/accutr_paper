@@ -41,7 +41,7 @@
 
 \comm{In all proofs, the authors are encouraged to provide more detailed explanations of the transitions from one step to another, even if some of those transitions are trivial.}
 
-\resp{Thank you for your comments. We carefully reviewed all of our proofs and revised the manuscript accordingly. {\bf To improve the flow, the analysis for each variant is now organized into iteration complexity, oracle calls of the subroutine, and finally, oracle complexity.} We add more details to the proofs to improve the clarity. \\
+\resp{Thank you for your comments. We carefully reviewed all of our proofs and revised the manuscript accordingly. To improve the flow, the analysis for each variant is now organized into iteration complexity, oracle calls of the subroutine, and finally, oracle complexity. We add more details to the proofs to improve the clarity. \\
       For comments where the corresponding revisions are straightforward and self-explanatory, we have omitted detailed responses for brevity and adopted proper revision in the manuscript. Regarding your comment on Lemma 3.13, we have completely rewritten the result (now Lemma 3.11) and improved its dependence on $\nu$.}
 \begin{itemize}
       \item \comm{Page 7, line 16. Even if it is obvious, mention when introducing the sequence $\{\phi_k(x)\}_{k\ge 0}$ that it is a monotone non-increasing sequence, since this property is used in Lemma 3.4.}
@@ -63,7 +63,7 @@
       \item \comm{Proof of Lemma 2.3. The proof implicitly assumes $M\ge 1$, but this is not mentioned in the paper. For example, Assumption 2.1 assumes $M>0$, but for the proof to work, it needs $M\ge 1$. The second inequality is in fact based on $\mu\ge \sqrt{M}\|d\|$, rather than $\mu\ge M\|d\|$. The same applies to line 28. It should be $\frac{3}{4}M\|d\|^4$ instead of $\frac{3}{4}M^2\|d\|^4$, unless one assumes $1\le M\le M^2$ and hence $-\frac{M}{4}\|d\|^4\ge -\frac{M^2}{4}\|d\|^4$. This needs to be fixed and it affects other lemmas, including Lemma 3.3 and others. The fix is to assume $M\ge 1$, so one can use $\mu\ge M\|d\|\ge \sqrt{M}\|d\|$ for the first part, and for the second part use
                   $-\frac{M}{4}\|d\|^4\ge -\frac{M^2}{4}\|d\|^4$.}
 
-            \resp{Thank you for looking into this. The second inequality is based on that
+            \resp{Thank you for looking into this. We did not use $M>1$. The second inequality is based on that
                   \begin{equation*}
                         M^2\|d\|^2 \leq \mu^2, \text{and thus } M^2\|d\|^4\leq \mu^2\|d\|^2.
                   \end{equation*}
@@ -126,7 +126,7 @@
 \begin{itemize}
       \item \comm{In the Contribution section, Page 3, line 28, the paper refers to [42] and states: ``On a global scale, all accelerated SOM, including ours and [42, 46].'' However, the plots do not show the performance of running [42]. Please either remove that statement or add the results of running this method.}
 
-            \resp{Thanks. After careful consideration, we have narrowed the reference to [46]. The original MS method (A-NPE) in [42], together with the searching procedure in Section 7 of [42], is primarily intended as a general algorithmic framework rather than a practical implementation, and its practical limitations have also been discussed in Section 4.3.3 of [47]. In practice, competitive MS-type methods require substantial enhancements \citep{carmon2022optimal,jiang2020unified}. Since our primary objective is to investigate the acceleration of trust-region-type methods and because the space limitation here, we have chosen to focus on the experiments of our approaches accordingly. A systematic empirical study of MS-type methods with different second-order oracles, including the $\trp$ oracle, is an interesting direction that we plan to pursue in future work.
+            \resp{Thanks. After careful consideration, we have narrowed the reference to [46]. The original MS method (A-NPE) in [42], together with the searching procedure in Section 7 of [42], is primarily intended as a general algorithmic framework rather than a practical implementation, and its practical limitations have also been discussed in Section 4.3.3 of [47]. In practice, competitive MS-type methods require substantial enhancements \citep{carmon2022optimal}. Since our primary objective is to investigate the acceleration of trust-region-type methods and because the space limitation here, we have chosen to focus on the experiments of our approaches accordingly. A systematic empirical study of MS-type methods with different second-order oracles, including the $\trp$ oracle, is an interesting direction that we plan to pursue in future work.
             }
 
       \item \comm{Please provide a link to the Git source code. This will help others use the method and compare against it.}
@@ -143,12 +143,16 @@
 
       \item \comm{Please provide extra details on the $\epsilon$ value used and the $\theta$ and $\eta$ parameter values used for Algorithm 2.}
 
-            \resp{Thanks for this suggestion. In the implementation, $\eta = 0.3$, $\theta = 1.3$, and $\epsilon_g$ is the precision parameter (also see the next comment).}
+            \resp{Thanks for this suggestion. In the implementation, $\eta = 0.3$, $\theta = 1.3$, and $\epsilon_g$ is the precision parameter. Details can be found in the git repo.}
 
       \item \comm{Please provide extra details on the computation of $D_0$ and $G_0$ in the implementation of Algorithm 2, since these quantities are required for Subroutine 2. For example, how did you compute $x^\ast$?}
-            \resp{Thanks for this suggestion. Note that in Algorithm 2, we only use $D_0$ and $G_0$ to set $\sigma_-$ and $\sigma_+$.
-                  These values only form a safe interval for $\sigma \in [\sigma_-, \sigma_+]$ to handle the search, and the actual values of $\sigma_-$ and $\sigma_+$ can be determined without actually computing $x^\ast$. }
-      \item[] {\color{blue} For example, we can set a $\sigma_-$ that is smaller than $\sqrt{\tfrac{2M\epsilon_g}{1+2\theta}}$. While for $\sigma_+$, it is set according to $G_0$ (the maximum gradient norm) because in the analysis of Lemma 4.5, we used argument such that $\|\nabla f(y(\sigma_+))\| \le G_0$. Thus, it only needs a safe constant value to bound the gradient norm from above along the iterates. As long as the search can terminate successfully, it implies that the choice $\sigma_-, \sigma_+$ is valid.}
+            \resp{Thank you for this suggestion. In our implementation, we do not compute $x^*$ and therefore do not explicitly evaluate $D_0=\|x_0-x^*\|$ or the corresponding theoretical bound $G_0$. These quantities are used only in the analysis to certify the existence of a valid upper bracketing point $\sigma_+$. In practice, we start from a prescribed positive guess for $\sigma_+$, solve the trust-region subproblem at $y(\sigma_+)$, and check the verifiable upper-bracketing condition
+                  \[
+                        \lambda=0,
+                        \qquad
+                        \|d\|\leq\frac{\eta}{M}\sigma_+.
+                  \]
+                  If this condition is not satisfied, we increase $\sigma_+$ by a fixed positive increment and repeat the test until it holds. Thus, the numerical implementation requires no knowledge of $x^*$, $D_0$, or $G_0$. This adaptive bracketing idea is analogous to the search procedure of \citet[Section~7]{monteiro2013accelerated}.}
 \end{itemize}
 
 \subsection{Minor concerns}
