@@ -2,10 +2,10 @@
 {
     \color{blue} We sincerely thank you for your careful reading of our manuscript and for your constructive and insightful comments. We have revised the manuscript accordingly and addressed all of your questions in detail. We are grateful for your suggestions, which have helped improve the clarity and completeness of the paper.
 
-    In particular, we would like to thank you for raising the three valuable discussion points in \S\ref{sec.discussion-points}. To investigate these issues more rigorously, we have provided an outline of the analysis concerning
+    In particular, we would like to thank you for raising the three valuable discussion points in \S\ref{sec.discussion-points}. To address these issues more rigorously, we have provided an outline of the analysis concerning
     \begin{enumerate}[leftmargin=*]
-        \item the inexact solution of the $\trp$ subproblem, together with the corresponding global and local convergence analysis; and
-        \item a simple adaptive mechanism for incorporating an estimate of the Hessian Lipschitz constant $M$ into the algorithms.
+        \item The inexact solution of the $\trp$ subproblem, together with the corresponding global and local detection analysis.
+        \item A simple adaptive mechanism for incorporating an estimate of the Hessian Lipschitz constant $M$ into the algorithms.
     \end{enumerate}
     Due to space limitations, we have chosen not to include the full technical details in the manuscript in order to maintain its conciseness. We believe that the analysis outlined here provides a clear roadmap for addressing these important practical aspects in a future extension of the current work.
 }
@@ -15,14 +15,14 @@
 \begin{itemize}
     \item \comm{Definition 2.1 combines function value residuals and gradient norms under a single tolerance $\epsilon$. Since these two measures usually operate on different scales and orders of magnitude, a unified $\epsilon$ may not be well-defined for all problems. The authors should justify the use of this combined stopping criterion or discuss the implications of the scale mismatch between $f(x)-f^*$ and $\|\nabla f(x)\|$.}
           \resp{
-              We see that these this question and the one below are closely related thus we answer them together. Please see the response below.
+              We see that this question and the one below are closely related thus we answer them together. Please see the response below.
           }
 
     \item \comm{In the pseudocode for both Algorithm 1 and Algorithm 2, the main iteration loop is defined as ``for $k=0,1,\ldots,K_\epsilon$.'' However, as the complexity analysis demonstrates, $K_\epsilon$ depends on unknown constants such as the initial distance to the optimum, $D_0=\|x_0-x^*\|$. Since $D_0$ is unknown a priori, $K_\epsilon$ cannot be used as a practical limit for the total number of iterations. For the sake of clarity, the authors should explicitly define the verifiable stopping criteria, e.g., $\|\nabla f(x_k)\|\le \epsilon$, that would be used in a numerical implementation to trigger the termination of the loop.}
 
-          \resp{Thank you for the valuable insight.  We have now revised the Definition 2.1. The two tolerances $\epsilon_f$ and $\epsilon_g$ are kept separate because
+          \resp{Thank you for the valuable insight.  We have now revised the Definition 2.1. The two tolerances $\epsilon_f$ and $\epsilon_g$ are kept separated because
               the function-value residual $f(x)-f^*$ and the gradient norm
-              $\|\nabla f(x)\|$ generally have different scales as you said. Under the bounded hessian assumption and convexity, the two
+              $\|\nabla f(x)\|$ generally have different scales as you said. Under the bounded Hessian assumption and convexity, the two
               measures are related by
               \[
                   \frac{1}{2\kappa_H}\|\nabla f(x)\|^2
@@ -32,8 +32,8 @@
               $\sqrt{2\kappa_H\epsilon_f}$-first-order stationary solution. Conversely,
               under local strong convexity, a sufficiently small gradient norm also
               controls the local function-value residual.\\
-              In particular, the
-              algorithms below use only the verifiable first-order condition
+              In particular, our
+              algorithms use only the verifiable first-order condition
               $\|\nabla f(x)\|\leq \epsilon_g$ as a stopping criterion. The tolerance $\epsilon_f$ is introduced only for complexity analysis and is reported as an anytime guarantee. It is not used as an input or stopping rule in the algorithm.
           }
 \end{itemize}
@@ -44,7 +44,7 @@
     \item \comm{Given that trust-region methods naturally handle negative curvature, it would be interesting to hear the authors' views on whether the $\trp$ oracle and estimating sequence techniques could be extended to non-convex settings to find second-order stationary points. Specifically, could such an extension potentially improve upon the complexity bounds of existing unaccelerated non-convex trust-region methods?}
 
           \resp{We thank the reviewer for this insightful question. Trust-region methods are indeed naturally suited to nonconvex problems because the trust-region subproblem can exploit negative curvature. $\trp$ oracle framework can be used to find second-order stationary points in nonconvex optimization, see~\citet{jiang2026beyond}.}
-    \item[]{\color{blue} That said, how to use the estimating sequence technique in the nonconvex setting is not immediate. The estimating sequence itself relies on affine lower models of $f$; this mechanism breaks down without convexity. We expect it to be useful only under additional structural assumptions, such as higher-order smoothness, weak convexity, or other conditions that allow suitable surrogate lower models to be constructed~(like the paper~\citet{carmon2017convex} did under second-order smoothness). Beyond that, the estimating sequence is unlikely to be a proper algorithmic ingredient. \\
+    \item[]{\color{blue} That said, how to use the estimating sequence technique in the nonconvex setting is not straightforward. The estimating sequence itself relies on affine lower models of $f$; this mechanism breaks down without convexity. We expect it to be useful only under additional structural assumptions, such as higher-order smoothness, weak convexity, or other conditions that allow suitable surrogate lower models to be constructed~(like the paper~\citet{carmon2017convex} did under second-order smoothness). Beyond that, the estimating sequence is unlikely to be a proper algorithmic ingredient. \\
           Regarding complexity, \citet{carmon2020lower} established a lower bound in
           \[
               \Omega\!\left(\sqrt{M}\,(f(x_0)-f^*)\,\epsilon^{-3/2}\right)
@@ -543,7 +543,7 @@
               \color{blue}
               Response: Thank you for the question. A monotone adaptive backtracking strategy can be incorporated into the \(\trp\) framework without degrading the global \(\widetilde O(\epsilon^{-1/3})\) oracle complexity, the analysis is similar to \cite{jiang2020unified,he2025history}. The key idea is to replace the algorithmic dependence on the exact value of \(M\) in Lemma~2.3 by a verifiable backtracking certificate. Throughout this response, \(M\) denotes the true Hessian Lipschitz constant in Assumption~2.1, while \(M_k\) denotes the adaptive estimate maintained by the algorithm. The trial estimate used inside the \(k\)-th iteration is denoted by \(\widehat M_k\). The resulting scheme is summarized below.
               \begin{algorithm}[htbp]
-                  \caption{Accelerated TR with Backtracking}\label{alg.accelerated-utr-backtrack}
+                  \noindent\textbf{Algorithm--Backtrack: Accelerated TR with Backtracking}
                   \begin{algorithmic}[1]
                       \STATE \textbf{Input:} initial point \(x_0=v_0\in \mathbb{R}^n\), \(s_0=0\), initial estimate \(M_0>0\), backtracking factor \(\gamma_b>1\), \(n_f=0\).
                       \FOR{\(k=0,1,2,\ldots\)}
@@ -642,7 +642,7 @@
                   +
                   8(\widehat M_k-M_k)\|x-x_0\|^3.
               \end{equation}
-              Then \(\widehat v_k\) in \Cref{alg.accelerated-utr-backtrack} is exactly
+              Then \(\widehat v_k\) in Algorithm--Backtrack is exactly
               \[
                   \widehat v_k=\arg\min_{x\in\mathbb R^n}\widehat \phi_k(x),
               \]
@@ -679,7 +679,7 @@
                       \frac{\sqrt 6}{6}
                       \frac{\|\nabla f(y+d)\|^{3/2}}{\sqrt{\widehat M}}.
                   \end{equation}
-                  Consequently, the total number \(n_f\) of failed backtracking trials in \Cref{alg.accelerated-utr-backtrack} satisfies
+                  Consequently, the total number \(n_f\) of failed backtracking trials in Algorithm--Backtrack satisfies
                   \begin{equation}
                       \label{eq.nf-bound}
                       n_f
@@ -772,7 +772,7 @@
 
               \begin{lemma}
                   \label{lem.adaptive-estimate-sequence}
-                  Suppose \(f\) is convex and Assumption~2.1 holds. Let \(\{\phi_k\}_{k\ge0}\) be defined by \eqref{eq.adaptive-phi0} and \eqref{eq.adaptive-phi-update}. Suppose that every accepted step in \Cref{alg.accelerated-utr-backtrack} satisfies
+                  Suppose \(f\) is convex and Assumption~2.1 holds. Let \(\{\phi_k\}_{k\ge0}\) be defined by \eqref{eq.adaptive-phi0} and \eqref{eq.adaptive-phi-update}. Suppose that every accepted step in Algorithm--Backtrack satisfies
                   \begin{equation}
                       \label{eq.accepted-bt-condition}
                       \left\langle \nabla f(x_{k+1}),y_k-x_{k+1}\right\rangle
@@ -1015,7 +1015,7 @@
                       \frac{a_k^{3/2}}{3\sqrt{3M_{k+1}}}
                       \|g_{k+1}\|^{3/2}.
                   \end{align*}
-                  By the definition of \(y_k\) in \Cref{alg.accelerated-utr-backtrack},
+                  By the definition of \(y_k\) in Algorithm--Backtrack,
                   \[
                       y_k
                       =
